@@ -8,9 +8,13 @@ set_target_properties(${PROJECT_NAME}
 		CXX_STANDARD 11
 )
 target_include_directories(${PROJECT_NAME}
-	PUBLIC
+	PRIVATE
+		${PROJECT_SOURCE_DIR}/include
+	INTERFACE
 		${PROJECT_SOURCE_DIR}/include
 )
+
+add_subdirectory("src/dml")
 
 option(KI_BUILD_EXAMPLES "Determines whether to build examples." ON)
 if (KI_BUILD_EXAMPLES)

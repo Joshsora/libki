@@ -1,0 +1,16 @@
+target_sources(${PROJECT_NAME}
+	PRIVATE
+		${PROJECT_SOURCE_DIR}/src/dml/FieldBase.cpp
+		${PROJECT_SOURCE_DIR}/src/dml/Record.cpp
+		${PROJECT_SOURCE_DIR}/src/dml/types/BytField.cpp
+		${PROJECT_SOURCE_DIR}/src/dml/types/UBytField.cpp
+		${PROJECT_SOURCE_DIR}/src/dml/types/ShrtField.cpp
+		${PROJECT_SOURCE_DIR}/src/dml/types/UShrtField.cpp
+		${PROJECT_SOURCE_DIR}/src/dml/types/IntField.cpp
+		${PROJECT_SOURCE_DIR}/src/dml/types/UIntField.cpp
+		${PROJECT_SOURCE_DIR}/src/dml/types/StrField.cpp
+		${PROJECT_SOURCE_DIR}/src/dml/types/WStrField.cpp
+		${PROJECT_SOURCE_DIR}/src/dml/types/FltField.cpp
+		${PROJECT_SOURCE_DIR}/src/dml/types/DblField.cpp
+		${PROJECT_SOURCE_DIR}/src/dml/types/GidField.cpp
+)
