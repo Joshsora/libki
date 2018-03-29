@@ -8,6 +8,10 @@ foreach (file ${files})
 	string(REGEX REPLACE "unit-([^$]+)" "test-\\1" testcase ${file_basename})
 
 	add_executable(${testcase} ${file})
+	set_target_properties(${testcase}
+		PROPERTIES
+			CXX_STANDARD 11
+	)
 	target_link_libraries(${testcase} Catch ${PROJECT_NAME})
 	add_test(${testcase} ${testcase})
 endforeach()

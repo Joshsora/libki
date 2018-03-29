@@ -33,3 +33,12 @@
 *.exe
 *.out
 *.app
+
+# Debug
+*.pdb
+
+# Incremental Linker
+*.ilk
+
+# Build directory
+build/
