@@ -23,7 +23,7 @@ TEST_CASE("Fields can be added to and retrieved from Records", "[dml]")
 	SECTION("Adding fields with the same name but different types should return nullptr")
 	{
 		auto *field = record->add_field<BYT>("TestField");
-		REQUIRE(record->add_field<SHRT>("TestField") != nullptr);
+		REQUIRE(record->add_field<SHRT>("TestField") == nullptr);
 	}
 
 	SECTION("Retreiving fields with the correct type should return the previously added Field")
