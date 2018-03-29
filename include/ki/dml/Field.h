@@ -7,18 +7,25 @@ namespace ki
 namespace dml
 {
 	template <typename ValueT>
-	class Field : public FieldBase
+	class Field final : public FieldBase
 	{
 		friend Record;
 	public:
-		ValueT get_value() const;
-		void set_value(ValueT value);
+		virtual ~Field() = default;
 
-		Field<ValueT> *clone(const Record &record) const;
+		ValueT get_value() const
+		{
+			return m_value;
+		}
 
-		void write_to(std::ostream &ostream) const;
-		void read_from(std::istream &istream);
-		size_t get_size() const;
+		void set_value(ValueT value)
+		{
+			m_value = value;
+		}
+
+		void write_to(std::ostream &ostream) const final;
+		void read_from(std::istream &istream) final;
+		size_t get_size() const final;
 	protected:
 		Field(std::string name, const Record &record)
 			: FieldBase(name, record)
@@ -28,6 +35,14 @@ namespace dml
 		}
 	private:
 		ValueT m_value;
+
+		Field<ValueT> *clone(const Record &record) const final
+		{
+			auto *clone = new Field<ValueT>(m_name, record);
+			clone->m_transferable = true;
+			clone->m_value = m_value;
+			return clone;
+		}
 	};
 
 	typedef Field<BYT> BytField;

@@ -6,11 +6,12 @@ namespace ki
 {
 namespace dml
 {
-	class Record : public util::Serializable
+	class Record final : public util::Serializable
 	{
 	public:
 		Record();
 		Record(const Record &record);
+		virtual ~Record();
 
 		bool has_field(std::string name) const;
 
@@ -19,33 +20,35 @@ namespace dml
 		{
 			if (!has_field(name))
 				return false;
-			return m_field_map[name]->is_type<ValueT>();
+			return m_field_map.at(name)->is_type<ValueT>();
 		}
 
 		template <typename ValueT>
-		Field<ValueT> &get_field(std::string name) const
+		Field<ValueT> *get_field(std::string name) const
 		{
 			if (has_field<ValueT>(name))
-				return dynamic_cast<Field<ValueT> *>(m_fields[name]);
+				return dynamic_cast<Field<ValueT> *>(m_field_map.at(name));
 			return nullptr;
 		}
 
 		template <typename ValueT>
-		Field<ValueT> &add_field(std::string name, bool transferable = true)
+		Field<ValueT> *add_field(std::string name, bool transferable = true)
 		{
+			// Does this field already exist?
 			if (has_field<ValueT>(name))
-				return nullptr;
-			Field<ValueT> *field = new Field<ValueT>(name, *this);
-			auto *base = static_cast<FieldBase *>(field);
-			m_fields.push_back(base);
-			m_field_map.insert({ base->get_name(), base });
+				return get_field<ValueT>(name);
+
+			// Create the field
+			auto *field = new Field<ValueT>(name, *this);
+			field->m_transferable = transferable;
+			add_field(field);
 			return field;
 		}
 
 		size_t get_field_count() const;
 
-		FieldList::iterator fields_begin() const;
-		FieldList::iterator fields_end() const;
+		FieldList::const_iterator fields_begin() const;
+		FieldList::const_iterator fields_end() const;
 
 		void write_to(std::ostream &ostream) const;
 		void read_from(std::istream &istream);
@@ -53,6 +56,8 @@ namespace dml
 	private:
 		FieldList m_fields;
 		FieldNameMap m_field_map;
+
+		void add_field(FieldBase *field);
 	};
 }
 }
