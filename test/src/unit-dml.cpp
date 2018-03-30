@@ -135,7 +135,7 @@ TEST_CASE("Field Serialization", "[dml]")
 	{
 		record->add_field<DBL>("TestDbl")->set_value(152.4);
 		record->write_to(ss);
-		REQUIRE(ss.str() == "\xCD\xCC\xCC\xCC\xCC\x0C\x64\x40");
+		REQUIRE(ss.str() == "\xCD\xCC\xCC\xCC\xCC\x0C\x63\x40");
 	}
 
 	SECTION("GID Fields")
@@ -245,7 +245,7 @@ TEST_CASE("Field Deserialization", "[dml]")
 
 	SECTION("DBL Fields")
 	{
-		ss.write("\xCD\xCC\xCC\xCC\xCC\x0C\x64\x40", 8);
+		ss.write("\xCD\xCC\xCC\xCC\xCC\x0C\x63\x40", 8);
 		ss.seekg(std::stringstream::beg);
 
 		auto *field = record->add_field<DBL>("TestDbl");
