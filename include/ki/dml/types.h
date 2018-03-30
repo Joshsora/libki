@@ -13,7 +13,7 @@ namespace dml
 	typedef int32_t INT;
 	typedef uint32_t UINT;
 	typedef std::string STR;
-	typedef std::wstring WSTR;
+	typedef std::u16string WSTR;
 	typedef float FLT;
 	typedef double DBL;
 	typedef uint64_t GID;

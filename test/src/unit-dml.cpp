@@ -108,7 +108,7 @@ TEST_CASE("Field Serialization", "[dml]")
 
 	SECTION("WSTR Fields")
 	{
-		record->add_field<WSTR>("TestWStr")->set_value(L"TEST");
+		record->add_field<WSTR>("TestWStr")->set_value(u"TEST");
 		record->write_to(ss);
 
 		union
@@ -119,9 +119,10 @@ TEST_CASE("Field Serialization", "[dml]")
 		memcpy(length_bytes.buff, ss.str().data(), 2);
 		REQUIRE(length_bytes.length == 0x4);
 
-		wchar_t value_buff[5] = { 0 };
+		char16_t value_buff[5] = { 0 };
 		memcpy(value_buff, ss.str().substr(2).data(), 8);
-		REQUIRE(wcscmp(value_buff, L"TEST") == 0);
+		std::u16string value(value_buff);
+		REQUIRE(value == u"TEST");
 	}
 
 	SECTION("FLT Fields")
@@ -227,13 +228,13 @@ TEST_CASE("Field Deserialization", "[dml]")
 	{
 		char buff[10];
 		memcpy(buff, "\x04\x00", sizeof(USHRT));
-		memcpy(&buff[2], (char *)L"TEST", 8);
+		memcpy(&buff[2], (char *)u"TEST", 8);
 		ss.write(buff, 10);
 		ss.seekg(std::stringstream::beg);
 
 		auto *field = record->add_field<WSTR>("TestWStr");
 		record->read_from(ss);
-		REQUIRE(field->get_value() == L"TEST");
+		REQUIRE(field->get_value() == u"TEST");
 	}
 
 	SECTION("FLT Fields")
