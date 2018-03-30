@@ -11,6 +11,9 @@ namespace dml
 {
 	class Record;
 
+	/**
+	 * An abstract base class for DML fields.
+	 */
 	class FieldBase : public util::Serializable
 	{
 		friend Record;
@@ -33,6 +36,10 @@ namespace dml
 
 		FieldBase(std::string name, const Record& record);
 
+		/**
+		 * Returns a new Field with the same name, transferability
+		 * and value but with a different owner Record.
+		 */
 		virtual FieldBase *clone(const Record &record) const = 0;
 	private:
 		const Record &m_record;

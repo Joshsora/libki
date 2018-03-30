@@ -6,6 +6,9 @@ namespace ki
 {
 namespace dml
 {
+	/**
+	 * An ordered collection of DML fields.
+	 */
 	class Record final : public util::Serializable
 	{
 	public:
@@ -13,8 +16,16 @@ namespace dml
 		Record(const Record &record);
 		virtual ~Record();
 
+		/**
+		 * Returns true if a field of any type has the name
+		 * specified.
+		 */
 		bool has_field(std::string name) const;
 
+		/**
+		 * Returns true if a field exists with the specified
+		 * name and type.
+		 */
 		template <typename ValueT>
 		bool has_field(std::string name) const
 		{
@@ -23,6 +34,13 @@ namespace dml
 			return m_field_map.at(name)->is_type<ValueT>();
 		}
 
+		/**
+		 * Returns a previously added field with the specified name
+		 * and type.
+		 * 
+		 * If the field was not previously added, then a nullptr is
+		 * returned.
+		 */
 		template <typename ValueT>
 		Field<ValueT> *get_field(std::string name) const
 		{
@@ -31,6 +49,16 @@ namespace dml
 			return nullptr;
 		}
 
+		/**
+		 * Adds a new field to the record with the specified name, type,
+		 * and transferability, and returns the newly created field.
+		 * 
+		 * If a field already exists with the specified name and type,
+		 * then the previously added field is returned.
+		 * 
+		 * If a field already exists with the specified name, but the type
+		 * differs, then a nullptr is returned.
+		 */
 		template <typename ValueT>
 		Field<ValueT> *add_field(std::string name, bool transferable = true)
 		{

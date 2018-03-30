@@ -36,6 +36,10 @@ namespace dml
 	private:
 		ValueT m_value;
 
+		/**
+		* Returns a new Field with the same name, transferability,
+		* type, and value but with a different owner Record.
+		*/
 		Field<ValueT> *clone(const Record &record) const final
 		{
 			auto *clone = new Field<ValueT>(m_name, record);
