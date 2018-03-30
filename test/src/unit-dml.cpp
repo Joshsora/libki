@@ -97,13 +97,13 @@ TEST_CASE("Field Serialization", "[dml]")
 		{
 			char buff[2];
 			SHRT length;
-		} lengthBytes;
-		memcpy(lengthBytes.buff, ss.str().data(), 2);
-		REQUIRE(lengthBytes.length == 0x4);
+		} length_bytes;
+		memcpy(length_bytes.buff, ss.str().data(), 2);
+		REQUIRE(length_bytes.length == 0x4);
 
-		char valueBuff[4];
-		memcpy(valueBuff, ss.str().substr(2).data(), 4);
-		REQUIRE(valueBuff == "TEST");
+		char value_buff[4];
+		memcpy(value_buff, ss.str().substr(2).data(), 4);
+		REQUIRE(value_buff == "TEST");
 	}
 
 	SECTION("WSTR Fields")
@@ -115,13 +115,13 @@ TEST_CASE("Field Serialization", "[dml]")
 		{
 			char buff[2];
 			SHRT length;
-		} lengthBytes;
-		memcpy(lengthBytes.buff, ss.str().data(), 2);
-		REQUIRE(lengthBytes.length == 0x4);
+		} length_bytes;
+		memcpy(length_bytes.buff, ss.str().data(), 2);
+		REQUIRE(length_bytes.length == 0x4);
 
-		wchar_t valueBuff[4];
-		memcpy(valueBuff, ss.str().substr(2).data(), 8);
-		REQUIRE(valueBuff == L"TEST");
+		wchar_t value_buff[4];
+		memcpy(value_buff, ss.str().substr(2).data(), 8);
+		REQUIRE(value_buff == L"TEST");
 	}
 
 	SECTION("FLT Fields")
@@ -142,7 +142,7 @@ TEST_CASE("Field Serialization", "[dml]")
 	{
 		record->add_field<GID>("TestGid")->set_value(0x8899AABBCCDDEEFF);
 		record->write_to(ss);
-		REQUIRE(ss.str() == "xFF\xEE\xDD\xCC\xBB\xAA\x99\x88");
+		REQUIRE(ss.str() == "\xFF\xEE\xDD\xCC\xBB\xAA\x99\x88");
 	}
 
 	delete record;
@@ -155,12 +155,112 @@ TEST_CASE("Field Deserialization", "[dml]")
 
 	SECTION("BYT Fields")
 	{
-		ss.write(new char[1] { (char)0xAA }, 1);
+		ss.write("\xAA", 1);
 		ss.seekg(std::stringstream::beg);
 
 		auto *field = record->add_field<BYT>("TestByt");
 		record->read_from(ss);
 		REQUIRE((UBYT)field->get_value() == 0xAA);
+	}
+
+	SECTION("UBYT Fields")
+	{
+		ss.write("\xAA", 1);
+		ss.seekg(std::stringstream::beg);
+
+		auto *field = record->add_field<BYT>("TestUByt");
+		record->read_from(ss);
+		REQUIRE((UBYT)field->get_value() == 0xAA);
+	}
+
+	SECTION("SHRT Fields")
+	{
+		ss.write("\xBB\xAA", 2);
+		ss.seekg(std::stringstream::beg);
+
+		auto *field = record->add_field<SHRT>("TestShrt");
+		record->read_from(ss);
+		REQUIRE((USHRT)field->get_value() == 0xAABB);
+	}
+
+	SECTION("USHRT Fields")
+	{
+		ss.write("\xBB\xAA", 2);
+		ss.seekg(std::stringstream::beg);
+
+		auto *field = record->add_field<USHRT>("TestUShrt");
+		record->read_from(ss);
+		REQUIRE(field->get_value() == 0xAABB);
+	}
+
+	SECTION("INT Fields")
+	{
+		ss.write("\xDD\xCC\xBB\xAA", 4);
+		ss.seekg(std::stringstream::beg);
+
+		auto *field = record->add_field<INT>("TestInt");
+		record->read_from(ss);
+		REQUIRE(field->get_value() == 0xAABBCCDD);
+	}
+
+	SECTION("UINT Fields")
+	{
+		ss.write("\xDD\xCC\xBB\xAA", 4);
+		ss.seekg(std::stringstream::beg);
+
+		auto *field = record->add_field<UINT>("TestUInt");
+		record->read_from(ss);
+		REQUIRE(field->get_value() == 0xAABBCCDD);
+	}
+
+	SECTION("STR Fields")
+	{
+		ss.write("\x04\x00TEST", 6);
+		ss.seekg(std::stringstream::beg);
+
+		auto *field = record->add_field<STR>("TestStr");
+		record->read_from(ss);
+		REQUIRE(field->get_value() == "TEST");
+	}
+
+	SECTION("WSTR Fields")
+	{
+		ss.write("\x04\x00T\x00E\x00S\x00T\x00", 10);
+		ss.seekg(std::stringstream::beg);
+
+		auto *field = record->add_field<WSTR>("TestWStr");
+		record->read_from(ss);
+		REQUIRE(field->get_value() == L"TEST");
+	}
+
+	SECTION("FLT Fields")
+	{
+		ss.write("\x66\x66\x18\x43", 4);
+		ss.seekg(std::stringstream::beg);
+
+		auto *field = record->add_field<FLT>("TestFlt");
+		record->read_from(ss);
+		REQUIRE(field->get_value() == 152.4f);
+	}
+
+	SECTION("DBL Fields")
+	{
+		ss.write("\xCD\xCC\xCC\xCC\xCC\x0C\x64\x40", 8);
+		ss.seekg(std::stringstream::beg);
+
+		auto *field = record->add_field<DBL>("TestDbl");
+		record->read_from(ss);
+		REQUIRE(field->get_value() == 152.4);
+	}
+
+	SECTION("GID Fields")
+	{
+		ss.write("\xFF\xEE\xDD\xCC\xBB\xAA\x99\x88", 8);
+		ss.seekg(std::stringstream::beg);
+
+		auto *field = record->add_field<GID>("TestGid");
+		record->read_from(ss);
+		REQUIRE(field->get_value() == 0x8899AABBCCDDEEFF);
 	}
 
 	delete record;
