@@ -35,8 +35,14 @@ namespace dml
 		Field<ValueT> *add_field(std::string name, bool transferable = true)
 		{
 			// Does this field already exist?
-			if (has_field<ValueT>(name))
-				return get_field<ValueT>(name);
+			if (has_field(name))
+			{
+				// Return nullptr if the type is not the same
+				auto *field = m_field_map.at(name);
+				if (!field->is_type<ValueT>())
+					return nullptr;
+				return dynamic_cast<Field<ValueT> *>(field);
+			}
 
 			// Create the field
 			auto *field = new Field<ValueT>(name, *this);
@@ -50,9 +56,9 @@ namespace dml
 		FieldList::const_iterator fields_begin() const;
 		FieldList::const_iterator fields_end() const;
 
-		void write_to(std::ostream &ostream) const;
-		void read_from(std::istream &istream);
-		size_t get_size() const;
+		void write_to(std::ostream &ostream) const final;
+		void read_from(std::istream &istream) final;
+		size_t get_size() const final;
 	private:
 		FieldList m_fields;
 		FieldNameMap m_field_map;
