@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 #include <ki/dml/Record.h>
+#include <fstream>
 
 using namespace ki::dml;
 
@@ -146,6 +147,13 @@ TEST_CASE("Field Serialization", "[dml]")
 		REQUIRE(ss.str() == "\xFF\xEE\xDD\xCC\xBB\xAA\x99\x88");
 	}
 
+	SECTION("Non-transferable Fields")
+	{
+		record->add_field<STR>("TestNOXFER", false)->set_value("Hello, world!");
+		record->write_to(ss);
+		REQUIRE(ss.str() == "");
+	}
+
 	delete record;
 }
 
@@ -266,6 +274,81 @@ TEST_CASE("Field Deserialization", "[dml]")
 		record->read_from(ss);
 		REQUIRE(field->get_value() == 0x8899AABBCCDDEEFF);
 	}
+
+	delete record;
+}
+
+TEST_CASE("Record Serialization", "[dml]")
+{
+	auto *record = new Record();
+	std::stringstream ss;
+
+	record->add_field<BYT>("TestByt")->set_value(0xAA);
+	record->add_field<UBYT>("TestUByt")->set_value(0xAA);
+	record->add_field<SHRT>("TestShrt")->set_value(0xAABB);
+	record->add_field<USHRT>("TestUShrt")->set_value(0xAABB);
+	record->add_field<INT>("TestInt")->set_value(0xAABBCCDD);
+	record->add_field<UINT>("TestUInt")->set_value(0xAABBCCDD);
+	record->add_field<STR>("TestStr")->set_value("TEST");
+	record->add_field<WSTR>("TestWStr")->set_value(u"TEST");
+	record->add_field<FLT>("TestFlt")->set_value(152.4f);
+	record->add_field<DBL>("TestDbl")->set_value(152.4);
+	record->add_field<GID>("TestGid")->set_value(0x8899AABBCCDDEEFF);
+	record->add_field<BYT>("TestNOXFER", false)->set_value(0xAA);
+	record->write_to(ss);
+
+	std::ifstream ifs("samples/dml.bin", std::ios::binary|std::ios::ate);
+	if (ifs.is_open())
+	{
+		size_t size = ifs.tellg();
+		char *buffer = new char[size];
+		ifs.seekg(0, std::ios::beg);
+		ifs.read(buffer, size);
+		ifs.close();
+
+		REQUIRE(strcmp(buffer, ss.str().c_str()) == 0);
+		delete[] buffer;
+	}
+	else
+		FAIL();
+
+	delete record;
+}
+
+TEST_CASE("Record Deserialization", "[dml]")
+{
+	auto *record = new Record();
+	std::ifstream ifs("samples/dml.bin", std::ios::binary);
+	if (!ifs.is_open())
+		FAIL();
+
+	auto *test_byt = record->add_field<BYT>("TestByt");
+	auto *test_ubyt = record->add_field<UBYT>("TestUByt");
+	auto *test_shrt = record->add_field<SHRT>("TestShrt");
+	auto *test_ushrt = record->add_field<USHRT>("TestUShrt");
+	auto *test_int = record->add_field<INT>("TestInt");
+	auto *test_uint = record->add_field<UINT>("TestUInt");
+	auto *test_str = record->add_field<STR>("TestStr");
+	auto *test_wstr = record->add_field<WSTR>("TestWStr");
+	auto *test_flt = record->add_field<FLT>("TestFlt");
+	auto *test_dbl = record->add_field<DBL>("TestDbl");
+	auto *test_gid = record->add_field<GID>("TestGid");
+	auto *test_noxfer = record->add_field<BYT>("TestNOXFER", false);
+	record->read_from(ifs);
+	ifs.close();
+
+	REQUIRE((UBYT)test_byt->get_value() == 0xAA);
+	REQUIRE((UBYT)test_ubyt->get_value() == 0xAA);
+	REQUIRE((USHRT)test_shrt->get_value() == 0xAABB);
+	REQUIRE(test_ushrt->get_value() == 0xAABB);
+	REQUIRE(test_int->get_value() == 0xAABBCCDD);
+	REQUIRE(test_uint->get_value() == 0xAABBCCDD);
+	REQUIRE(test_str->get_value() == "TEST");
+	REQUIRE(test_wstr->get_value() == u"TEST");
+	REQUIRE(test_flt->get_value() == 152.4f);
+	REQUIRE(test_dbl->get_value() == 152.4);
+	REQUIRE(test_gid->get_value() == 0x8899AABBCCDDEEFF);
+	REQUIRE(test_noxfer->get_value() == 0x0);
 
 	delete record;
 }
