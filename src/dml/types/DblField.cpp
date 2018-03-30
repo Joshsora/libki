@@ -1,5 +1,6 @@
 #include "ki/dml/Field.h"
 #include "ki/util/ValueBytes.h"
+#include <algorithm>
 
 namespace ki
 {
@@ -8,8 +9,10 @@ namespace dml
 	template <>
 	void DblField::write_to(std::ostream &ostream) const
 	{
-		const ValueBytes<USHRT> endianness_check = { 0x0102 };
-		ValueBytes<DBL> data = { m_value };
+		ValueBytes<USHRT> endianness_check;
+		endianness_check.value = 0x0102;
+		ValueBytes<DBL> data;
+		data.value = m_value;
 		if (endianness_check.buff[0] == 0x01)
 			std::reverse(&data.buff[0], &data.buff[7]);
 		ostream.write(data.buff, sizeof(DBL));
@@ -18,7 +21,8 @@ namespace dml
 	template <>
 	void DblField::read_from(std::istream &istream)
 	{
-		const ValueBytes<USHRT> endianness_check = { 0x0102 };
+		ValueBytes<USHRT> endianness_check;
+		endianness_check.value = 0x0102;
 		ValueBytes<DBL> data;
 		istream.read(data.buff, sizeof(DBL));
 		if (endianness_check.buff[0] == 0x01)
