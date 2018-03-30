@@ -12,7 +12,7 @@ namespace dml
 		ValueBytes<INT> data;
 		data.value = m_value;
 		if (data.buff[0] == ((m_value & 0xFF000000) >> 24))
-			std::reverse(&data.buff[0], &data.buff[3]);
+			std::reverse(&data.buff[0], &data.buff[4]);
 		ostream.write(data.buff, sizeof(INT));
 	}
 
@@ -24,7 +24,7 @@ namespace dml
 		ValueBytes<INT> data;
 		istream.read(data.buff, sizeof(INT));
 		if (endianness_check.buff[0] == 0x01)
-			std::reverse(&data.buff[0], &data.buff[3]);
+			std::reverse(&data.buff[0], &data.buff[4]);
 		m_value = data.value;
 	}
 

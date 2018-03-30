@@ -12,7 +12,7 @@ namespace dml
 		ValueBytes<SHRT> data;
 		data.value = m_value;
 		if (data.buff[0] == ((m_value & 0xFF00) >> 8))
-			std::reverse(&data.buff[0], &data.buff[1]);
+			std::reverse(&data.buff[0], &data.buff[2]);
 		ostream.write(data.buff, sizeof(SHRT));
 	}
 
@@ -24,7 +24,7 @@ namespace dml
 		ValueBytes<SHRT> data;
 		istream.read(data.buff, sizeof(SHRT));
 		if (endianness_check.buff[0] == 0x01)
-			std::reverse(&data.buff[0], &data.buff[1]);
+			std::reverse(&data.buff[0], &data.buff[2]);
 		m_value = data.value;
 	}
 

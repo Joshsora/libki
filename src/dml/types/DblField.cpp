@@ -14,7 +14,7 @@ namespace dml
 		ValueBytes<DBL> data;
 		data.value = m_value;
 		if (endianness_check.buff[0] == 0x01)
-			std::reverse(&data.buff[0], &data.buff[7]);
+			std::reverse(&data.buff[0], &data.buff[8]);
 		ostream.write(data.buff, sizeof(DBL));
 	}
 
@@ -26,7 +26,7 @@ namespace dml
 		ValueBytes<DBL> data;
 		istream.read(data.buff, sizeof(DBL));
 		if (endianness_check.buff[0] == 0x01)
-			std::reverse(&data.buff[0], &data.buff[3]);
+			std::reverse(&data.buff[0], &data.buff[8]);
 		m_value = data.value;
 	}
 

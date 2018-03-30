@@ -12,7 +12,7 @@ namespace dml
 		ValueBytes<GID> data;
 		data.value = m_value;
 		if (data.buff[0] == ((m_value & 0xFF00000000000000) >> 56))
-			std::reverse(&data.buff[0], &data.buff[7]);
+			std::reverse(&data.buff[0], &data.buff[8]);
 		ostream.write(data.buff, sizeof(GID));
 	}
 
@@ -24,7 +24,7 @@ namespace dml
 		ValueBytes<GID> data;
 		istream.read(data.buff, sizeof(GID));
 		if (endianness_check.buff[0] == 0x01)
-			std::reverse(&data.buff[0], &data.buff[7]);
+			std::reverse(&data.buff[0], &data.buff[8]);
 		m_value = data.value;
 	}
 
