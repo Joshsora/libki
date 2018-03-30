@@ -47,20 +47,29 @@ namespace dml
 	void Record::write_to(std::ostream &ostream) const
 	{
 		for (auto it = m_fields.begin(); it != m_fields.end(); ++it)
-			(*it)->write_to(ostream);
+		{
+			if ((*it)->is_transferable())
+				(*it)->write_to(ostream);
+		}
 	}
 
 	void Record::read_from(std::istream &istream)
 	{
 		for (auto it = m_fields.begin(); it != m_fields.end(); ++it)
-			(*it)->read_from(istream);
+		{
+			if ((*it)->is_transferable())
+				(*it)->read_from(istream);
+		}
 	}
 
 	size_t Record::get_size() const
 	{
 		size_t size = 0;
 		for (auto it = m_fields.begin(); it != m_fields.end(); ++it)
-			size += (*it)->get_size();
+		{
+			if ((*it)->is_transferable())
+				size += (*it)->get_size();
+		}
 		return size;
 	}
 
