@@ -98,12 +98,12 @@ TEST_CASE("Field Serialization", "[dml]")
 			char buff[2];
 			SHRT length;
 		} length_bytes;
-		memcpy(length_bytes.buff, ss.str().data(), 2);
+		memcpy(length_bytes.buff, ss.str().c_str(), 2);
 		REQUIRE(length_bytes.length == 0x4);
 
-		char value_buff[4];
-		memcpy(value_buff, ss.str().substr(2).data(), 4);
-		REQUIRE(value_buff == "TEST");
+		char value_buff[5] = { 0 };
+		memcpy(value_buff, ss.str().substr(2).c_str(), 4);
+		REQUIRE(strcmp(value_buff, "TEST") == 0);
 	}
 
 	SECTION("WSTR Fields")
@@ -119,9 +119,9 @@ TEST_CASE("Field Serialization", "[dml]")
 		memcpy(length_bytes.buff, ss.str().data(), 2);
 		REQUIRE(length_bytes.length == 0x4);
 
-		wchar_t value_buff[4];
+		wchar_t value_buff[5] = { 0 };
 		memcpy(value_buff, ss.str().substr(2).data(), 8);
-		REQUIRE(value_buff == L"TEST");
+		REQUIRE(wcscmp(value_buff, L"TEST") == 0);
 	}
 
 	SECTION("FLT Fields")
@@ -225,7 +225,10 @@ TEST_CASE("Field Deserialization", "[dml]")
 
 	SECTION("WSTR Fields")
 	{
-		ss.write("\x04\x00T\x00E\x00S\x00T\x00", 10);
+		char buff[10];
+		memcpy(buff, "\x04\x00", sizeof(USHRT));
+		memcpy(&buff[2], (char *)L"TEST", 8);
+		ss.write(buff, 10);
 		ss.seekg(std::stringstream::beg);
 
 		auto *field = record->add_field<WSTR>("TestWStr");
