@@ -1,4 +1,5 @@
 #include "ki/dml/Record.h"
+#include <algorithm>
 
 namespace ki
 {

@@ -1,6 +1,7 @@
 #include "ki/dml/Field.h"
 #include "ki/util/ValueBytes.h"
 #include <algorithm>
+#include <locale>
 #include <codecvt>
 
 namespace ki
