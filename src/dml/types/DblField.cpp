@@ -35,5 +35,11 @@ namespace dml
 	{
 		return sizeof(DBL);
 	}
+
+	template <>
+	const char* DblField::get_type_name() const
+	{
+		return "DBL";
+	}
 }
 }

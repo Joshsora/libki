@@ -40,5 +40,23 @@ namespace dml
 	{
 		return sizeof(USHRT) + m_value.length();
 	}
+
+	template <>
+	const char* StrField::get_type_name() const
+	{
+		return "STR";
+	}
+
+	template <>
+	std::string StrField::get_value_string() const
+	{
+		return m_value;
+	}
+
+	template <>
+	void StrField::set_value_from_string(std::string value)
+	{
+		m_value = value;
+	}
 }
 }

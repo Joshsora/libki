@@ -87,6 +87,25 @@ namespace dml
 		void write_to(std::ostream &ostream) const final;
 		void read_from(std::istream &istream) final;
 		size_t get_size() const final;
+
+
+		/**
+		* Creates an XML node from this record's data.
+		*
+		* The document is only used to allocate necessary resources, and
+		* so the returned node has not been appended to the document.
+		*/
+		rapidxml::xml_node<> *as_xml(rapidxml::xml_document<> &doc) const;
+
+		/**
+		* Loads data from an XML Record node into this record.
+		* 
+		* If a Field already exists, and the type is the same,
+		* then the new value is copied into the original Field.
+		* If the type is not the same, then the original Field
+		* is deleted, and replaced with the new one.
+		*/
+		void from_xml(rapidxml::xml_node<> *node);
 	private:
 		FieldList m_fields;
 		FieldNameMap m_field_map;

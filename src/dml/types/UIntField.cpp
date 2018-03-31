@@ -33,5 +33,11 @@ namespace dml
 	{
 		return sizeof(UINT);
 	}
+
+	template <>
+	const char* UIntField::get_type_name() const
+	{
+		return "UINT";
+	}
 }
 }

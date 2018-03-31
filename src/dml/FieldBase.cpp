@@ -1,4 +1,5 @@
 #include "ki/dml/FieldBase.h"
+#include "ki/dml/Field.h"
 
 namespace ki
 {
@@ -25,6 +26,49 @@ namespace dml
 	bool FieldBase::is_transferable() const
 	{
 		return m_transferable;
+	}
+
+	FieldBase* FieldBase::create_from_xml(const Record& record, const rapidxml::xml_node<>* node)
+	{
+		auto *type_attr = node->first_attribute("TYPE");
+		if (!type_attr)
+		{
+			// TODO: Exceptions
+			return nullptr;
+		}
+		const std::string type = type_attr->value();
+
+		FieldBase *field;
+		if (type == "BYT")
+			field = new BytField("", record);
+		else if (type == "UBYT")
+			field = new UBytField("", record);
+		else if (type == "SHRT")
+			field = new ShrtField("", record);
+		else if (type == "USHRT")
+			field = new UShrtField("", record);
+		else if (type == "INT")
+			field = new IntField("", record);
+		else if (type == "UINT")
+			field = new UIntField("", record);
+		else if (type == "STR")
+			field = new StrField("", record);
+		else if (type == "WSTR")
+			field = new WStrField("", record);
+		else if (type == "FLT")
+			field = new FltField("", record);
+		else if (type == "DBL")
+			field = new DblField("", record);
+		else if (type == "GID")
+			field = new GidField("", record);
+		else
+		{
+			// TODO: Exceptions
+			return nullptr;
+		}
+
+		field->from_xml(node);
+		return field;
 	}
 }
 }

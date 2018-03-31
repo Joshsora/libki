@@ -33,5 +33,11 @@ namespace dml
 	{
 		return sizeof(INT);
 	}
+
+	template <>
+	const char* IntField::get_type_name() const
+	{
+		return "INT";
+	}
 }
 }

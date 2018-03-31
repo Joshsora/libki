@@ -26,5 +26,11 @@ namespace dml
 	{
 		return sizeof(BYT);
 	}
+
+	template <>
+	const char* UBytField::get_type_name() const
+	{
+		return "UBYT";
+	}
 }
 }

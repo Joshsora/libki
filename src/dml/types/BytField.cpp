@@ -26,5 +26,11 @@ namespace dml
 	{
 		return sizeof(BYT);
 	}
+
+	template <>
+	const char* BytField::get_type_name() const
+	{
+		return "BYT";
+	}
 }
 }

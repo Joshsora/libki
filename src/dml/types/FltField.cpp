@@ -35,5 +35,11 @@ namespace dml
 	{
 		return sizeof(FLT);
 	}
+
+	template <>
+	const char* FltField::get_type_name() const
+	{
+		return "FLT";
+	}
 }
 }

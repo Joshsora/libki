@@ -33,5 +33,11 @@ namespace dml
 	{
 		return sizeof(USHRT);
 	}
+
+	template <>
+	const char* ShrtField::get_type_name() const
+	{
+		return "SHRT";
+	}
 }
 }

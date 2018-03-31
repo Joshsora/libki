@@ -12,10 +12,10 @@ namespace dml
 
 	Record::~Record()
 	{
-		m_fields.clear();
-		m_field_map.clear();
 		for (auto it = m_fields.begin(); it != m_fields.end(); ++it)
 			delete *it;
+		m_fields.clear();
+		m_field_map.clear();
 	}
 
 	Record::Record(const Record& record)
@@ -77,6 +77,58 @@ namespace dml
 	{
 		m_fields.push_back(field);
 		m_field_map.insert({ field->get_name(), field });
+	}
+
+	rapidxml::xml_node<> *Record::as_xml(rapidxml::xml_document<> &doc) const
+	{
+		auto *node = doc.allocate_node(rapidxml::node_type::node_element, "RECORD");
+		for (auto it = m_fields.begin(); it != m_fields.end(); ++it)
+			node->append_node((*it)->as_xml(doc));
+		return node;
+	}
+
+	void Record::from_xml(rapidxml::xml_node<> *node)
+	{
+		// Make sure that we've been passed a <RECORD> element.
+		const std::string node_name = node->name();
+		if (node_name != "RECORD")
+		{
+			// TODO: Exceptions
+			return;
+		}
+
+		// Every child node inside a <RECORD> element is a Field.
+		for (auto *field_node = node->first_node();
+			field_node; field_node = field_node->next_sibling())
+		{
+			FieldBase *field = FieldBase::create_from_xml(*this, field_node);
+			if (has_field(field->get_name()))
+			{
+				// Is the old field the same type as the one created from
+				// the XML data?
+				FieldBase *old_field = m_field_map.at(field->get_name());
+				if (field->m_type_hash == old_field->m_type_hash)
+				{
+					// Set the value of the old field to the value of the new
+					// one.
+					old_field->set_value(field);
+					delete field;
+				}
+				else
+				{
+					// Since the types are different, we can't set the value
+					// of the old field to the value of the new one so,
+					// replace the old field with this new one instead.
+					ptrdiff_t index = std::find(
+						m_fields.begin(), m_fields.end(), old_field) - m_fields.begin();
+					m_fields[index] = field;
+					m_field_map[field->get_name()] = field;
+					delete old_field;
+				}
+			}
+			else
+				add_field(field);
+		}
 	}
 }
 }

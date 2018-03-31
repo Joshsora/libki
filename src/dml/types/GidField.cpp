@@ -33,5 +33,11 @@ namespace dml
 	{
 		return sizeof(GID);
 	}
+
+	template <>
+	const char* GidField::get_type_name() const
+	{
+		return "GID";
+	}
 }
 }
