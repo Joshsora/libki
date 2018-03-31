@@ -1,6 +1,10 @@
 project(ki)
 cmake_minimum_required(VERSION 3.1)
 
+set(RAPIDXML_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/third_party)
+add_library(RapidXML INTERFACE)
+target_include_directories(RapidXML INTERFACE ${RAPIDXML_INCLUDE_DIR})
+
 add_library(${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME}
 	PROPERTIES
@@ -13,6 +17,7 @@ target_include_directories(${PROJECT_NAME}
 	INTERFACE
 		${PROJECT_SOURCE_DIR}/include
 )
+target_link_libraries(${PROJECT_NAME} RapidXML)
 
 add_subdirectory("src/dml")
 
