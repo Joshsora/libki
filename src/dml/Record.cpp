@@ -119,7 +119,7 @@ namespace dml
 					// Since the types are different, we can't set the value
 					// of the old field to the value of the new one so,
 					// replace the old field with this new one instead.
-					ptrdiff_t index = std::find(
+					const std::ptrdiff_t index = std::find(
 						m_fields.begin(), m_fields.end(), old_field) - m_fields.begin();
 					m_fields[index] = field;
 					m_field_map[field->get_name()] = field;
