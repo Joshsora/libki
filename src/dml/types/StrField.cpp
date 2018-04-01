@@ -21,16 +21,30 @@ namespace dml
 	void StrField::read_from(std::istream &istream)
 	{
 		// Get the length
-		ValueBytes<USHRT> endianness_check;
-		endianness_check.value = 0x0102;
 		ValueBytes<USHRT> length_data;
 		istream.read(length_data.buff, sizeof(USHRT));
+		if (istream.fail())
+		{
+			std::ostringstream oss;
+			oss << "Not enough data was available to read STR value (" << m_name << ").";
+			throw parse_error(oss.str());
+		}
+
+		ValueBytes<USHRT> endianness_check;
+		endianness_check.value = 0x0102;
 		if (endianness_check.buff[0] == 0x01)
 			std::reverse(&length_data.buff[0], &length_data.buff[2]);
 
 		// Read the data into a buffer
 		char *data = new char[length_data.value + 1] { 0 };
 		istream.read(data, length_data.value);
+		if (istream.fail())
+		{
+			std::ostringstream oss;
+			oss << "Not enough data was available to read STR value (" << m_name << ").";
+			throw parse_error(oss.str());
+		}
+
 		m_value = STR(data);
 		delete[] data;
 	}

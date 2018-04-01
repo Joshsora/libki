@@ -1,7 +1,9 @@
 #pragma once
 #include "FieldBase.h"
 #include "types.h"
+#include "exception.h"
 #include <sstream>
+#include <stdexcept>
 
 namespace ki
 {
@@ -69,7 +71,7 @@ namespace dml
 		* Example: <FieldName TYPE="STR">Value</FieldName>
 		*
 		* If the field in the XML data does not have the same type
-		* as this field, then an exception is thrown.
+		* as this field, then a value_error is thrown.
 		*/
 		void from_xml(const rapidxml::xml_node<> *node) final
 		{
@@ -82,12 +84,15 @@ namespace dml
 				attr; attr = attr->next_attribute())
 			{
 				const std::string name = attr->name();
-				if (name != "TYPE")
+				if (name == "TYPE")
 				{
 					const std::string value = attr->value();
 					if (value != get_type_name())
 					{
-						// TODO: Exceptions
+						std::ostringstream oss;
+						oss << "XML Field node has incorrect TYPE attribute value. ";
+						oss << "(value=\"" << value << "\", expected=\"" << get_type_name() << "\". ";
+						throw value_error(oss.str());
 					}
 				}
 				else if (name == "NOXFER")
@@ -97,7 +102,9 @@ namespace dml
 				}
 				else
 				{
-					// TODO: Exceptions
+					std::ostringstream oss;
+					oss << "XML Field node has unknown attribute \"" << name << "\".";
+					throw value_error(oss.str());
 				}
 			}
 
@@ -140,7 +147,11 @@ namespace dml
 			}
 			else
 			{
-				// TODO: Exceptions
+				std::ostringstream oss;
+				oss << "Tried to copy value from " <<
+					other->get_type_name() << " field to " <<
+					get_type_name() << " field.";
+				throw value_error(oss.str());
 			}
 		}
 

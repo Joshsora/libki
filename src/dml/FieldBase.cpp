@@ -33,8 +33,9 @@ namespace dml
 		auto *type_attr = node->first_attribute("TYPE");
 		if (!type_attr)
 		{
-			// TODO: Exceptions
-			return nullptr;
+			std::ostringstream oss;
+			oss << "XML Field node is missing required TYPE attribute (" << node->name() << ").";
+			throw value_error(oss.str());
 		}
 		const std::string type = type_attr->value();
 
@@ -63,8 +64,9 @@ namespace dml
 			field = new GidField("", record);
 		else
 		{
-			// TODO: Exceptions
-			return nullptr;
+			std::ostringstream oss;
+			oss << "Unknown DML type \"" << type << "\" in XML Field node: " << node->name() << ".";
+			throw value_error(oss.str());
 		}
 
 		field->from_xml(node);

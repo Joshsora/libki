@@ -18,6 +18,12 @@ namespace dml
 	{
 		ValueBytes<UBYT> data;
 		istream.read(data.buff, sizeof(UBYT));
+		if (istream.fail())
+		{
+			std::ostringstream oss;
+			oss << "Not enough data was available to read UBYT value (" << m_name << ").";
+			throw parse_error(oss.str());
+		}
 		m_value = data.value;
 	}
 

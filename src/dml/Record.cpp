@@ -94,8 +94,9 @@ namespace dml
 		const std::string node_name = node->name();
 		if (node_name != "RECORD")
 		{
-			// TODO: Exceptions
-			return;
+			std::ostringstream oss;
+			oss << "Expected <RECORD> node but got <" << node->name() << ">.";
+			throw value_error(oss.str());
 		}
 
 		// Every child node inside a <RECORD> element is a Field.

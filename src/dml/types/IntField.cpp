@@ -19,12 +19,20 @@ namespace dml
 	template <>
 	void IntField::read_from(std::istream &istream)
 	{
-		ValueBytes<USHRT> endianness_check;
-		endianness_check.value = 0x0102;
 		ValueBytes<INT> data;
 		istream.read(data.buff, sizeof(INT));
+		if (istream.fail())
+		{
+			std::ostringstream oss;
+			oss << "Not enough data was available to read INT value (" << m_name << ").";
+			throw parse_error(oss.str());
+		}
+
+		ValueBytes<USHRT> endianness_check;
+		endianness_check.value = 0x0102;
 		if (endianness_check.buff[0] == 0x01)
 			std::reverse(&data.buff[0], &data.buff[4]);
+
 		m_value = data.value;
 	}
 
