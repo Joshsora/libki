@@ -15,6 +15,11 @@ namespace dml
 		friend Record;
 		friend FieldBase;
 	public:
+		Field(std::string name) : FieldBase(name)
+		{
+			m_type_hash = typeid(ValueT).hash_code();
+			m_value = ValueT();
+		}
 		virtual ~Field() = default;
 
 		ValueT get_value() const
@@ -112,13 +117,6 @@ namespace dml
 			if (!value.empty())
 				set_value_from_string(value);
 		}
-	protected:
-		Field(std::string name, const Record &record)
-			: FieldBase(name, record)
-		{
-			m_type_hash = typeid(ValueT).hash_code();
-			m_value = ValueT();
-		}
 	private:
 		ValueT m_value;
 
@@ -126,9 +124,9 @@ namespace dml
 		* Returns a new Field with the same name, transferability,
 		* type, and value but with a different owner Record.
 		*/
-		Field<ValueT> *clone(const Record &record) const final
+		Field<ValueT> *clone() const final
 		{
-			auto *clone = new Field<ValueT>(m_name, record);
+			auto *clone = new Field<ValueT>(m_name);
 			clone->m_transferable = true;
 			clone->m_value = m_value;
 			return clone;

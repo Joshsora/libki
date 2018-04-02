@@ -5,17 +5,11 @@ namespace ki
 {
 namespace dml
 {
-	FieldBase::FieldBase(std::string name, const Record& record)
-		: m_record(record)
+	FieldBase::FieldBase(std::string name)
 	{
 		m_name = name;
 		m_transferable = true;
 		m_type_hash = 0;
-	}
-
-	const Record &FieldBase::get_record() const
-	{
-		return m_record;
 	}
 
 	std::string FieldBase::get_name() const
@@ -28,7 +22,7 @@ namespace dml
 		return m_transferable;
 	}
 
-	FieldBase* FieldBase::create_from_xml(const Record& record, const rapidxml::xml_node<>* node)
+	FieldBase* FieldBase::create_from_xml(const rapidxml::xml_node<>* node)
 	{
 		auto *type_attr = node->first_attribute("TYPE");
 		if (!type_attr)
@@ -41,27 +35,27 @@ namespace dml
 
 		FieldBase *field;
 		if (type == "BYT")
-			field = new BytField("", record);
+			field = new BytField("");
 		else if (type == "UBYT")
-			field = new UBytField("", record);
+			field = new UBytField("");
 		else if (type == "SHRT")
-			field = new ShrtField("", record);
+			field = new ShrtField("");
 		else if (type == "USHRT")
-			field = new UShrtField("", record);
+			field = new UShrtField("");
 		else if (type == "INT")
-			field = new IntField("", record);
+			field = new IntField("");
 		else if (type == "UINT")
-			field = new UIntField("", record);
+			field = new UIntField("");
 		else if (type == "STR")
-			field = new StrField("", record);
+			field = new StrField("");
 		else if (type == "WSTR")
-			field = new WStrField("", record);
+			field = new WStrField("");
 		else if (type == "FLT")
-			field = new FltField("", record);
+			field = new FltField("");
 		else if (type == "DBL")
-			field = new DblField("", record);
+			field = new DblField("");
 		else if (type == "GID")
-			field = new GidField("", record);
+			field = new GidField("");
 		else
 		{
 			std::ostringstream oss;

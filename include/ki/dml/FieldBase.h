@@ -19,9 +19,9 @@ namespace dml
 	{
 		friend Record;
 	public:
+		FieldBase(std::string name);
 		virtual ~FieldBase() = default;
 
-		const Record &get_record() const;
 		std::string get_name() const;
 		bool is_transferable() const;
 
@@ -52,27 +52,23 @@ namespace dml
 		/**
 		 * Creates a new Field from XML data.
 		 */
-		static FieldBase *create_from_xml(const Record& record, const rapidxml::xml_node<> *node);
+		static FieldBase *create_from_xml(const rapidxml::xml_node<> *node);
 	protected:
 		std::string m_name;
 		bool m_transferable;
 		size_t m_type_hash;
 
-		FieldBase(std::string name, const Record& record);
-
 		/**
 		 * Returns a new Field with the same name, transferability
 		 * and value but with a different owner Record.
 		 */
-		virtual FieldBase *clone(const Record &record) const = 0;
+		virtual FieldBase *clone() const = 0;
 
 		/**
 		 * Copies the value of another Field into this one
 		 * if the types are the same.
 		 */
 		virtual void set_value(FieldBase *other) = 0;
-	private:
-		const Record &m_record;
 	};
 
 	typedef std::vector<FieldBase *> FieldList;

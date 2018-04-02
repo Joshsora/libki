@@ -73,7 +73,7 @@ namespace dml
 			}
 
 			// Create the field
-			auto *field = new Field<ValueT>(name, *this);
+			auto *field = new Field<ValueT>(name);
 			field->m_transferable = transferable;
 			add_field(field);
 			return field;

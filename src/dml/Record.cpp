@@ -22,7 +22,7 @@ namespace dml
 	Record::Record(const Record& record)
 	{
 		for (auto it = record.fields_begin(); it != record.fields_end(); ++it)
-			add_field((*it)->clone(*this));
+			add_field((*it)->clone());
 	}
 
 	bool Record::has_field(std::string name) const
@@ -103,7 +103,7 @@ namespace dml
 		for (auto *field_node = node->first_node();
 			field_node; field_node = field_node->next_sibling())
 		{
-			FieldBase *field = FieldBase::create_from_xml(*this, field_node);
+			FieldBase *field = FieldBase::create_from_xml(field_node);
 			if (has_field(field->get_name()))
 			{
 				// Is the old field the same type as the one created from
