@@ -29,7 +29,8 @@ namespace protocol
 
 			std::ostringstream oss;
 			data.write_to(oss);
-			m_payload = std::vector<char>(oss.str().c_str(), data.get_size());
+			std::string data_string = oss.str();
+			m_payload.assign(data_string.begin(), data_string.end());
 		}
 
 		template <typename DataT>

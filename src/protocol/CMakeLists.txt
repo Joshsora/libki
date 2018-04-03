@@ -1,0 +1,12 @@
+target_sources(${PROJECT_NAME}
+	PRIVATE
+		${PROJECT_SOURCE_DIR}/src/protocol/Packet.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/control/ClientHello.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/control/ServerHello.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/control/Ping.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/dml/Message.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageBuilder.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageManager.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageModule.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageTemplate.cpp
+)
