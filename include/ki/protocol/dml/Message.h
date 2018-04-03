@@ -9,7 +9,7 @@ namespace protocol
 {
 namespace dml
 {
-	class Message : public util::Serializable
+	class Message final : public util::Serializable
 	{
 	public:
 		Message(uint8_t service_id = 0, uint8_t type = 0);
@@ -25,9 +25,9 @@ namespace dml
 		const ki::dml::Record &get_record() const;
 		void set_record(const ki::dml::Record &record);
 
-		void write_to(std::ostream &ostream) const final;
-		void read_from(std::istream &istream) final;
-		size_t get_size() const final;
+		void write_to(std::ostream &ostream) const override final;
+		void read_from(std::istream &istream) override final;
+		size_t get_size() const override final;
 	private:
 		uint8_t m_service_id;
 		uint8_t m_type;

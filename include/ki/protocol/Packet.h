@@ -9,7 +9,7 @@ namespace ki
 {
 namespace protocol
 {
-	class Packet : public util::Serializable
+	class Packet final : public util::Serializable
 	{
 	public:
 		Packet(bool control = false, uint8_t opcode = 0);
@@ -45,9 +45,9 @@ namespace protocol
 			return data;
 		}
 
-		virtual void write_to(std::ostream &ostream) const final;
-		virtual void read_from(std::istream &istream) final;
-		virtual size_t get_size() const final;
+		void write_to(std::ostream &ostream) const override final;
+		void read_from(std::istream &istream) override final;
+		size_t get_size() const override final;
 	private:
 		bool m_control;
 		uint8_t m_opcode;
