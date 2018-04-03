@@ -11,7 +11,7 @@ namespace protocol
 {
 namespace control
 {
-	class ClientHello : public util::Serializable
+	class ClientHello final : public util::Serializable
 	{
 	public:
 		ClientHello(uint16_t session_id = 0,
@@ -27,9 +27,9 @@ namespace control
 		uint32_t get_milliseconds() const;
 		void set_milliseconds(uint32_t milliseconds);
 
-		void write_to(std::ostream &ostream) const final;
-		void read_from(std::istream &istream) final;
-		size_t get_size() const final;
+		void write_to(std::ostream &ostream) const override final;
+		void read_from(std::istream &istream) override final;
+		size_t get_size() const override final;
 
 		static Packet *create_packet(uint16_t session_id = 0,
 			uint64_t timestamp = 0, uint32_t milliseconds = 0)
