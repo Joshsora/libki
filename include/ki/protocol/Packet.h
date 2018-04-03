@@ -39,7 +39,7 @@ namespace protocol
 			static_assert(std::is_base_of<Serializable, DataT>::value,
 				"DataT must derive from Serializable.");
 
-			std::istringstream iss(m_payload.data());
+			std::istringstream iss(std::string(m_payload.data(), m_payload.size()));
 			DataT *data = new DataT();
 			data->read_from(iss);
 			return data;
