@@ -32,12 +32,11 @@ namespace dml
 			m_value = value;
 		}
 
-		const char *get_type_name() const final;
+		const char *get_type_name() const override final;
 
-		void write_to(std::ostream &ostream) const final;
-		void read_from(std::istream &istream) final;
-		size_t get_size() const final;
-
+		void write_to(std::ostream &ostream) const override final;
+		void read_from(std::istream &istream) override final;
+		size_t get_size() const override final;
 
 		/**
 		* Creates an XML node from this field's data.
@@ -124,7 +123,7 @@ namespace dml
 		* Returns a new Field with the same name, transferability,
 		* type, and value but with a different owner Record.
 		*/
-		Field<ValueT> *clone() const final
+		Field<ValueT> *clone() const override final
 		{
 			auto *clone = new Field<ValueT>(m_name);
 			clone->m_transferable = true;

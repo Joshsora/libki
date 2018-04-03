@@ -84,10 +84,9 @@ namespace dml
 		FieldList::const_iterator fields_begin() const;
 		FieldList::const_iterator fields_end() const;
 
-		void write_to(std::ostream &ostream) const final;
-		void read_from(std::istream &istream) final;
-		size_t get_size() const final;
-
+		void write_to(std::ostream &ostream) const override final;
+		void read_from(std::istream &istream) override final;
+		size_t get_size() const override final;
 
 		/**
 		* Creates an XML node from this record's data.
