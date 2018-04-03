@@ -32,14 +32,7 @@ namespace control
 
 		static Packet *create_packet(uint16_t session_id = 0,
 			uint16_t milliseconds = 0, uint8_t minutes = 0,
-			bool response = false)
-		{
-			Ping data(session_id, milliseconds, minutes);
-			auto *packet = new Packet(true, 
-				(uint8_t)(response ? Opcode::PING_RSP : Opcode::PING));
-			packet->set_payload_data(data);
-			return packet;
-		}
+			bool response = false);
 	private:
 		uint16_t m_session_id;
 		uint16_t m_milliseconds;
