@@ -30,6 +30,13 @@ namespace dml
 		return m_field_map.count(name);
 	}
 
+	FieldBase *Record::get_field(std::string name) const
+	{
+		if (has_field(name))
+			return m_field_map.at(name);
+		return nullptr;
+	}
+
 	size_t Record::get_field_count() const
 	{
 		return m_fields.size();
