@@ -24,7 +24,7 @@ namespace dml
 		const ki::dml::Record &get_record() const;
 		void set_record(ki::dml::Record *record);
 
-		MessageBuilder &build_message();
+		MessageBuilder &build_message() const;
 	private:
 		std::string m_name;
 		uint8_t m_type;
