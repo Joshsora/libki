@@ -53,6 +53,9 @@ namespace dml
 		 * Creates a new Field from XML data.
 		 */
 		static FieldBase *create_from_xml(const rapidxml::xml_node<> *node);
+
+		virtual std::string get_value_string() const = 0;
+		virtual void set_value_from_string(std::string value) = 0;
 	protected:
 		std::string m_name;
 		bool m_transferable;
