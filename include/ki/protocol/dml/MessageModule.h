@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <array>
 #include <map>
 
 namespace ki
@@ -31,6 +30,8 @@ namespace dml
 		const MessageTemplate *get_message_template(uint8_t type) const;
 		const MessageTemplate *get_message_template(std::string name) const;
 
+		void sort_lookup();
+
 		MessageBuilder &build_message(uint8_t message_type) const;
 		MessageBuilder &build_message(std::string message_name) const;
 	private:
@@ -39,7 +40,8 @@ namespace dml
 		std::string m_protocol_description;
 		uint8_t m_last_message_type;
 
-		std::array<MessageTemplate *, 255> m_templates;
+		std::vector<MessageTemplate *> m_templates;
+		std::map<uint8_t, MessageTemplate *> m_message_type_map;
 		std::map<std::string, MessageTemplate *> m_message_name_map;
 	};
 

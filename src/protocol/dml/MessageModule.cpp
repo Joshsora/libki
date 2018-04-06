@@ -14,7 +14,6 @@ namespace dml
 		m_protocol_type = protocol_type;
 		m_protocol_description = "";
 		m_last_message_type = 0;
-		m_templates = std::array<MessageTemplate *, 255> { nullptr };
 	}
 
 	MessageModule::~MessageModule()
@@ -67,7 +66,7 @@ namespace dml
 
 		// Do we already have a message template with this name?
 		if (m_message_name_map.count(name) == 1)
-			return nullptr;
+			return m_message_name_map.at(name);
 
 		// Message type is based on the _MsgOrder field if it's present
 		// Otherwise it just goes in order of added templates
@@ -83,12 +82,13 @@ namespace dml
 			return nullptr;
 
 		// Do we already have a message template with this type?
-		if (m_templates[message_type] != nullptr)
+		if (m_message_type_map.count(message_type) == 1)
 			return nullptr;
 
 		// Create the template and add it to our maps
 		auto *message_template = new MessageTemplate(name, message_type, record);
-		m_templates[message_type] = message_template;
+		m_templates.push_back(message_template);
+		m_message_type_map.insert({ message_type, message_template });
 		m_message_name_map.insert({ name, message_template });
 		m_last_message_type = message_type;
 		return message_template;
@@ -96,7 +96,9 @@ namespace dml
 
 	const MessageTemplate *MessageModule::get_message_template(uint8_t type) const
 	{
-		return m_templates[type];
+		if (m_message_type_map.count(type) == 1)
+			return m_message_type_map.at(type);
+		return nullptr;
 	}
 
 	const MessageTemplate *MessageModule::get_message_template(std::string name) const
@@ -104,6 +106,26 @@ namespace dml
 		if (m_message_name_map.count(name) == 1)
 			return m_message_name_map.at(name);
 		return nullptr;
+	}
+
+	void MessageModule::sort_lookup()
+	{
+		uint8_t message_type = 1;
+
+		// First, clear the message type map since we're going to be
+		// moving everything around
+		m_message_type_map.clear();
+
+		// Iterating over a map with std::string as the key
+		// is guaranteed to be in alphabetical order
+		for (auto it = m_message_name_map.begin();
+			it != m_message_name_map.end(); ++it)
+		{
+			auto *message_template = it->second;
+			message_template->set_type(message_type);
+			m_message_type_map.insert({ message_type, message_template });
+			message_type++;
+		}
 	}
 
 	MessageBuilder& MessageModule::build_message(uint8_t message_type) const
