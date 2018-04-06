@@ -1,6 +1,8 @@
 #pragma once
 #include "Message.h"
+#include "ki/protocol/exception.h"
 #include <string>
+#include <sstream>
 
 namespace ki
 {
@@ -20,10 +22,12 @@ namespace dml
 		template <typename ValueT>
 		MessageBuilder &set_field_value(std::string name, ValueT value)
 		{
-			auto *field = m_message->get_record().get_field<ValueT>(name);
+			auto *field = m_message->get_record()->get_field<ValueT>(name);
 			if (!field)
 			{
-				// TODO: Exceptions
+				std::ostringstream oss;
+				oss << "No field with name " << name << " exists with specified type.";
+				throw value_error(oss.str());
 			}
 			field->set_value(value);
 			return *this;
