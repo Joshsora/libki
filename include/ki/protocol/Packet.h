@@ -1,5 +1,6 @@
 #pragma once
 #include "../util/Serializable.h"
+#include "exception.h"
 #include <cstdint>
 #include <vector>
 #include <sstream>
@@ -41,7 +42,15 @@ namespace protocol
 
 			std::istringstream iss(std::string(m_payload.data(), m_payload.size()));
 			DataT *data = new DataT();
-			data->read_from(iss);
+			try
+			{
+				data->read_from(iss);
+			}
+			catch (parse_error &e)
+			{
+				delete data;
+				throw;
+			}
 			return data;
 		}
 
