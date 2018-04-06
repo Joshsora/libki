@@ -21,6 +21,7 @@ namespace dml
 		for (auto it = m_templates.begin();
 			it != m_templates.end(); ++it)
 			delete *it;
+		m_message_type_map.clear();
 		m_message_name_map.clear();
 	}
 
@@ -54,7 +55,8 @@ namespace dml
 		m_protocol_description = protocol_description;
 	}
 
-	const MessageTemplate *MessageModule::add_message_template(std::string name, ki::dml::Record *record)
+	const MessageTemplate *MessageModule::add_message_template(std::string name,
+		ki::dml::Record *record, bool auto_sort)
 	{
 		if (!record)
 			return nullptr;
@@ -69,28 +71,33 @@ namespace dml
 			return m_message_name_map.at(name);
 
 		// Message type is based on the _MsgOrder field if it's present
-		// Otherwise it just goes in order of added templates
-		uint8_t message_type;
+		// Otherwise it's based on the alphabetical order of template names
+		uint8_t message_type = 0;
 		auto *order_field = record->get_field<ki::dml::UBYT>("_MsgOrder");
 		if (order_field)
+		{
 			message_type = order_field->get_value();
-		else
-			message_type = m_last_message_type + 1;
 
-		// Don't allow message type to be zero
-		if (message_type == 0)
-			return nullptr;
+			// Don't allow message type to be 0
+			if (message_type == 0)
+				return nullptr;
 
-		// Do we already have a message template with this type?
-		if (m_message_type_map.count(message_type) == 1)
-			return nullptr;
+			// Do we already have a template with this type?
+			if (m_message_type_map.count(message_type) == 1)
+				return nullptr;
+		}
 
-		// Create the template and add it to our maps
-		auto *message_template = new MessageTemplate(name, message_type, record);
+		// Create the message template and add it to our lookups
+		auto *message_template = new MessageTemplate(name, message_type, m_service_id, record);
 		m_templates.push_back(message_template);
-		m_message_type_map.insert({ message_type, message_template });
 		m_message_name_map.insert({ name, message_template });
-		m_last_message_type = message_type;
+
+		// Is this module ordered?
+		if (message_type != 0)
+			m_message_type_map.insert({ message_type, message_template });
+		else if (auto_sort)
+			sort_lookup();
+
 		return message_template;
 	}
 
@@ -125,6 +132,10 @@ namespace dml
 			message_template->set_type(message_type);
 			m_message_type_map.insert({ message_type, message_template });
 			message_type++;
+
+			// Make sure we haven't overflowed
+			if (message_type == 0)
+				throw value_error("Module has more than 254 messages.");
 		}
 	}
 
@@ -139,8 +150,7 @@ namespace dml
 			throw value_error(oss.str());
 		}
 
-		return message_template->build_message()
-			.set_service_id(m_service_id);
+		return message_template->build_message();
 	}
 
 	MessageBuilder &MessageModule::build_message(std::string message_name) const
@@ -154,8 +164,7 @@ namespace dml
 			throw value_error(oss.str());
 		}
 
-		return message_template->build_message()
-			.set_service_id(m_service_id);
+		return message_template->build_message();
 	}
 }
 }

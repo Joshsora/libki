@@ -6,10 +6,12 @@ namespace protocol
 {
 namespace dml
 {
-	MessageTemplate::MessageTemplate(std::string name, uint8_t type, ki::dml::Record* record)
+	MessageTemplate::MessageTemplate(std::string name, uint8_t type,
+		uint8_t service_id, ki::dml::Record* record)
 	{
 		m_name = name;
 		m_type = type;
+		m_service_id = service_id;
 		m_record = record;
 	}
 
@@ -38,6 +40,16 @@ namespace dml
 		m_type = type;
 	}
 
+	uint8_t MessageTemplate::get_service_id() const
+	{
+		return m_service_id;
+	}
+
+	void MessageTemplate::set_service_id(uint8_t service_id)
+	{
+		m_service_id = service_id;
+	}
+
 	const ki::dml::Record& MessageTemplate::get_record() const
 	{
 		return *m_record;
@@ -52,6 +64,7 @@ namespace dml
 	{
 		return MessageBuilder()
 			.set_message_type(m_type)
+			.set_service_id(m_service_id)
 			.use_template_record(*m_record);
 	}
 }

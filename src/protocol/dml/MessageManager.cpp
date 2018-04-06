@@ -56,8 +56,6 @@ namespace dml
 
 		// It's safe to allocate the module we're working on now
 		auto *message_module = new MessageModule();
-		bool sort_required = true;
-		bool first_message = true;
 
 		// Get the root node and iterate through children
 		// Each child is a MessageTemplate
@@ -90,16 +88,13 @@ namespace dml
 			}
 			else
 			{
-				// Base sorting on whether the first message has the _MsgOrder field.
-				if (first_message)
-				{
-					sort_required = !record->has_field("_MsgOrder");
-					first_message = false;
-				}
+				// Only do sorting after we've reached the final message
+				// This only affects modules that aren't ordered with _MsgOrder.
+				const bool auto_sort = node->next_sibling() == nullptr;
 
 				// The template will use the record itself to figure out name and type;
 				// we only give the XML data incase the record doesn't have it defined.
-				auto *message_template = message_module->add_message_template(message_name, record);
+				auto *message_template = message_module->add_message_template(message_name, record, auto_sort);
 				if (!message_template)
 				{
 					delete[] data;
@@ -113,10 +108,6 @@ namespace dml
 				}
 			}
 		}
-
-		// Sort the module's lookup if we need to
-		if (sort_required)
-			message_module->sort_lookup();
 
 		// Make sure we aren't overwriting another module
 		if (m_service_id_map.count(message_module->get_service_id()) == 1)
