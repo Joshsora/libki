@@ -110,6 +110,9 @@ namespace dml
 		for (auto *field_node = node->first_node();
 			field_node; field_node = field_node->next_sibling())
 		{
+			if (field_node->type() != rapidxml::node_type::node_element)
+				continue;
+
 			FieldBase *field = FieldBase::create_from_xml(field_node);
 			if (has_field(field->get_name()))
 			{
