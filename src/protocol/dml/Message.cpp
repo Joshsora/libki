@@ -11,6 +11,7 @@ namespace dml
 	{
 		m_service_id = service_id;
 		m_type = type;
+		m_record = nullptr;
 	}
 
 	Message::~Message()
