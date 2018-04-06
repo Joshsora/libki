@@ -38,5 +38,22 @@ namespace dml
 	{
 		return "BYT";
 	}
+
+	template <>
+	std::string BytField::get_value_string() const
+	{
+		std::ostringstream oss;
+		oss << (int16_t)m_value;
+		return oss.str();
+	}
+
+	template <>
+	void BytField::set_value_from_string(std::string value)
+	{
+		std::istringstream iss(value);
+		int16_t temp = 0;
+		iss >> temp;
+		m_value = temp & 0xFF;
+	}
 }
 }

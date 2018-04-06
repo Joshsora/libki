@@ -34,6 +34,8 @@ namespace dml
 			return m_field_map.at(name)->is_type<ValueT>();
 		}
 
+		FieldBase *get_field(std::string name) const;
+
 		/**
 		 * Returns a previously added field with the specified name
 		 * and type.

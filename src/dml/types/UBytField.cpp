@@ -38,5 +38,22 @@ namespace dml
 	{
 		return "UBYT";
 	}
+
+	template <>
+	std::string UBytField::get_value_string() const
+	{
+		std::ostringstream oss;
+		oss << (uint16_t)m_value;
+		return oss.str();
+	}
+
+	template <>
+	void UBytField::set_value_from_string(std::string value)
+	{
+		std::istringstream iss(value);
+		uint16_t temp = 0;
+		iss >> temp;
+		m_value = temp & 0xFF;
+	}
 }
 }

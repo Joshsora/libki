@@ -116,6 +116,9 @@ namespace dml
 			if (!value.empty())
 				set_value_from_string(value);
 		}
+
+		std::string get_value_string() const override final;
+		void set_value_from_string(std::string value) override final;
 	private:
 		ValueT m_value;
 
@@ -126,7 +129,7 @@ namespace dml
 		Field<ValueT> *clone() const override final
 		{
 			auto *clone = new Field<ValueT>(m_name);
-			clone->m_transferable = true;
+			clone->m_transferable = m_transferable;
 			clone->m_value = m_value;
 			return clone;
 		}
@@ -151,9 +154,6 @@ namespace dml
 				throw value_error(oss.str());
 			}
 		}
-
-		std::string get_value_string() const;
-		void set_value_from_string(std::string value);
 	};
 
 	typedef Field<BYT> BytField;
@@ -182,6 +182,18 @@ namespace dml
 		std::istringstream iss(value);
 		iss >> m_value;
 	}
+
+	template <>
+	std::string BytField::get_value_string() const;
+
+	template <>
+	void BytField::set_value_from_string(std::string value);
+
+	template <>
+	std::string UBytField::get_value_string() const;
+
+	template <>
+	void UBytField::set_value_from_string(std::string value);
 
 	template <>
 	std::string StrField::get_value_string() const;

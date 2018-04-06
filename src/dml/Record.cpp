@@ -30,6 +30,13 @@ namespace dml
 		return m_field_map.count(name);
 	}
 
+	FieldBase *Record::get_field(std::string name) const
+	{
+		if (has_field(name))
+			return m_field_map.at(name);
+		return nullptr;
+	}
+
 	size_t Record::get_field_count() const
 	{
 		return m_fields.size();
@@ -103,6 +110,9 @@ namespace dml
 		for (auto *field_node = node->first_node();
 			field_node; field_node = field_node->next_sibling())
 		{
+			if (field_node->type() != rapidxml::node_type::node_element)
+				continue;
+
 			FieldBase *field = FieldBase::create_from_xml(field_node);
 			if (has_field(field->get_name()))
 			{
