@@ -101,8 +101,10 @@ namespace net
 		// whether this is a control packet or not
 		if (header.is_control())
 			on_control_message(header);
-		else
+		else if (m_established)
 			on_application_message(header);
+		else
+			close();
 	}
 
 	void Session::on_control_message(const PacketHeader& header)
