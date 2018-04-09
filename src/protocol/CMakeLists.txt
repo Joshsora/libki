@@ -1,6 +1,5 @@
 target_sources(${PROJECT_NAME}
 	PRIVATE
-		${PROJECT_SOURCE_DIR}/src/protocol/Packet.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/control/ClientHello.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/control/ServerHello.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/control/Ping.cpp
@@ -9,4 +8,7 @@ target_sources(${PROJECT_NAME}
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageManager.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageModule.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageTemplate.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/net/PacketHeader.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/net/Participant.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/net/Session.cpp
 )
