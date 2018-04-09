@@ -1,5 +1,6 @@
 #include "ki/protocol/net/Participant.h"
 #include "ki/protocol/exception.h"
+#include <cstring>
 
 namespace ki
 {
@@ -49,7 +50,7 @@ namespace net
 		((uint16_t *)packet_data)[1] = size;
 
 		// Copy the payload into the buffer and send it
-		memcpy(&packet_data[4], data, size);
+		std::memcpy(&packet_data[4], data, size);
 		send_packet_data(packet_data, size + 4);
 		delete[] packet_data;
 	}
