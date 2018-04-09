@@ -71,16 +71,6 @@ namespace control
 		return sizeof(dml::USHRT) + sizeof(dml::USHRT) +
 			sizeof(dml::UBYT);
 	}
-
-	Packet* Ping::create_packet(uint16_t session_id,
-		uint16_t milliseconds, uint8_t minutes, bool response)
-	{
-		const Ping data(session_id, milliseconds, minutes);
-		auto *packet = new Packet(true,
-			(uint8_t)(response ? Opcode::PING_RSP : Opcode::PING));
-		packet->set_payload_data(data);
-		return packet;
-	}
 }
 }
 }

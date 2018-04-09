@@ -1,7 +1,5 @@
 #pragma once
 #include "../../util/Serializable.h"
-#include "../Packet.h"
-#include "Opcode.h"
 #include <cstdint>
 
 namespace ki
@@ -29,10 +27,6 @@ namespace control
 		void write_to(std::ostream &ostream) const override final;
 		void read_from(std::istream &istream) override final;
 		size_t get_size() const override final;
-
-		static Packet *create_packet(uint16_t session_id = 0,
-			uint16_t milliseconds = 0, uint8_t minutes = 0,
-			bool response = false);
 	private:
 		uint16_t m_session_id;
 		uint16_t m_milliseconds;

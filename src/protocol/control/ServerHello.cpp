@@ -7,8 +7,8 @@ namespace protocol
 {
 namespace control
 {
-	ServerHello::ServerHello(uint16_t session_id,
-		uint32_t timestamp, uint32_t milliseconds)
+	ServerHello::ServerHello(const uint16_t session_id,
+		const int32_t timestamp, const uint32_t milliseconds)
 	{
 		m_session_id = session_id;
 		m_timestamp = timestamp;
@@ -20,17 +20,17 @@ namespace control
 		return m_session_id;
 	}
 
-	void ServerHello::set_session_id(uint16_t session_id)
+	void ServerHello::set_session_id(const uint16_t session_id)
 	{
 		m_session_id = session_id;
 	}
 
-	uint32_t ServerHello::get_timestamp() const
+	int32_t ServerHello::get_timestamp() const
 	{
 		return m_timestamp;
 	}
 
-	void ServerHello::set_timestamp(uint32_t timestamp)
+	void ServerHello::set_timestamp(const int32_t timestamp)
 	{
 		m_timestamp = timestamp;
 	}
@@ -40,7 +40,7 @@ namespace control
 		return m_milliseconds;
 	}
 
-	void ServerHello::set_milliseconds(uint32_t milliseconds)
+	void ServerHello::set_milliseconds(const uint32_t milliseconds)
 	{
 		m_milliseconds = milliseconds;
 	}
@@ -50,7 +50,7 @@ namespace control
 		dml::Record record;
 		record.add_field<dml::USHRT>("m_session_id")->set_value(m_session_id);
 		record.add_field<dml::UINT>("unknown");
-		record.add_field<dml::UINT>("m_timestamp")->set_value(m_timestamp);
+		record.add_field<dml::INT>("m_timestamp")->set_value(m_timestamp);
 		record.add_field<dml::UINT>("m_milliseconds")->set_value(m_milliseconds);
 		record.write_to(ostream);
 	}
@@ -60,7 +60,7 @@ namespace control
 		dml::Record record;
 		auto *session_id = record.add_field<dml::USHRT>("m_session_id");
 		record.add_field<dml::UINT>("unknown");
-		auto *timestamp = record.add_field<dml::UINT>("m_timestamp");
+		auto *timestamp = record.add_field<dml::INT>("m_timestamp");
 		auto *milliseconds = record.add_field<dml::UINT>("m_milliseconds");
 		record.read_from(istream);
 
@@ -71,17 +71,8 @@ namespace control
 
 	size_t ServerHello::get_size() const
 	{
-		return sizeof(dml::USHRT) + sizeof(dml::GID) +
-			sizeof(dml::UINT);
-	}
-
-	Packet *ServerHello::create_packet(uint16_t session_id,
-		uint32_t timestamp, uint32_t milliseconds)
-	{
-		const ServerHello data(session_id, timestamp, milliseconds);
-		auto *packet = new Packet(true, (uint8_t)Opcode::SERVER_HELLO);
-		packet->set_payload_data(data);
-		return packet;
+		return sizeof(dml::USHRT) + sizeof(dml::UINT) + 
+			sizeof(dml::INT) + sizeof(dml::UINT);
 	}
 }
 }
