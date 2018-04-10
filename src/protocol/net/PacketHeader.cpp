@@ -51,7 +51,7 @@ namespace net
 		if (istream.fail())
 			throw parse_error("Not enough data was available to read packet header. (m_opcode)");
 		istream.ignore(2);
-		if (istream.fail())
+		if (istream.eof())
 			throw parse_error("Not enough data was available to read packet header. (ignored bytes)");
 	}
 
