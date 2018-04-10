@@ -59,6 +59,7 @@ namespace net
 		*/
 		void process_data(const char *data, size_t size);
 
+		virtual void send_packet_data(const char *data, const size_t size) = 0;
 		virtual void close() = 0;
 	private:
 		ParticipantType m_type;
@@ -69,7 +70,6 @@ namespace net
 		uint16_t m_incoming_packet_size;
 		uint8_t m_shift;
 
-		virtual void send_packet_data(const char *data, const size_t size) = 0;
 		virtual void on_packet_available() {};
 	};
 }
