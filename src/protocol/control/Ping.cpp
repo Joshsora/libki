@@ -1,5 +1,6 @@
 #include "ki/protocol/control/Ping.h"
 #include "ki/dml/Record.h"
+#include "ki/protocol/exception.h"
 
 namespace ki
 {
@@ -59,7 +60,16 @@ namespace control
 		auto *session_id = record.add_field<dml::USHRT>("m_session_id");
 		auto *milliseconds = record.add_field<dml::USHRT>("m_milliseconds");
 		auto *minutes = record.add_field<dml::UBYT>("m_minutes");
-		record.read_from(istream);
+		try
+		{
+			record.read_from(istream);
+		}
+		catch (dml::parse_error &e)
+		{
+			std::ostringstream oss;
+			oss << "Error reading Ping payload: " << e.what();
+			throw parse_error(oss.str());
+		}
 
 		m_session_id = session_id->get_value();
 		m_milliseconds = milliseconds->get_value();

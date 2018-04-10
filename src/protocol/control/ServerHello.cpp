@@ -1,5 +1,6 @@
 #include "ki/protocol/control/ServerHello.h"
 #include "ki/dml/Record.h"
+#include "ki/protocol/exception.h"
 
 namespace ki
 {
@@ -62,7 +63,16 @@ namespace control
 		record.add_field<dml::UINT>("unknown");
 		auto *timestamp = record.add_field<dml::INT>("m_timestamp");
 		auto *milliseconds = record.add_field<dml::UINT>("m_milliseconds");
-		record.read_from(istream);
+		try
+		{
+			record.read_from(istream);
+		}
+		catch (dml::parse_error &e)
+		{
+			std::ostringstream oss;
+			oss << "Error reading ServerHello payload: " << e.what();
+			throw parse_error(oss.str());
+		}
 
 		m_session_id = session_id->get_value();
 		m_timestamp = timestamp->get_value();
