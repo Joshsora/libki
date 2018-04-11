@@ -60,6 +60,18 @@ namespace net
 		).count() <= 10;
 	}
 
+	void Session::send_packet(const bool is_control, const control::Opcode opcode,
+		const util::Serializable& data)
+	{
+		std::ostringstream ss;
+		PacketHeader header(is_control, (uint8_t)opcode);
+		header.write_to(ss);
+		data.write_to(ss);
+
+		const auto buffer = ss.str();
+		send_data(buffer.c_str(), buffer.length());
+	}
+
 	void Session::on_connected()
 	{
 		// If this is the server-side of a Session

@@ -31,23 +31,10 @@ namespace net
 		uint16_t get_latency() const;
 
 		bool is_alive() const;
+
+		void send_packet(bool is_control, control::Opcode opcode,
+			const util::Serializable &data);
 	protected:
-		template <typename DataT>
-		void send_packet(const bool is_control, const control::Opcode opcode,
-			const DataT &data)
-		{
-			static_assert(std::is_base_of<util::Serializable, DataT>::value,
-				"DataT must inherit Serializable.");
-
-			std::ostringstream ss;
-			PacketHeader header(is_control, (uint8_t)opcode);
-			header.write_to(ss);
-			data.write_to(ss);
-
-			const auto buffer = ss.str();
-			send_data(buffer.c_str(), buffer.length());
-		}
-
 		template <typename DataT>
 		DataT read_data()
 		{
