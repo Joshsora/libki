@@ -8,8 +8,8 @@ target_sources(${PROJECT_NAME}
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageManager.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageModule.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageTemplate.cpp
-		${PROJECT_SOURCE_DIR}/src/protocol/dml/Session.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/net/PacketHeader.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/net/Participant.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/net/Session.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/net/DMLSession.cpp
 )
