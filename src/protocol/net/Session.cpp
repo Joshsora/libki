@@ -90,8 +90,7 @@ namespace net
 
 			// Send a SERVER_HELLO packet to the client
 			const control::ServerHello hello(m_id, timestamp, milliseconds);
-			send_packet<control::ServerHello>(
-				true, control::Opcode::SERVER_HELLO, hello);
+			send_packet(true, control::Opcode::SERVER_HELLO, hello);
 		}
 	}
 
@@ -176,8 +175,7 @@ namespace net
 
 			// Send a CLIENT_HELLO packet to the server
 			const control::ClientHello hello(m_id, timestamp, milliseconds);
-			send_packet<control::ClientHello>(
-				true, control::Opcode::CLIENT_HELLO, hello);
+			send_packet(true, control::Opcode::CLIENT_HELLO, hello);
 		}
 		catch (parse_error &e)
 		{
@@ -232,8 +230,7 @@ namespace net
 			}
 
 			// Send the response
-			send_packet<control::Ping>(
-				true, control::Opcode::PING_RSP, ping);
+			send_packet(true, control::Opcode::PING_RSP, ping);
 		}
 		catch (parse_error &e)
 		{
