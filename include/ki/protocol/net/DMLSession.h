@@ -14,6 +14,8 @@ namespace net
 		DMLSession(ParticipantType type, uint16_t id,
 			const dml::MessageManager &manager);
 		~DMLSession() = default;
+
+		void send_message(const dml::Message &message);
 	protected:
 		void on_application_message(const PacketHeader& header) override;
 		virtual void on_message(const dml::Message &message) {}

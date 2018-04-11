@@ -9,6 +9,7 @@ namespace control
 {
 	enum class Opcode : uint8_t
 	{
+		NONE = 0,
 		SERVER_HELLO = 0,
 		UDP_HELLO = 1,
 		PING = 3,
