@@ -6,20 +6,20 @@ namespace ki
 {
 namespace protocol
 {
-namespace dml
+namespace net
 {
-	class DMLSession : public net::Session
+	class DMLSession : public Session
 	{
 	public:
-		DMLSession(net::ParticipantType type, uint16_t id,
-			const MessageManager &manager);
+		DMLSession(ParticipantType type, uint16_t id,
+			const dml::MessageManager &manager);
 		~DMLSession() = default;
 	protected:
-		void on_application_message(const net::PacketHeader& header) override;
-		virtual void on_message(const Message &message) {}
+		void on_application_message(const PacketHeader& header) override;
+		virtual void on_message(const dml::Message &message) {}
 		virtual void on_invalid_message() {}
 	private:
-		const MessageManager &m_manager;
+		const dml::MessageManager &m_manager;
 	};
 }
 }

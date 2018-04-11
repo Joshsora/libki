@@ -4,13 +4,13 @@ namespace ki
 {
 namespace protocol
 {
-namespace dml
+namespace net
 {
-	DMLSession::DMLSession(const net::ParticipantType type, const  uint16_t id,
-		const MessageManager& manager)
-		: net::Session(type, id), m_manager(manager) {}
+	DMLSession::DMLSession(const ParticipantType type, const  uint16_t id,
+		const dml::MessageManager& manager)
+		: Session(type, id), m_manager(manager) {}
 
-	void DMLSession::on_application_message(const net::PacketHeader& header)
+	void DMLSession::on_application_message(const PacketHeader& header)
 	{
 		const auto *message = m_manager.message_from_binary(m_data_stream);
 		if (!message)
