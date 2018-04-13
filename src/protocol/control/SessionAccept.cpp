@@ -1,4 +1,4 @@
-#include "ki/protocol/control/ClientHello.h"
+#include "ki/protocol/control/SessionAccept.h"
 #include "ki/dml/Record.h"
 #include "ki/protocol/exception.h"
 
@@ -8,7 +8,7 @@ namespace protocol
 {
 namespace control
 {
-	ClientHello::ClientHello(const uint16_t session_id,
+	SessionAccept::SessionAccept(const uint16_t session_id,
 		const int32_t timestamp, const uint32_t milliseconds)
 	{
 		m_session_id = session_id;
@@ -16,37 +16,37 @@ namespace control
 		m_milliseconds = milliseconds;
 	}
 
-	uint16_t ClientHello::get_session_id() const
+	uint16_t SessionAccept::get_session_id() const
 	{
 		return m_session_id;
 	}
 
-	void ClientHello::set_session_id(const uint16_t session_id)
+	void SessionAccept::set_session_id(const uint16_t session_id)
 	{
 		m_session_id = session_id;
 	}
 
-	int32_t ClientHello::get_timestamp() const
+	int32_t SessionAccept::get_timestamp() const
 	{
 		return m_timestamp;
 	}
 
-	void ClientHello::set_timestamp(const int32_t timestamp)
+	void SessionAccept::set_timestamp(const int32_t timestamp)
 	{
 		m_timestamp = timestamp;
 	}
 
-	uint32_t ClientHello::get_milliseconds() const
+	uint32_t SessionAccept::get_milliseconds() const
 	{
 		return m_milliseconds;
 	}
 
-	void ClientHello::set_milliseconds(const uint32_t milliseconds)
+	void SessionAccept::set_milliseconds(const uint32_t milliseconds)
 	{
 		m_milliseconds = milliseconds;
 	}
 
-	void ClientHello::write_to(std::ostream& ostream) const
+	void SessionAccept::write_to(std::ostream& ostream) const
 	{
 		dml::Record record;
 		record.add_field<dml::USHRT>("unknown");
@@ -57,7 +57,7 @@ namespace control
 		record.write_to(ostream);
 	}
 
-	void ClientHello::read_from(std::istream& istream)
+	void SessionAccept::read_from(std::istream& istream)
 	{
 		dml::Record record;
 		record.add_field<dml::USHRT>("unknown");
@@ -72,7 +72,7 @@ namespace control
 		catch (dml::parse_error &e)
 		{
 			std::ostringstream oss;
-			oss << "Error reading ClientHello payload: " << e.what();
+			oss << "Error reading SessionAccept payload: " << e.what();
 			throw parse_error(oss.str());
 		}
 
@@ -81,7 +81,7 @@ namespace control
 		m_session_id = session_id->get_value();
 	}
 
-	size_t ClientHello::get_size() const
+	size_t SessionAccept::get_size() const
 	{
 		return sizeof(dml::USHRT) + sizeof(dml::UINT) + 
 			sizeof(dml::INT) + sizeof(dml::UINT) +

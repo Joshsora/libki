@@ -9,12 +9,12 @@ namespace protocol
 {
 namespace control
 {
-	class ServerHello final : public util::Serializable
+	class SessionOffer final : public util::Serializable
 	{
 	public:
-		ServerHello(uint16_t session_id = 0,
+		SessionOffer(uint16_t session_id = 0,
 			int32_t timestamp = 0, uint32_t milliseconds = 0);
-		virtual ~ServerHello() = default;
+		virtual ~SessionOffer() = default;
 
 		uint16_t get_session_id() const;
 		void set_session_id(uint16_t session_id);

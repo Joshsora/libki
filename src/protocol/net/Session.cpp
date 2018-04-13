@@ -1,7 +1,7 @@
 #include "ki/protocol/net/Session.h"
 #include "ki/protocol/exception.h"
-#include "ki/protocol/control/ServerHello.h"
-#include "ki/protocol/control/ClientHello.h"
+#include "ki/protocol/control/SessionOffer.h"
+#include "ki/protocol/control/SessionAccept.h"
 #include "ki/protocol/control/Ping.h"
 
 namespace ki
@@ -75,7 +75,7 @@ namespace net
 	void Session::on_connected()
 	{
 		// If this is the server-side of a Session
-		// we need to send SERVER_HELLO first.
+		// we need to send SESSION_OFFER first.
 		if (get_type() == ParticipantType::SERVER)
 		{
 			// Work out the current timestamp and how many milliseconds
@@ -88,9 +88,9 @@ namespace net
 				now.time_since_epoch()
 			).count() - (timestamp * 1000);
 
-			// Send a SERVER_HELLO packet to the client
-			const control::ServerHello hello(m_id, timestamp, milliseconds);
-			send_packet(true, control::Opcode::SERVER_HELLO, hello);
+			// Send a SESSION_OFFER packet to the client
+			const control::SessionOffer hello(m_id, timestamp, milliseconds);
+			send_packet(true, control::Opcode::SESSION_OFFER, hello);
 		}
 	}
 
@@ -122,11 +122,11 @@ namespace net
 	{
 		switch ((control::Opcode)header.get_opcode())
 		{
-		case (control::Opcode::SERVER_HELLO):
+		case (control::Opcode::SESSION_OFFER):
 			on_server_hello();
 			break;
 
-		case (control::Opcode::CLIENT_HELLO):
+		case (control::Opcode::SESSION_ACCEPT):
 			on_client_hello();
 			break;
 
@@ -146,7 +146,7 @@ namespace net
 	void Session::on_server_hello()
 	{
 		// If this is the server-side of a Session
-		// we can't handle a SERVER_HELLO
+		// we can't handle a SESSION_OFFER
 		if (get_type() != ParticipantType::CLIENT)
 		{
 			close();
@@ -157,7 +157,7 @@ namespace net
 		try
 		{
 			// We've been given our id from the server now
-			const auto server_hello = read_data<control::ServerHello>();
+			const auto server_hello = read_data<control::SessionOffer>();
 			m_id = server_hello.get_session_id();
 			on_hello(m_id,
 				server_hello.get_timestamp(),
@@ -173,13 +173,13 @@ namespace net
 				now.time_since_epoch()
 				).count() - (timestamp * 1000);
 
-			// Send a CLIENT_HELLO packet to the server
-			const control::ClientHello hello(m_id, timestamp, milliseconds);
-			send_packet(true, control::Opcode::CLIENT_HELLO, hello);
+			// Send a SESSION_ACCEPT packet to the server
+			const control::SessionAccept hello(m_id, timestamp, milliseconds);
+			send_packet(true, control::Opcode::SESSION_ACCEPT, hello);
 		}
 		catch (parse_error &e)
 		{
-			// The CLIENT_HELLO wasn't valid...
+			// The SESSION_ACCEPT wasn't valid...
 			// Close the session
 			close();
 		}
@@ -188,7 +188,7 @@ namespace net
 	void Session::on_client_hello()
 	{
 		// If this is the client-side of a Session
-		// we can't handle a CLIENT_HELLO
+		// we can't handle a SESSION_ACCEPT
 		if (get_type() != ParticipantType::SERVER)
 		{
 			close();
@@ -199,14 +199,14 @@ namespace net
 		try
 		{
 			// The session is now established!
-			const auto client_hello = read_data<control::ClientHello>();
+			const auto client_hello = read_data<control::SessionAccept>();
 			on_hello(client_hello.get_session_id(),
 				client_hello.get_timestamp(),
 				client_hello.get_milliseconds());
 		}
 		catch (parse_error &e)
 		{
-			// The CLIENT_HELLO wasn't valid...
+			// The SESSION_ACCEPT wasn't valid...
 			// Close the session
 			close();
 		}
@@ -234,7 +234,7 @@ namespace net
 		}
 		catch (parse_error &e)
 		{
-			// The CLIENT_HELLO wasn't valid...
+			// The SESSION_ACCEPT wasn't valid...
 			// Close the session
 			close();
 		}
@@ -249,7 +249,7 @@ namespace net
 		}
 		catch (parse_error &e)
 		{
-			// The CLIENT_HELLO wasn't valid...
+			// The SESSION_ACCEPT wasn't valid...
 			// Close the session
 			close();
 		}
