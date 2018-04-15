@@ -1,6 +1,5 @@
-#include "ki/protocol/net/Participant.h"
+#include "ki/protocol/net/Session.h"
 #include "ki/protocol/exception.h"
-#include <cstring>
 
 namespace ki
 {
@@ -8,43 +7,74 @@ namespace protocol
 {
 namespace net
 {
-	Participant::Participant(const ParticipantType type)
-	{		
-		m_type = type;
-		m_maximum_packet_size = KI_DEFAULT_MAXIMUM_RECEIVE_SIZE;
+	Session::Session(const uint16_t id)
+	{
+		m_id = id;
+		m_established = false;
+		m_access_level = 0;
+		m_latency = 0;
+		m_creation_time = std::chrono::steady_clock::now();
+		m_waiting_for_keep_alive_response = false;
 
+		m_maximum_packet_size = KI_DEFAULT_MAXIMUM_RECEIVE_SIZE;
 		m_receive_state = ReceiveState::WAITING_FOR_START_SIGNAL;
 		m_start_signal = 0;
 		m_incoming_packet_size = 0;
 		m_shift = 0;
 	}
 
-	ParticipantType Participant::get_type() const
-	{
-		return m_type;
-	}
-
-	void Participant::set_type(const ParticipantType type)
-	{
-		m_type = type;
-	}
-
-
-	uint16_t Participant::get_maximum_packet_size() const
+	uint16_t Session::get_maximum_packet_size() const
 	{
 		return m_maximum_packet_size;
 	}
 
-	void Participant::set_maximum_packet_size(const uint16_t maximum_packet_size)
+	void Session::set_maximum_packet_size(const uint16_t maximum_packet_size)
 	{
 		m_maximum_packet_size = maximum_packet_size;
 	}
 
-	void Participant::send_data(const char* data, const size_t size)
+	uint16_t Session::get_id() const
+	{
+		return m_id;
+	}
+
+	bool Session::is_established() const
+	{
+		return m_established;
+	}
+
+	uint8_t Session::get_access_level() const
+	{
+		return m_access_level;
+	}
+
+	void Session::set_access_level(const uint8_t access_level)
+	{
+		m_access_level = access_level;
+	}
+
+	uint16_t Session::get_latency() const
+	{
+		return m_latency;
+	}
+
+	void Session::send_packet(const bool is_control, const uint8_t opcode,
+		const util::Serializable& data)
+	{
+		std::ostringstream ss;
+		PacketHeader header(is_control, opcode);
+		header.write_to(ss);
+		data.write_to(ss);
+
+		const auto buffer = ss.str();
+		send_data(buffer.c_str(), buffer.length());
+	}
+
+	void Session::send_data(const char* data, const size_t size)
 	{
 		// Allocate the entire buffer
 		char *packet_data = new char[size + 4];
-		
+
 		// Add the frame header
 		((uint16_t *)packet_data)[0] = KI_START_SIGNAL;
 		((uint16_t *)packet_data)[1] = size;
@@ -55,7 +85,7 @@ namespace net
 		delete[] packet_data;
 	}
 
-	void Participant::process_data(const char *data, const size_t size)
+	void Session::process_data(const char *data, const size_t size)
 	{
 		size_t position = 0;
 		while (position < size)
@@ -133,6 +163,29 @@ namespace net
 		}
 	}
 
+	void Session::on_packet_available()
+	{
+		// Read the packet header
+		PacketHeader header;
+		try
+		{
+			header.read_from(m_data_stream);
+		}
+		catch (parse_error &e)
+		{
+			on_invalid_packet();
+			return;
+		}
+
+		// Hand off to the right handler based on
+		// whether this is a control packet or not
+		if (header.is_control())
+			on_control_message(header);
+		else if (m_established)
+			on_application_message(header);
+		else
+			close();
+	}
 }
 }
 }
