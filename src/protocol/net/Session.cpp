@@ -1,5 +1,6 @@
 #include "ki/protocol/net/Session.h"
 #include "ki/protocol/exception.h"
+#include <cstring>
 
 namespace ki
 {
