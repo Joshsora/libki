@@ -6,13 +6,12 @@ namespace protocol
 {
 namespace net
 {
-	DMLSession::DMLSession(const ParticipantType type, const  uint16_t id,
-		const dml::MessageManager& manager)
-		: Session(type, id), m_manager(manager) {}
+	DMLSession::DMLSession(const uint16_t id, const dml::MessageManager& manager)
+		: Session(id), m_manager(manager) {}
 
 	void DMLSession::send_message(const dml::Message& message)
 	{
-		send_packet(false, control::Opcode::NONE, message);
+		send_packet(false, 0, message);
 	}
 
 	void DMLSession::on_application_message(const PacketHeader& header)

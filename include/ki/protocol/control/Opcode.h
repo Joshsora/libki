@@ -12,8 +12,8 @@ namespace control
 		NONE = 0,
 		SESSION_OFFER = 0,
 		UDP_HELLO = 1,
-		PING = 3,
-		PING_RSP = 4,
+		KEEP_ALIVE = 3,
+		KEEP_ALIVE_RSP = 4,
 		SESSION_ACCEPT = 5
 	};
 }

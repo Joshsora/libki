@@ -1,6 +1,7 @@
 target_sources(${PROJECT_NAME}
 	PRIVATE
-		${PROJECT_SOURCE_DIR}/src/protocol/control/Ping.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/control/ClientKeepAlive.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/control/ServerKeepAlive.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/control/SessionAccept.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/control/SessionOffer.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/Message.cpp
@@ -8,8 +9,9 @@ target_sources(${PROJECT_NAME}
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageManager.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageModule.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageTemplate.cpp
-		${PROJECT_SOURCE_DIR}/src/protocol/net/PacketHeader.cpp
-		${PROJECT_SOURCE_DIR}/src/protocol/net/Participant.cpp
-		${PROJECT_SOURCE_DIR}/src/protocol/net/Session.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/net/ClientSession.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/net/DMLSession.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/net/PacketHeader.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/net/ServerSession.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/net/Session.cpp
 )

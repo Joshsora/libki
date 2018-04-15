@@ -8,12 +8,15 @@ namespace protocol
 {
 namespace net
 {
-	class DMLSession : public Session
+	/**
+	 * Implements an application protocol that uses the DML
+	 * message system (as seen in Wizard101 and Pirate101).
+	 */
+	class DMLSession : public virtual Session
 	{
 	public:
-		DMLSession(ParticipantType type, uint16_t id,
-			const dml::MessageManager &manager);
-		~DMLSession() = default;
+		DMLSession(uint16_t id, const dml::MessageManager &manager);
+		virtual ~DMLSession() = default;
 
 		void send_message(const dml::Message &message);
 	protected:
