@@ -20,16 +20,16 @@ TEST_CASE("Control Message Serialization", "[control]")
 
 		const char expected_bytes[] = {
 			// Session ID
-			0xCD, 0xAB,
+			'\xCD', '\xAB',
 			
 			// Unknown
-			0x00, 0x00, 0x00, 0x00,
+			'\x00', '\x00', '\x00', '\x00',
 
 			// Timestamp
-			0xDD, 0xCC, 0xBB, 0xAA,
+			'\xDD', '\xCC', '\xBB', '\xAA',
 
 			// Milliseconds
-			0xDD, 0xCC, 0xBB, 0xAA
+			'\xDD', '\xCC', '\xBB', '\xAA'
 		};
 		REQUIRE(oss.str() == std::string(expected_bytes, sizeof(expected_bytes)));
 	}
@@ -41,19 +41,19 @@ TEST_CASE("Control Message Serialization", "[control]")
 
 		const char expected_bytes[] = {
 			// Unknown
-			0x00, 0x00,
+			'\x00', '\x00',
 
 			// Unknown
-			0x00, 0x00, 0x00, 0x00,
+			'\x00', '\x00', '\x00', '\x00',
 
 			// Timestamp
-			0xDD, 0xCC, 0xBB, 0xAA,
+			'\xDD', '\xCC', '\xBB', '\xAA',
 
 			// Milliseconds
-			0xDD, 0xCC, 0xBB, 0xAA,
+			'\xDD', '\xCC', '\xBB', '\xAA',
 
 			// Session ID
-			0xCD, 0xAB
+			'\xCD', '\xAB'
 		};
 		REQUIRE(oss.str() == std::string(expected_bytes, sizeof(expected_bytes)));
 	}
@@ -65,13 +65,13 @@ TEST_CASE("Control Message Serialization", "[control]")
 
 		const char expected_bytes[] = {
 			// Session ID
-			0xCD, 0xAB,
+			'\xCD', '\xAB',
 
 			// Milliseconds
-			0xCD, 0xAB,
+			'\xCD', '\xAB',
 
 			// Minutes
-			0xCD, 0xAB
+			'\xCD', '\xAB'
 		};
 		REQUIRE(oss.str() == std::string(expected_bytes, sizeof(expected_bytes)));
 	}
@@ -83,31 +83,31 @@ TEST_CASE("Control Message Serialization", "[control]")
 
 		const char expected_bytes[] = {
 			// Unknown
-			0x00, 0x00,
+			'\x00', '\x00',
 
 			// Timestamp
-			0xDD, 0xCC, 0xBB, 0xAA
+			'\xDD', '\xCC', '\xBB', '\xAA'
 		};
 		REQUIRE(oss.str() == std::string(expected_bytes, sizeof(expected_bytes)));
 	}
 }
 
 TEST_CASE("Control Message Deserialization", "[control]")
-{	
+{
 	SECTION("SessionOffer")
 	{
 		const char bytes[] = {
 			// Session ID
-			0xCD, 0xAB,
+			'\xCD', '\xAB',
 
 			// Unknown
-			0x00, 0x00, 0x00, 0x00,
+			'\x00', '\x00', '\x00', '\x00',
 
 			// Timestamp
-			0xDD, 0xCC, 0xBB, 0xAA,
+			'\xDD', '\xCC', '\xBB', '\xAA',
 
 			// Milliseconds
-			0xDD, 0xCC, 0xBB, 0xAA
+			'\xDD', '\xCC', '\xBB', '\xAA'
 		};
 		std::istringstream iss(std::string(bytes, sizeof(bytes)));
 
@@ -123,19 +123,19 @@ TEST_CASE("Control Message Deserialization", "[control]")
 	{
 		const char bytes[] = {
 			// Unknown
-			0x00, 0x00,
+			'\x00', '\x00',
 
 			// Unknown
-			0x00, 0x00, 0x00, 0x00,
+			'\x00', '\x00', '\x00', '\x00',
 
 			// Timestamp
-			0xDD, 0xCC, 0xBB, 0xAA,
+			'\xDD', '\xCC', '\xBB', '\xAA',
 
 			// Milliseconds
-			0xDD, 0xCC, 0xBB, 0xAA,
+			'\xDD', '\xCC', '\xBB', '\xAA',
 
 			// Session ID
-			0xCD, 0xAB
+			'\xCD', '\xAB'
 		};
 		std::istringstream iss(std::string(bytes, sizeof(bytes)));
 
@@ -151,13 +151,13 @@ TEST_CASE("Control Message Deserialization", "[control]")
 	{
 		const char bytes[] = {
 			// Session ID
-			0xCD, 0xAB,
+			'\xCD', '\xAB',
 
 			// Milliseconds
-			0xCD, 0xAB,
+			'\xCD', '\xAB',
 
 			// Minutes
-			0xCD, 0xAB
+			'\xCD', '\xAB'
 		};
 		std::istringstream iss(std::string(bytes, sizeof(bytes)));
 
@@ -173,10 +173,10 @@ TEST_CASE("Control Message Deserialization", "[control]")
 	{
 		const char bytes[] = {
 			// Unknown
-			0x00, 0x00,
+			'\x00', '\x00',
 
 			// Timestamp
-			0xDD, 0xCC, 0xBB, 0xAA
+			'\xDD', '\xCC', '\xBB', '\xAA'
 		};
 		std::istringstream iss(std::string(bytes, sizeof(bytes)));
 
