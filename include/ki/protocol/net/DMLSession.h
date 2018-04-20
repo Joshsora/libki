@@ -8,6 +8,12 @@ namespace protocol
 {
 namespace net
 {
+	enum class InvalidDMLMessageErrorCode
+	{
+		INVALID_MESSAGE_DATA,
+		INSUFFICIENT_ACCESS
+	};
+
 	/**
 	 * Implements an application protocol that uses the DML
 	 * message system (as seen in Wizard101 and Pirate101).
@@ -24,7 +30,7 @@ namespace net
 	protected:
 		void on_application_message(const PacketHeader& header) override;
 		virtual void on_message(const dml::Message &message) {}
-		virtual void on_invalid_message() {}
+		virtual void on_invalid_message(InvalidDMLMessageErrorCode error) {}
 	private:
 		const dml::MessageManager &m_manager;
 	};
