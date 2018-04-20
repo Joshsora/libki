@@ -182,10 +182,8 @@ namespace net
 		// whether this is a control packet or not
 		if (header.is_control())
 			on_control_message(header);
-		else if (m_established)
-			on_application_message(header);
 		else
-			close();
+			on_application_message(header);
 	}
 }
 }
