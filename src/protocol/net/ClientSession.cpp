@@ -72,7 +72,7 @@ namespace net
 			break;
 
 		default:
-			close();
+			close(SessionCloseErrorCode::UNHANDLED_CONTROL_MESSAGE);
 			break;
 		}
 	}
@@ -87,9 +87,9 @@ namespace net
 		}
 		catch (parse_error &e)
 		{
-			// The SESSION_ACCEPT wasn't valid...
+			// The SESSION_OFFER wasn't valid...
 			// Close the session
-			close();
+			close(SessionCloseErrorCode::INVALID_MESSAGE);
 			return;
 		}
 
@@ -98,7 +98,7 @@ namespace net
 				std::chrono::steady_clock::now() - m_connection_time
 			).count() > KI_CONNECTION_TIMEOUT)
 		{
-			close();
+			close(SessionCloseErrorCode::SESSION_OFFER_TIMED_OUT);
 			return;
 		}
 
@@ -136,7 +136,7 @@ namespace net
 		{
 			// The KEEP_ALIVE wasn't valid...
 			// Close the session
-			close();
+			close(SessionCloseErrorCode::INVALID_MESSAGE);
 			return;
 		}
 
@@ -158,7 +158,7 @@ namespace net
 		{
 			// The KEEP_ALIVE_RSP wasn't valid...
 			// Close the session
-			close();
+			close(SessionCloseErrorCode::INVALID_MESSAGE);
 			return;
 		}
 

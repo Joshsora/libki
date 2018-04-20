@@ -104,7 +104,7 @@ namespace net
 					// correctly.
 					if (m_start_signal != KI_START_SIGNAL)
 					{
-						close();
+						close(SessionCloseErrorCode::INVALID_FRAMING_START_SIGNAL);
 						return;
 					}
 
@@ -126,7 +126,7 @@ namespace net
 					// stop processing data.
 					if (m_incoming_packet_size > m_maximum_packet_size)
 					{
-						close();
+						close(SessionCloseErrorCode::INVALID_FRAMING_SIZE_EXCEEDS_MAXIMUM);
 						return;
 					}
 

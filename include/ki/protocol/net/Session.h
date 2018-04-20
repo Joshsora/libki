@@ -17,6 +17,22 @@ namespace protocol
 {
 namespace net
 {
+	enum class SessionCloseErrorCode
+	{
+		NONE,
+		APPLICATION_ERROR,
+
+		INVALID_FRAMING_START_SIGNAL,
+		INVALID_FRAMING_SIZE_EXCEEDS_MAXIMUM,
+
+		UNHANDLED_CONTROL_MESSAGE,
+		UNHANDLED_APPLICATION_MESSAGE,
+		INVALID_MESSAGE,
+
+		SESSION_OFFER_TIMED_OUT,
+		SESSION_DIED
+	};
+
 	enum class ReceiveState
 	{
 		// Waiting for the 0xF00D start signal.
@@ -106,7 +122,7 @@ namespace net
 
 		/* Low-level socket methods */
 		virtual void send_packet_data(const char *data, const size_t size) = 0;
-		virtual void close() = 0;
+		virtual void close(SessionCloseErrorCode error) = 0;
 	private:
 		/* Low-level networking members */
 		uint16_t m_maximum_packet_size;
