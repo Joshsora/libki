@@ -9,6 +9,11 @@ namespace net
 	DMLSession::DMLSession(const uint16_t id, const dml::MessageManager& manager)
 		: Session(id), m_manager(manager) {}
 
+	const dml::MessageManager& DMLSession::get_manager() const
+	{
+		return m_manager;
+	}
+
 	void DMLSession::send_message(const dml::Message& message)
 	{
 		send_packet(false, 0, message);
