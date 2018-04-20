@@ -31,7 +31,7 @@ namespace net
 
 		// Are we sufficiently authenticated to handle this message?
 		if (get_access_level() >= message->get_access_level())
-			on_message(*message);
+			on_message(message);
 		else
 			on_invalid_message(InvalidDMLMessageErrorCode::INSUFFICIENT_ACCESS);
 		delete message;

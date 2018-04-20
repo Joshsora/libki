@@ -29,7 +29,7 @@ namespace net
 		void send_message(const dml::Message &message);
 	protected:
 		void on_application_message(const PacketHeader& header) override;
-		virtual void on_message(const dml::Message &message) {}
+		virtual void on_message(const dml::Message *message) {}
 		virtual void on_invalid_message(InvalidDMLMessageErrorCode error) {}
 	private:
 		const dml::MessageManager &m_manager;
