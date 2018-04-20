@@ -1,6 +1,6 @@
 #pragma once
+#include "Message.h"
 #include "MessageModule.h"
-#include "MessageBuilder.h"
 #include "../../dml/Record.h"
 #include <string>
 
@@ -20,10 +20,10 @@ namespace dml
 		const MessageModule *get_module(uint8_t service_id) const;
 		const MessageModule *get_module(const std::string &protocol_type) const;
 
-		MessageBuilder &build_message(uint8_t service_id, uint8_t message_type) const;
-		MessageBuilder &build_message(uint8_t service_id, const std::string &message_name) const;
-		MessageBuilder &build_message(const std::string &protocol_type, uint8_t message_type) const;
-		MessageBuilder &build_message(const std::string &protocol_type, const std::string &message_name) const;
+		Message *create_message(uint8_t service_id, uint8_t message_type) const;
+		Message *create_message(uint8_t service_id, const std::string &message_name) const;
+		Message *create_message(const std::string &protocol_type, uint8_t message_type) const;
+		Message *create_message(const std::string &protocol_type, const std::string &message_name) const;
 
 		/**
 		 * If the DML message header cannot be read, then a nullptr

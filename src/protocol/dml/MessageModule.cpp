@@ -139,7 +139,7 @@ namespace dml
 		}
 	}
 
-	MessageBuilder& MessageModule::build_message(uint8_t message_type) const
+	Message *MessageModule::create_message(uint8_t message_type) const
 	{
 		auto *message_template = get_message_template(message_type);
 		if (!message_template)
@@ -150,10 +150,10 @@ namespace dml
 			throw value_error(oss.str());
 		}
 
-		return message_template->build_message();
+		return message_template->create_message();
 	}
 
-	MessageBuilder &MessageModule::build_message(std::string message_name) const
+	Message *MessageModule::create_message(std::string message_name) const
 	{
 		auto *message_template = get_message_template(message_name);
 		if (!message_template)
@@ -164,7 +164,7 @@ namespace dml
 			throw value_error(oss.str());
 		}
 
-		return message_template->build_message();
+		return message_template->create_message();
 	}
 }
 }

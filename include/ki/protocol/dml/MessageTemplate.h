@@ -1,6 +1,6 @@
 #pragma once
 #include "../../dml/Record.h"
-#include "MessageBuilder.h"
+#include "Message.h"
 #include <string>
 
 namespace ki
@@ -25,10 +25,16 @@ namespace dml
 		uint8_t get_service_id() const;
 		void set_service_id(uint8_t service_id);
 
+		std::string get_handler() const;
+		void set_handler(std::string handler);
+
+		uint8_t get_access_level() const;
+		void set_access_level(uint8_t access_level);
+
 		const ki::dml::Record &get_record() const;
 		void set_record(ki::dml::Record *record);
 
-		MessageBuilder &build_message() const;
+		Message *create_message() const;
 	private:
 		std::string m_name;
 		uint8_t m_type;

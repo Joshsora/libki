@@ -1,4 +1,5 @@
 #include "ki/protocol/dml/MessageManager.h"
+#include "ki/protocol/dml/MessageHeader.h"
 #include "ki/protocol/exception.h"
 #include "ki/dml/Record.h"
 #include "ki/util/ValueBytes.h"
@@ -155,7 +156,7 @@ namespace dml
 		return nullptr;
 	}
 
-	MessageBuilder &MessageManager::build_message(uint8_t service_id, uint8_t message_type) const
+	Message *MessageManager::create_message(uint8_t service_id, uint8_t message_type) const
 	{
 		auto *message_module = get_module(service_id);
 		if (!message_module)
@@ -165,10 +166,10 @@ namespace dml
 			throw value_error(oss.str());
 		}
 
-		return message_module->build_message(message_type);
+		return message_module->create_message(message_type);
 	}
 
-	MessageBuilder& MessageManager::build_message(uint8_t service_id, const std::string& message_name) const
+	Message *MessageManager::create_message(uint8_t service_id, const std::string& message_name) const
 	{
 		auto *message_module = get_module(service_id);
 		if (!message_module)
@@ -178,10 +179,10 @@ namespace dml
 			throw value_error(oss.str());
 		}
 
-		return message_module->build_message(message_name);
+		return message_module->create_message(message_name);
 	}
 
-	MessageBuilder& MessageManager::build_message(const std::string& protocol_type, uint8_t message_type) const
+	Message *MessageManager::create_message(const std::string& protocol_type, uint8_t message_type) const
 	{
 		auto *message_module = get_module(protocol_type);
 		if (!message_module)
@@ -191,10 +192,10 @@ namespace dml
 			throw value_error(oss.str());
 		}
 
-		return message_module->build_message(message_type);
+		return message_module->create_message(message_type);
 	}
 
-	MessageBuilder& MessageManager::build_message(const std::string& protocol_type, const std::string& message_name) const
+	Message *MessageManager::create_message(const std::string& protocol_type, const std::string& message_name) const
 	{
 		auto *message_module = get_module(protocol_type);
 		if (!message_module)
@@ -204,35 +205,47 @@ namespace dml
 			throw value_error(oss.str());
 		}
 
-		return message_module->build_message(message_name);
+		return message_module->create_message(message_name);
 	}
 
 	const Message *MessageManager::message_from_binary(std::istream& istream) const
 	{
-		// Read the message header and raw payload
-		Message *message = new Message();
+		// Read the message header
+		MessageHeader header;
 		try
 		{
-			message->read_from(istream);
+			header.read_from(istream);
 		}
 		catch (parse_error &e)
 		{
-			delete message;
 			return nullptr;
 		}
 
 		// Get the message module that uses the specified service id
-		auto *message_module = get_module(message->get_service_id());
+		auto *message_module = get_module(header.get_service_id());
 		if (!message_module)
-			return message;
+			return nullptr;
 
 		// Get the message template for this message type
-		auto *message_template = message_module->get_message_template(message->get_type());
+		auto *message_template = message_module->get_message_template(header.get_type());
 		if (!message_template)
-			return message;
+			return nullptr;
 
-		// Parse the raw payload with the template
-		message->use_template_record(message_template->get_record());
+		// Make sure that the size specified is enough to read this message
+		if (header.get_message_size() < message_template->get_record().get_size())
+			return nullptr;
+
+		// Create a new Message from the template
+		auto *message = new Message(message_template);
+		try
+		{
+			message->get_record()->read_from(istream);
+		}
+		catch (ki::dml::parse_error &e)
+		{
+			delete message;
+			return nullptr;
+		}
 		return message;
 	}
 }

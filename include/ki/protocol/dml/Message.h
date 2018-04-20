@@ -1,4 +1,5 @@
 #pragma once
+#include "MessageHeader.h"
 #include "../../util/Serializable.h"
 #include "../../dml/Record.h"
 #include <iostream>
@@ -9,48 +10,40 @@ namespace protocol
 {
 namespace dml
 {
+	class MessageTemplate;
+
 	class Message final : public util::Serializable
 	{
 	public:
-		Message(uint8_t service_id = 0, uint8_t type = 0);
+		Message(const MessageTemplate *message_template = nullptr);
 		virtual ~Message();
 
-		uint8_t get_service_id() const;
-		void set_service_id(uint8_t service_id);
-
-		uint8_t get_type() const;
-		void set_type(uint8_t type);
+		const MessageTemplate *get_template() const;
+		void set_template(const MessageTemplate *message_template);
 
 		ki::dml::Record *get_record();
 		const ki::dml::Record *get_record() const;
 
-		/**
-		 * Sets the record to a copy of the specified record.
-		 */
-		void set_record(const ki::dml::Record &record);
+		ki::dml::FieldBase *get_field(std::string name);
+		const ki::dml::FieldBase *get_field(std::string name) const;
 
-		/**
-		 * If raw data is present, then this uses the specified record 
-		 * to parse the raw DML message payload into a new Record.
-		 * If raw data is not present, this is equivalent to set_record.
-		 * 
-		 * If the raw data is parsed successfully, the internal raw 
-		 * data is cleared, and calls to get_record will return a valid
-		 * Record pointer.
-		 * 
-		 * However, if the raw data is not parsed successfully, then
-		 * calls to get_record will still return nullptr.
-		 */
-		void use_template_record(const ki::dml::Record &record);
+		uint8_t get_service_id() const;
+		uint8_t get_type() const;
+		uint16_t get_message_size() const;
+		std::string get_handler() const;
+		uint8_t get_access_level() const;
 
 		void write_to(std::ostream &ostream) const override final;
 		void read_from(std::istream &istream) override final;
 		size_t get_size() const override final;
 	private:
-		uint8_t m_service_id;
-		uint8_t m_type;
-		std::vector<char> m_raw_data;
+		const MessageTemplate *m_template;
 		ki::dml::Record *m_record;
+
+		// This is used to store raw data when a Message is
+		// constructed without a MessageTemplate.
+		MessageHeader m_header;
+		std::vector<char> m_raw_data;
 	};
 }
 }

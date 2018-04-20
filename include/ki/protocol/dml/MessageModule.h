@@ -1,4 +1,5 @@
 #pragma once
+#include "Message.h"
 #include "MessageTemplate.h"
 #include <cstdint>
 #include <string>
@@ -33,8 +34,8 @@ namespace dml
 
 		void sort_lookup();
 
-		MessageBuilder &build_message(uint8_t message_type) const;
-		MessageBuilder &build_message(std::string message_name) const;
+		Message *create_message(uint8_t message_type) const;
+		Message *create_message(std::string message_name) const;
 	private:
 		uint8_t m_service_id;
 		std::string m_protocol_type;

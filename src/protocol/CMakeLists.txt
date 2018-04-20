@@ -5,7 +5,7 @@ target_sources(${PROJECT_NAME}
 		${PROJECT_SOURCE_DIR}/src/protocol/control/SessionAccept.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/control/SessionOffer.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/Message.cpp
-		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageBuilder.cpp
+		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageHeader.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageManager.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageModule.cpp
 		${PROJECT_SOURCE_DIR}/src/protocol/dml/MessageTemplate.cpp
