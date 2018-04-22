@@ -34,7 +34,23 @@ namespace dml
 			return m_field_map.at(name)->is_type<ValueT>();
 		}
 
-		FieldBase *get_field(std::string name) const;
+		FieldBase *get_field(std::string name);
+		const FieldBase *get_field(std::string name) const;
+
+		/**
+		* Returns a previously added field with the specified name
+		* and type.
+		*
+		* If the field was not previously added, then a nullptr is
+		* returned.
+		*/
+		template <typename ValueT>
+		Field<ValueT> *get_field(std::string name)
+		{
+			if (has_field<ValueT>(name))
+				return dynamic_cast<Field<ValueT> *>(m_field_map.at(name));
+			return nullptr;
+		}
 
 		/**
 		 * Returns a previously added field with the specified name
@@ -44,7 +60,7 @@ namespace dml
 		 * returned.
 		 */
 		template <typename ValueT>
-		Field<ValueT> *get_field(std::string name) const
+		const Field<ValueT> *get_field(std::string name) const
 		{
 			if (has_field<ValueT>(name))
 				return dynamic_cast<Field<ValueT> *>(m_field_map.at(name));
