@@ -1,4 +1,5 @@
 #include "ki/protocol/net/DMLSession.h"
+#include "ki/protocol/exception.h"
 
 namespace ki
 {
@@ -22,10 +23,45 @@ namespace net
 	void DMLSession::on_application_message(const PacketHeader& header)
 	{
 		// Attempt to create a Message instance from the data in the stream
-		const auto *message = m_manager.message_from_binary(m_data_stream);
+		auto error_code = InvalidDMLMessageErrorCode::NONE;
+		const dml::Message *message = nullptr;
+		try
+		{
+			message = m_manager.message_from_binary(m_data_stream);
+		}
+		catch (parse_error &e)
+		{
+			switch (e.get_error_code())
+			{
+			case parse_error::INVALID_HEADER_DATA:
+				error_code = InvalidDMLMessageErrorCode::INVALID_HEADER_DATA;
+				break;
+			case parse_error::INSUFFICIENT_MESSAGE_DATA:
+			case parse_error::INVALID_MESSAGE_DATA:
+				error_code = InvalidDMLMessageErrorCode::INVALID_MESSAGE_DATA;
+				break;
+			default:
+				error_code = InvalidDMLMessageErrorCode::UNKNOWN;
+			}
+		}
+		catch (value_error &e)
+		{
+			switch (e.get_error_code())
+			{
+			case value_error::DML_INVALID_SERVICE:
+				error_code = InvalidDMLMessageErrorCode::INVALID_SERVICE;
+				break;
+			case value_error::DML_INVALID_MESSAGE_TYPE:
+				error_code = InvalidDMLMessageErrorCode::INVALID_MESSAGE_TYPE;
+				break;
+			default:
+				error_code = InvalidDMLMessageErrorCode::UNKNOWN;
+			}
+		}
+
 		if (!message)
 		{
-			on_invalid_message(InvalidDMLMessageErrorCode::INVALID_MESSAGE_DATA);
+			on_invalid_message(error_code);
 			return;
 		}
 

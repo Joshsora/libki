@@ -73,7 +73,7 @@ namespace control
 		{
 			std::ostringstream oss;
 			oss << "Error reading SessionAccept payload: " << e.what();
-			throw parse_error(oss.str());
+			throw parse_error(oss.str(), parse_error::INVALID_MESSAGE_DATA);
 		}
 
 		m_timestamp = timestamp->get_value();

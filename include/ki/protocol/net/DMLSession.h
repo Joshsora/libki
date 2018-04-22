@@ -10,7 +10,12 @@ namespace net
 {
 	enum class InvalidDMLMessageErrorCode
 	{
+		NONE,
+		UNKNOWN,
+		INVALID_HEADER_DATA,
 		INVALID_MESSAGE_DATA,
+		INVALID_SERVICE,
+		INVALID_MESSAGE_TYPE,
 		INSUFFICIENT_ACCESS
 	};
 

@@ -31,7 +31,7 @@ namespace dml
 		{
 			std::ostringstream oss;
 			oss << "Could not open file: " << filepath;
-			throw value_error(oss.str());
+			throw value_error(oss.str(), value_error::MISSING_FILE);
 		}
 
 		// Load contents into memory
@@ -52,7 +52,7 @@ namespace dml
 
 			std::ostringstream oss;
 			oss << "Failed to parse: " << filepath;
-			throw parse_error(oss.str());
+			throw parse_error(oss.str(), parse_error::INVALID_XML_DATA);
 		}
 
 		// It's safe to allocate the module we're working on now
@@ -118,8 +118,8 @@ namespace dml
 
 			std::ostringstream oss;
 			oss << "Message Module has already been loaded with Service ID ";
-			oss << message_module->get_service_id();
-			throw value_error(oss.str());
+			oss << (uint16_t)message_module->get_service_id();
+			throw value_error(oss.str(), value_error::OVERWRITES_LOOKUP);
 		}
 
 		if (m_protocol_type_map.count(message_module->get_protocol_type()) == 1)
@@ -130,7 +130,7 @@ namespace dml
 			std::ostringstream oss;
 			oss << "Message Module has already been loaded with Protocol Type ";
 			oss << message_module->get_protocol_type();
-			throw value_error(oss.str());
+			throw value_error(oss.str(), value_error::OVERWRITES_LOOKUP);
 		}
 
 		// Add it to our maps
@@ -162,8 +162,8 @@ namespace dml
 		if (!message_module)
 		{
 			std::ostringstream oss;
-			oss << "No service exists with id: " << service_id;
-			throw value_error(oss.str());
+			oss << "No service exists with id: " << (uint16_t)service_id;
+			throw value_error(oss.str(), value_error::DML_INVALID_SERVICE);
 		}
 
 		return message_module->create_message(message_type);
@@ -175,8 +175,8 @@ namespace dml
 		if (!message_module)
 		{
 			std::ostringstream oss;
-			oss << "No service exists with id: " << service_id;
-			throw value_error(oss.str());
+			oss << "No service exists with id: " << (uint16_t)service_id;
+			throw value_error(oss.str(), value_error::DML_INVALID_SERVICE);
 		}
 
 		return message_module->create_message(message_name);
@@ -189,7 +189,7 @@ namespace dml
 		{
 			std::ostringstream oss;
 			oss << "No service exists with protocol type: " << protocol_type;
-			throw value_error(oss.str());
+			throw value_error(oss.str(), value_error::DML_INVALID_PROTOCOL_TYPE);
 		}
 
 		return message_module->create_message(message_type);
@@ -202,7 +202,7 @@ namespace dml
 		{
 			std::ostringstream oss;
 			oss << "No service exists with protocol type: " << protocol_type;
-			throw value_error(oss.str());
+			throw value_error(oss.str(), value_error::DML_INVALID_PROTOCOL_TYPE);
 		}
 
 		return message_module->create_message(message_name);
@@ -212,28 +212,35 @@ namespace dml
 	{
 		// Read the message header
 		MessageHeader header;
-		try
-		{
-			header.read_from(istream);
-		}
-		catch (parse_error &e)
-		{
-			return nullptr;
-		}
+		header.read_from(istream);
 
 		// Get the message module that uses the specified service id
 		auto *message_module = get_module(header.get_service_id());
 		if (!message_module)
-			return nullptr;
+		{
+			std::ostringstream oss;
+			oss << "No service exists with id: " << (uint16_t)header.get_service_id();
+			throw value_error(oss.str(), value_error::DML_INVALID_SERVICE);
+		}
 
 		// Get the message template for this message type
 		auto *message_template = message_module->get_message_template(header.get_type());
 		if (!message_template)
-			return nullptr;
+		{
+			std::ostringstream oss;
+			oss << "No message exists with type: " << (uint16_t)header.get_service_id();
+			oss << "(service=" << message_module->get_protocol_type() << ")";
+			throw value_error(oss.str(), value_error::DML_INVALID_MESSAGE_TYPE);
+		}
 
 		// Make sure that the size specified is enough to read this message
 		if (header.get_message_size() < message_template->get_record().get_size())
-			return nullptr;
+		{
+			std::ostringstream oss;
+			oss << "No message exists with type: " << (uint16_t)header.get_service_id();
+			oss << "(service=" << message_module->get_protocol_type() << ")";
+			throw value_error(oss.str(), value_error::DML_INVALID_MESSAGE_TYPE);
+		}
 
 		// Create a new Message from the template
 		auto *message = new Message(message_template);
@@ -244,7 +251,7 @@ namespace dml
 		catch (ki::dml::parse_error &e)
 		{
 			delete message;
-			return nullptr;
+			throw parse_error("Failed to read DML message payload.", parse_error::INVALID_MESSAGE_DATA);
 		}
 		return message;
 	}

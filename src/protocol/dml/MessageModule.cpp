@@ -135,7 +135,7 @@ namespace dml
 
 			// Make sure we haven't overflowed
 			if (message_type == 0)
-				throw value_error("Module has more than 254 messages.");
+				throw value_error("Module has more than 254 messages.", value_error::EXCEEDS_LIMIT);
 		}
 	}
 
@@ -147,7 +147,7 @@ namespace dml
 			std::ostringstream oss;
 			oss << "No message exists with type: " << message_type;
 			oss << "(service=" << m_protocol_type << ")";
-			throw value_error(oss.str());
+			throw value_error(oss.str(), value_error::DML_INVALID_MESSAGE_TYPE);
 		}
 
 		return message_template->create_message();
@@ -161,7 +161,7 @@ namespace dml
 			std::ostringstream oss;
 			oss << "No message exists with name: " << message_name;
 			oss << "(service=" << m_protocol_type << ")";
-			throw value_error(oss.str());
+			throw value_error(oss.str(), value_error::DML_INVALID_MESSAGE_NAME);
 		}
 
 		return message_template->create_message();

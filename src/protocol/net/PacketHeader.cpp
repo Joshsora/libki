@@ -46,13 +46,16 @@ namespace net
 	{
 		m_control = istream.get() >= 1;
 		if (istream.fail())
-			throw parse_error("Not enough data was available to read packet header. (m_control)");
+			throw parse_error("Not enough data was available to read packet header. (m_control)",
+				parse_error::INVALID_HEADER_DATA);
 		m_opcode = istream.get();
 		if (istream.fail())
-			throw parse_error("Not enough data was available to read packet header. (m_opcode)");
+			throw parse_error("Not enough data was available to read packet header. (m_opcode)",
+				parse_error::INVALID_HEADER_DATA);
 		istream.ignore(2);
 		if (istream.eof())
-			throw parse_error("Not enough data was available to read packet header. (ignored bytes)");
+			throw parse_error("Not enough data was available to read packet header. (ignored bytes)",
+				parse_error::INVALID_HEADER_DATA);
 	}
 
 	size_t PacketHeader::get_size() const

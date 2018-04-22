@@ -69,7 +69,7 @@ namespace control
 		{
 			std::ostringstream oss;
 			oss << "Error reading ClientKeepAlive payload: " << e.what();
-			throw parse_error(oss.str());
+			throw parse_error(oss.str(), parse_error::INVALID_MESSAGE_DATA);
 		}
 
 		m_session_id = session_id->get_value();

@@ -50,7 +50,7 @@ namespace dml
 
 				std::ostringstream oss;
 				oss << "Error reading DML message payload: " << e.what();
-				throw parse_error(oss.str());
+				throw parse_error(oss.str(), parse_error::INVALID_MESSAGE_DATA);
 			}
 		}
 	}
@@ -140,10 +140,12 @@ namespace dml
 		{
 			// Check for mismatches between the header and template
 			if (m_header.get_service_id() != m_template->get_service_id())
-				throw value_error("ServiceID mismatch between MessageHeader and assigned template.");
+				throw value_error("ServiceID mismatch between MessageHeader and assigned template.",
+					value_error::DML_INVALID_SERVICE);
 			if (m_header.get_type() != m_template->get_type())
-				throw value_error("Message Type mismatch between MessageHeader and assigned template.");
-
+				throw value_error("Message Type mismatch between MessageHeader and assigned template.",
+					value_error::DML_INVALID_MESSAGE_TYPE);
+			
 			// Read the payload into the record
 			m_record->read_from(istream);
 		}
@@ -155,7 +157,8 @@ namespace dml
 			m_raw_data.resize(size);
 			istream.read(m_raw_data.data(), size);
 			if (istream.fail())
-				throw parse_error("Not enough data was available to read DML message payload.");
+				throw parse_error("Not enough data was available to read DML message payload.",
+					parse_error::INSUFFICIENT_MESSAGE_DATA);
 		}
 	}
 

@@ -70,7 +70,7 @@ namespace dml
 		{
 			std::ostringstream oss;
 			oss << "Error reading MessageHeader: " << e.what();
-			throw parse_error(oss.str());
+			throw parse_error(oss.str(), parse_error::INVALID_HEADER_DATA);
 		}
 
 		m_service_id = service_id->get_value();
