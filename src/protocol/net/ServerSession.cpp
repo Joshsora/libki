@@ -34,12 +34,12 @@ namespace net
 		if (!m_established)
 			return std::chrono::duration_cast<std::chrono::seconds>(
 				std::chrono::steady_clock::now() - m_creation_time
-				).count() <= KI_CONNECTION_TIMEOUT;
+			).count() <= (KI_CONNECTION_TIMEOUT * 2);
 
 		// Otherwise, use the last time we received a heartbeat.
 		return std::chrono::duration_cast<std::chrono::seconds>(
 			std::chrono::steady_clock::now() - m_last_received_heartbeat_time
-			).count() <= KI_CLIENT_HEARTBEAT;
+		).count() <= (KI_CLIENT_HEARTBEAT * 2);
 	}
 
 	void ServerSession::on_connected()
