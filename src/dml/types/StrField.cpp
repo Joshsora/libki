@@ -14,7 +14,7 @@ namespace dml
 		if (data.buff[0] == ((m_value.length() & 0xFF00) >> 8))
 			std::reverse(&data.buff[0], &data.buff[2]);
 		ostream.write(data.buff, sizeof(USHRT));
-		ostream.write(m_value.c_str(), m_value.length());
+		ostream.write(m_value.data(), m_value.length());
 	}
 
 	template <>
@@ -36,7 +36,7 @@ namespace dml
 			std::reverse(&length_data.buff[0], &length_data.buff[2]);
 
 		// Read the data into a buffer
-		char *data = new char[length_data.value + 1] { 0 };
+		char *data = new char[length_data.value];
 		istream.read(data, length_data.value);
 		if (istream.fail())
 		{
@@ -45,7 +45,7 @@ namespace dml
 			throw parse_error(oss.str());
 		}
 
-		m_value = STR(data);
+		m_value = STR(data, length_data.value);
 		delete[] data;
 	}
 
