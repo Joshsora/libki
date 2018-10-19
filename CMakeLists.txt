@@ -21,6 +21,7 @@ target_link_libraries(${PROJECT_NAME} RapidXML)
 
 add_subdirectory("src/dml")
 add_subdirectory("src/protocol")
+add_subdirectory("src/util")
 
 option(KI_BUILD_EXAMPLES "Determines whether to build examples." ON)
 if (KI_BUILD_EXAMPLES)
