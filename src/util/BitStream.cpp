@@ -1,6 +1,7 @@
 #include "ki/util/BitStream.h"
 #include <limits>
 #include <exception>
+#include <cstring>
 
 namespace ki
 {
@@ -156,7 +157,7 @@ namespace ki
 
 		// Allocate a new buffer, copy everything over, and then delete the old buffer
 		auto *new_buffer = new uint8_t[new_size] { 0 };
-		memcpy(new_buffer, m_buffer, m_buffer_size);
+		std::memcpy(new_buffer, m_buffer, m_buffer_size);
 		delete[] m_buffer;
 		m_buffer = new_buffer;
 	}

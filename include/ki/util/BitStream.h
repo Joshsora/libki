@@ -42,7 +42,7 @@ namespace ki
 			void set_bit(int bit);
 		};
 
-		explicit BitStream(size_t buffer_size = KI_BITSTREAM_DEFAULT_BUFFER_SIZE);
+		explicit BitStream(std::size_t buffer_size = KI_BITSTREAM_DEFAULT_BUFFER_SIZE);
 		~BitStream();
 
 		/**
@@ -143,7 +143,7 @@ namespace ki
 
 	private:
 		uint8_t *m_buffer;
-		size_t m_buffer_size;
+		std::size_t m_buffer_size;
 		stream_pos m_position;
 
 		void expand_buffer();
