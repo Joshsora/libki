@@ -15,5 +15,5 @@ foreach (file ${files})
 			CXX_STANDARD 11
 	)
 	target_link_libraries(${testcase} Catch ${PROJECT_NAME})
-	add_test(${testcase} ${testcase})
+	add_test(${testcase} ${testcase} -s -r junit -o ${PROJECT_BINARY_DIR}/Testing/${testcase}.xml)
 endforeach()
