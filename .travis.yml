@@ -32,4 +32,5 @@ script:
   - make test CTEST_OUTPUT_ON_FAILURE=TRUE
 
   # Coverage
+  - export COVERALLS_SERVICE_NAME=travis-ci
   - make coveralls
