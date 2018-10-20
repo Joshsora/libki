@@ -21,4 +21,4 @@ steps:
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: 'JUnit'
-    testResultsFiles: 'build/**/test-*.xml'
+    testResultsFiles: 'build/Testing/reports/test-*.xml'

@@ -141,7 +141,12 @@ namespace ki
 		validate_buffer();
 	}
 
-	const uint8_t* BitStream::data() const
+	std::size_t BitStream::capacity() const
+	{
+		return m_buffer_size;
+	}
+
+	const uint8_t *BitStream::data() const
 	{
 		return m_buffer;
 	}
@@ -149,7 +154,7 @@ namespace ki
 	void BitStream::expand_buffer()
 	{
 		// Work out a new buffer size
-		auto new_size = (2 << (uint64_t)log2(m_position.get_byte())) + 2;
+		auto new_size = (2 << (uint64_t)log2(m_position.get_byte()) + 1) + 2;
 		if (new_size < m_buffer_size)
 			new_size = std::numeric_limits<size_t>::max();
 
@@ -162,6 +167,7 @@ namespace ki
 		std::memcpy(new_buffer, m_buffer, m_buffer_size);
 		delete[] m_buffer;
 		m_buffer = new_buffer;
+		m_buffer_size = new_size;
 	}
 
 	void BitStream::validate_buffer()

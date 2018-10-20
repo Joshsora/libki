@@ -57,6 +57,11 @@ namespace ki
 		void seek(stream_pos position);
 
 		/**
+		 * @return The current size of the internal buffer.
+		 */
+		std::size_t capacity() const;
+
+		/**
 		 * @return A pointer to the start of the internal buffer.
 		 */
 		const uint8_t *data() const;

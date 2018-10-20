@@ -3,6 +3,7 @@ add_library(Catch INTERFACE)
 target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
 
 file(COPY "samples" DESTINATION "${PROJECT_BINARY_DIR}/test")
+file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/Testing/reports/")
 
 file(GLOB files "src/unit-*.cpp")
 foreach (file ${files})
@@ -15,5 +16,5 @@ foreach (file ${files})
 			CXX_STANDARD 11
 	)
 	target_link_libraries(${testcase} Catch ${PROJECT_NAME})
-	add_test(${testcase} ${testcase} -s -r junit -o ${PROJECT_BINARY_DIR}/Testing/${testcase}.xml)
+	add_test(${testcase} ${testcase} -s -r junit -o "${PROJECT_BINARY_DIR}/Testing/reports/${testcase}.xml")
 endforeach()
