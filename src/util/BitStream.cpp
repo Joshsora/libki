@@ -2,6 +2,7 @@
 #include <limits>
 #include <exception>
 #include <cstring>
+#include <stdexcept>
 
 namespace ki
 {
@@ -153,7 +154,7 @@ namespace ki
 
 		// Has the buffer reached maximum size?
 		if (new_size == m_buffer_size)
-			throw std::exception("Buffer cannot be expanded as it has reached maximum size.");
+			throw std::runtime_error("Buffer cannot be expanded as it has reached maximum size.");
 
 		// Allocate a new buffer, copy everything over, and then delete the old buffer
 		auto *new_buffer = new uint8_t[new_size] { 0 };
@@ -166,7 +167,7 @@ namespace ki
 	{
 		// Make sure we haven't underflowed
 		if (m_position.get_byte() < 0)
-			throw std::exception("Position of buffer is less than 0!");
+			throw std::runtime_error("Position of buffer is less than 0!");
 
 		// Expand the buffer if we've overflowed
 		if (m_position.get_byte() >= m_buffer_size)
