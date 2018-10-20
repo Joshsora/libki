@@ -7,11 +7,10 @@
 namespace ki
 {
 	/**
-	 * 
+	 * A readable/writeable stream of bits.
 	 */
 	class BitStream
 	{
-
 	public:
 		/**
 		 * Represents a position in a BitStream's buffer.
@@ -34,6 +33,8 @@ namespace ki
 			stream_pos &operator -=(int bits);
 			stream_pos &operator ++();
 			stream_pos &operator --();
+			stream_pos operator ++(int increment);
+			stream_pos operator --(int increment);
 
 		private:
 			intmax_t m_byte;

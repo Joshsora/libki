@@ -118,6 +118,20 @@ namespace ki
 		return *this;
 	}
 
+	BitStream::stream_pos BitStream::stream_pos::operator++(int increment)
+	{
+		auto copy(*this);
+		++(*this);
+		return copy;
+	}
+
+	BitStream::stream_pos BitStream::stream_pos::operator--(int increment)
+	{
+		auto copy(*this);
+		--(*this);
+		return copy;
+	}
+
 	BitStream::BitStream(const size_t buffer_size)
 	{
 		m_buffer = new uint8_t[buffer_size] { 0 };
