@@ -25,6 +25,7 @@ script:
   - rm -rf build/
   - mkdir build
   - cd build
+  - export COVERALLS_SERVICE_NAME=travis-ci
   - cmake -DCOVERALLS=ON -DCMAKE_BUILD_TYPE=Debug ..
   - make
 
@@ -32,5 +33,4 @@ script:
   - make test CTEST_OUTPUT_ON_FAILURE=TRUE
 
   # Coverage
-  - export COVERALLS_SERVICE_NAME=travis-ci
   - make coveralls
