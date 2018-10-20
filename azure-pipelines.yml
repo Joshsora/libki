@@ -13,12 +13,12 @@ steps:
     cd build
     cmake ..
     make
-    make test CTEST_OUTPUT_ON_FAILURE=TRUE
   displayName: 'Compile'
 - script: |
+    cd build
     make test CTEST_OUTPUT_ON_FAILURE=TRUE
   displayName: 'Test'
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: 'JUnit'
-    testResultsFiles: '**/test-*.xml'
+    testResultsFiles: 'build/**/test-*.xml'
