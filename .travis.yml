@@ -12,6 +12,7 @@ addons:
       - gcc-6
       - g++-6
       - cmake
+      - lcov
 script:  
   # Export CC and CXX to tell cmake which compiler to use
   - export CC=/usr/bin/gcc-6
@@ -20,12 +21,19 @@ script:
   # Check versions of gcc, g++ and cmake
   - gcc-6 -v && g++-6 -v && cmake --version
 
+  # Configure coveralls
+  - export COVERALLS_SERVICE_NAME=travis-ci
+  - export COVERALLS_REPO_TOKEN=AVdmBeqZ1of0v2ST0FfKy7cOFYeildj6C
+
   # Build
   - rm -rf build/
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DCOVERALLS=ON -DCMAKE_BUILD_TYPE=Debug ..
   - make
 
   # Testing
   - make test CTEST_OUTPUT_ON_FAILURE=TRUE
+
+  # Coverage
+  - make coveralls
