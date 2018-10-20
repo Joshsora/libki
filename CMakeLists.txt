@@ -1,6 +1,7 @@
 project(ki)
 cmake_minimum_required(VERSION 3.1)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 set(RAPIDXML_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/third_party)
 add_library(RapidXML INTERFACE)
 target_include_directories(RapidXML INTERFACE ${RAPIDXML_INCLUDE_DIR})
@@ -21,6 +22,15 @@ target_link_libraries(${PROJECT_NAME} RapidXML)
 
 add_subdirectory("src/dml")
 add_subdirectory("src/protocol")
+
+option(COVERALLS "Generate coveralls data" OFF)
+if (COVERALLS)
+    include(Coveralls)
+	coveralls_turn_on_coverage()
+
+	get_target_property(COVERAGE_SRCS ${PROJECT_NAME} SOURCES)
+    coveralls_setup("${COVERAGE_SRCS}" ON)
+endif()
 
 option(KI_BUILD_EXAMPLES "Determines whether to build examples." ON)
 if (KI_BUILD_EXAMPLES)

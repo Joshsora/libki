@@ -12,6 +12,7 @@ addons:
       - gcc-6
       - g++-6
       - cmake
+      - lcov
 script:  
   # Export CC and CXX to tell cmake which compiler to use
   - export CC=/usr/bin/gcc-6
@@ -24,8 +25,11 @@ script:
   - rm -rf build/
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DCOVERALLS=ON -DCMAKE_BUILD_TYPE=Debug ..
   - make
 
   # Testing
   - make test CTEST_OUTPUT_ON_FAILURE=TRUE
+
+  # Coverage
+  - make coveralls
