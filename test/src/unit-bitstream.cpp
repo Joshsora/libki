@@ -23,6 +23,59 @@
 
 using namespace ki;
 
+TEST_CASE("BitStream::stream_pos Functionality", "[bit-stream]")
+{
+	BitStream::stream_pos position(1, 4);
+
+	SECTION("Increment single bit")
+	{
+		++position;
+		if (position.get_byte() != 1 || position.get_bit() != 5)
+			FAIL();
+		SUCCEED();
+	}
+
+	SECTION("Decrement single bit")
+	{
+		--position;
+		if (position.get_byte() != 1 || position.get_bit() != 3)
+			FAIL();
+		SUCCEED();
+	}
+
+	SECTION("Increment bits and move to next byte")
+	{
+		position += 4;
+		if (position.get_byte() != 2 || position.get_bit() != 0)
+			FAIL();
+		SUCCEED();
+	}
+
+	SECTION("Decrement bits and move to previous byte")
+	{
+		position -= 4;
+		if (position.get_byte() != 1 || position.get_bit() != 7)
+			FAIL();
+		SUCCEED();
+	}
+
+	SECTION("Increment byte")
+	{
+		position += BitStream::stream_pos(1, 0);
+		if (position.get_byte() != 2 || position.get_bit() != 4)
+			FAIL();
+		SUCCEED();
+	}
+
+	SECTION("Decrement byte")
+	{
+		position -= BitStream::stream_pos(1, 0);
+		if (position.get_byte() != 0 || position.get_bit() != 4)
+			FAIL();
+		SUCCEED();
+	}
+}
+
 TEST_CASE("BitStream Functionality", "[bit-stream]")
 {
 	auto *bit_stream = new BitStream();
