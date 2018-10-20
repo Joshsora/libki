@@ -14,4 +14,11 @@ steps:
     cmake ..
     make
     make test CTEST_OUTPUT_ON_FAILURE=TRUE
-  displayName: 'make'
+  displayName: 'Compile'
+- script: |
+    make test CTEST_OUTPUT_ON_FAILURE=TRUE
+  displayName: 'Test'
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '**/test-*.xml'
