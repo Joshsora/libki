@@ -53,8 +53,8 @@ TEST_CASE("BitStream::stream_pos Functionality", "[bit-stream]")
 
 	SECTION("Decrement bits and move to previous byte")
 	{
-		position -= 4;
-		if (position.get_byte() != 1 || position.get_bit() != 7)
+		position -= 5;
+		if (position.get_byte() != 0 || position.get_bit() != 7)
 			FAIL();
 		SUCCEED();
 	}
