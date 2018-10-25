@@ -3,7 +3,7 @@
 #include <exception>
 #include <cstring>
 #include <stdexcept>
-#include <math.h>
+#include <cmath>
 
 namespace ki
 {
@@ -168,7 +168,7 @@ namespace ki
 	void BitStream::expand_buffer()
 	{
 		// Work out a new buffer size
-		auto new_size = (2 << (uint64_t)log2(m_position.get_byte()) + 1) + 2;
+		auto new_size = (2 << (uint64_t)std::log2(m_position.get_byte()) + 1) + 2;
 		if (new_size < m_buffer_size)
 			new_size = std::numeric_limits<size_t>::max();
 
