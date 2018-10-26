@@ -30,14 +30,17 @@ namespace pclass
 		template <typename ValueT>
 		Type &define_primitive(const std::string &name)
 		{
-			// TODO: Create primitive types
+			auto hash = m_hash_calculator->calculate_type_hash(name);
+			auto *type = new PrimitiveType<ValueT>(name, hash);
+			define_type(type);
+			return *type;
 		}
 
 		template <class ClassT>
 		Type &define_class(const std::string &name)
 		{
 			// Ensure that ClassT inherits PropertyClass
-			static_assert(std::is_base_of<Object, ClassT>::value, "ClassT must inherit PropertyClass!");
+			static_assert(std::is_base_of<PropertyClass, ClassT>::value, "ClassT must inherit PropertyClass!");
 
 			// TODO: Create class types
 		}
@@ -50,6 +53,9 @@ namespace pclass
 
 			// TODO: Create enum types
 		}
+
+	protected:
+		void define_type(Type *type);
 
 	private:
 		static TypeSystem *s_instance;

@@ -33,7 +33,7 @@ namespace pclass
 		return m_kind;
 	}
 
-	PropertyClass* Type::instantiate() const
+	PropertyClass *Type::instantiate() const
 	{
 		std::ostringstream oss;
 		oss << "Type '" << m_name << "' cannot be instantiated.";

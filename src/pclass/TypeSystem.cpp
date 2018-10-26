@@ -3,9 +3,9 @@
 #include <iomanip>
 
 #define DEFINE_INTEGER_PRIMTIIVE(st, ut, n) \
-	s_instance->define_primitive<st>(n); \
-	s_instance->define_primitive<st>("signed " n); \
-	s_instance->define_primitive<ut>("unsigned " n)
+	define_primitive<st>(n); \
+	define_primitive<st>("signed " n); \
+	define_primitive<ut>("unsigned " n)
 
 namespace ki
 {
@@ -14,54 +14,41 @@ namespace pclass
 	TypeSystem& TypeSystem::get_singleton()
 	{
 		if (s_instance == nullptr)
-		{
 			// Create the static instance with the default hash calculator
 			s_instance = new TypeSystem(new WizardHashCalculator());
-
-			// Define integer types
-			s_instance->define_primitive<bool>("bool");
-			DEFINE_INTEGER_PRIMTIIVE(int8_t, uint8_t, "char");
-			DEFINE_INTEGER_PRIMTIIVE(int8_t, uint8_t, "__int8");
-			s_instance->define_primitive<int8_t>("int8_t");
-			s_instance->define_primitive<uint8_t>("uint8_t");
-
-			DEFINE_INTEGER_PRIMTIIVE(int16_t, uint16_t, "short");
-			DEFINE_INTEGER_PRIMTIIVE(int16_t, uint16_t, "__int16");
-			s_instance->define_primitive<int16_t>("int16_t");
-			s_instance->define_primitive<uint16_t>("uint16_t");
-
-			DEFINE_INTEGER_PRIMTIIVE(int32_t, uint32_t, "int");
-			DEFINE_INTEGER_PRIMTIIVE(int32_t, uint32_t, "__int32");
-			s_instance->define_primitive<int32_t>("int32_t");
-			s_instance->define_primitive<uint32_t>("uint32_t");
-
-			DEFINE_INTEGER_PRIMTIIVE(int64_t, uint64_t, "long");
-			DEFINE_INTEGER_PRIMTIIVE(int64_t, uint64_t, "__int64");
-			s_instance->define_primitive<int64_t>("int64_t");
-			s_instance->define_primitive<uint64_t>("uint64_t");
-			s_instance->define_primitive<uint64_t>("gid");
-
-			// TODO: Define bit integer types
-
-			// Define floating point types
-			s_instance->define_primitive<float>("float");
-			s_instance->define_primitive<double>("double");
-
-			// TODO: Define bit floating point types
-
-			// Define string types
-			s_instance->define_primitive<std::string>("std::string");
-			s_instance->define_primitive<std::wstring>("std::wstring");
-		}
-
 		return *s_instance;
 	}
 
 	TypeSystem::TypeSystem(HashCalculator* hash_calculator)
 	{
 		m_hash_calculator = hash_calculator;
-	}
 
+		// Pre-define C++ primitive types
+		// Define integer types
+		define_primitive<bool>("bool");
+		DEFINE_INTEGER_PRIMTIIVE(int8_t, uint8_t, "char");
+		DEFINE_INTEGER_PRIMTIIVE(int8_t, uint8_t, "__int8");
+		define_primitive<int8_t>("int8_t");
+		define_primitive<uint8_t>("uint8_t");
+		DEFINE_INTEGER_PRIMTIIVE(int16_t, uint16_t, "short");
+		DEFINE_INTEGER_PRIMTIIVE(int16_t, uint16_t, "__int16");
+		define_primitive<int16_t>("int16_t");
+		define_primitive<uint16_t>("uint16_t");
+		DEFINE_INTEGER_PRIMTIIVE(int32_t, uint32_t, "int");
+		DEFINE_INTEGER_PRIMTIIVE(int32_t, uint32_t, "__int32");
+		define_primitive<int32_t>("int32_t");
+		define_primitive<uint32_t>("uint32_t");
+		DEFINE_INTEGER_PRIMTIIVE(int64_t, uint64_t, "long");
+		DEFINE_INTEGER_PRIMTIIVE(int64_t, uint64_t, "__int64");
+		define_primitive<int64_t>("int64_t");
+		define_primitive<uint64_t>("uint64_t");
+		define_primitive<uint64_t>("gid");
+
+		// TODO: Define bit integer types
+		// TODO: Define floating point types
+		// TODO: Define bit floating point types
+		// TODO: Define string types
+	}
 
 	TypeSystem::~TypeSystem()
 	{
@@ -126,6 +113,40 @@ namespace pclass
 			throw std::runtime_error(oss.str());
 		}
 		return *(it->second);
+	}
+
+	void TypeSystem::define_type(Type *type)
+	{
+		// Does a type with this name already exist?
+		if (m_type_name_lookup.find(type->get_name()) != m_type_name_lookup.end())
+		{
+			// This pointer will become lost since it isn't being added to the lookups.
+			delete type;
+
+			// Throw an error
+			std::ostringstream oss;
+			oss << "Type '" << type->get_name() << "' is already defined.";
+			throw std::runtime_error(oss.str());
+		}
+
+		// Does a type with this hash already exist?
+		if (m_type_name_lookup.find(type->get_name()) != m_type_name_lookup.end())
+		{
+			// This pointer will become lost since it isn't being added to the lookups.
+			delete type;
+
+			// Throw an error
+			auto &other_type = get_type(type->get_hash());
+			std::ostringstream oss;
+			oss << "Type hash collision between '" << type->get_name()
+				<< "' and '" << other_type.get_name() << "'.";
+			throw std::runtime_error(oss.str());
+		}
+
+		// This type is safe to add to our lookups
+		m_types.push_back(type);
+		m_type_name_lookup[type->get_name()] = type;
+		m_type_hash_lookup[type->get_hash()] = type;
 	}
 }
 }

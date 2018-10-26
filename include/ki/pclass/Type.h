@@ -5,11 +5,10 @@
 #include "ki/pclass/HashCalculator.h"
 #include "ki/pclass/Value.h"
 #include "ki/pclass/PropertyClass.h"
+#include "ki/util/BitStream.h"
 
 namespace ki
 {
-	class BitStream;
-
 namespace pclass
 {
 	/**
