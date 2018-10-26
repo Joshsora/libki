@@ -75,7 +75,7 @@ namespace ki
 			m_value = 0;
 		}
 
-		BitInteger(BitInteger<N, Unsigned> &cp)
+		BitInteger(const BitInteger<N, Unsigned> &cp)
 		{
 			m_value = cp.m_value;
 		}

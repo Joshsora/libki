@@ -7,6 +7,16 @@
 	define_primitive<st>("signed " n); \
 	define_primitive<ut>("unsigned " n)
 
+#define DEFINE_BI_PRIMITIVE(n) \
+	define_primitive< bi<n> >("bi" #n)
+
+#define DEFINE_BUI_PRIMITIVE(n) \
+	define_primitive< bui<n> >("bui" #n)
+
+#define DEFINE_BIT_INTEGER_PRIMITIVE(n) \
+	DEFINE_BI_PRIMITIVE(n); \
+	DEFINE_BUI_PRIMITIVE(n)
+
 namespace ki
 {
 namespace pclass
@@ -43,6 +53,17 @@ namespace pclass
 		define_primitive<int64_t>("int64_t");
 		define_primitive<uint64_t>("uint64_t");
 		define_primitive<uint64_t>("gid");
+
+		// Define bit-integer types
+		DEFINE_BIT_INTEGER_PRIMITIVE(1);
+		DEFINE_BIT_INTEGER_PRIMITIVE(2);
+		DEFINE_BIT_INTEGER_PRIMITIVE(3);
+		DEFINE_BIT_INTEGER_PRIMITIVE(4);
+		DEFINE_BIT_INTEGER_PRIMITIVE(5);
+		DEFINE_BIT_INTEGER_PRIMITIVE(6);
+		DEFINE_BIT_INTEGER_PRIMITIVE(7);
+		define_primitive<bi<24>>("s24");
+		define_primitive<bui<24>>("u24");
 
 		// TODO: Define bit integer types
 		// TODO: Define floating point types
