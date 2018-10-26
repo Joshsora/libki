@@ -183,13 +183,13 @@ namespace ki
 		* The number of bits a type will occupy if written to a BitStream.
 		* This does not reflect the size of the type in memory.
 		*/
-		static constexpr size_t value = sizeof(T) * 8;
+		static constexpr std::size_t value = sizeof(T) * 8;
 	};
 
 	template <uint8_t N, bool Unsigned>
 	struct bitsizeof<BitInteger<N, Unsigned>>
 	{
-		static constexpr size_t value = N;
+		static constexpr std::size_t value = N;
 	};
 
 	/**
