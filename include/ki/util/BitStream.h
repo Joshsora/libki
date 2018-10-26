@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <type_traits>
+#include "ki/util/BitTypes.h"
 
 #define KI_BITSTREAM_DEFAULT_BUFFER_SIZE 0x2000
 
@@ -73,9 +74,9 @@ namespace ki
 		 */
 		template <
 			typename IntegerT,
-			typename = std::enable_if<std::is_integral<IntegerT>::value>
+			typename = std::enable_if<is_integral<IntegerT>::value>
 		>
-		IntegerT read(const uint8_t bits)
+		IntegerT read(const uint8_t bits = bitsizeof<IntegerT>::value)
 		{
 			IntegerT value = 0;
 
@@ -116,9 +117,9 @@ namespace ki
 		 */
 		template <
 			typename IntegerT,
-			typename = std::enable_if<std::is_integral<IntegerT>::value>
+			typename = std::enable_if<is_integral<IntegerT>::value>
 		>
-		void write(IntegerT value, const uint8_t bits)
+		void write(IntegerT value, const uint8_t bits = bitsizeof<IntegerT>::value)
 		{
 			// Iterate until we've written all of the bits
 			auto unwritten_bits = bits;

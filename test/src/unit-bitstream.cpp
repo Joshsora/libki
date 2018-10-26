@@ -18,8 +18,8 @@
 #define KI_TEST_BITSTREAM_U32 0x0A090807
 #define KI_TEST_BITSTREAM_U64 0x1211100F0E0D0C0BL
 
-#define KI_TEST_WRITE_BUI(n) bit_stream->write(KI_TEST_BITSTREAM_BUI##n, n)
-#define KI_TEST_READ_BUI(n) bit_stream->read<uint8_t>(n) == KI_TEST_BITSTREAM_BUI##n
+#define KI_TEST_WRITE_BUI(n) bit_stream->write<bui<n>>(KI_TEST_BITSTREAM_BUI##n)
+#define KI_TEST_READ_BUI(n) bit_stream->read<bui<n>>() == KI_TEST_BITSTREAM_BUI##n
 
 using namespace ki;
 
@@ -117,11 +117,11 @@ TEST_CASE("BitStream Functionality", "[bit-stream]")
 	SECTION("Writing values with a size greater than 8 bits")
 	{
 		// Write some values
-		bit_stream->write<uint8_t>(KI_TEST_BITSTREAM_U8, 8);
-		bit_stream->write<uint16_t>(KI_TEST_BITSTREAM_U16, 16);
-		bit_stream->write<uint32_t>(KI_TEST_BITSTREAM_U24, 24);
-		bit_stream->write<uint32_t>(KI_TEST_BITSTREAM_U32, 32);
-		bit_stream->write<uint64_t>(KI_TEST_BITSTREAM_U64, 64);
+		bit_stream->write<uint8_t>(KI_TEST_BITSTREAM_U8);
+		bit_stream->write<uint16_t>(KI_TEST_BITSTREAM_U16);
+		bit_stream->write<bui<24>>(KI_TEST_BITSTREAM_U24);
+		bit_stream->write<uint32_t>(KI_TEST_BITSTREAM_U32);
+		bit_stream->write<uint64_t>(KI_TEST_BITSTREAM_U64);
 
 		// Make sure tell is reporting the right position
 		auto position = bit_stream->tell();
@@ -197,15 +197,15 @@ TEST_CASE("BitStream Functionality", "[bit-stream]")
 		sample.read((char *)bit_stream->data(), size);
 
 		// Read the values and check they are what we are expecting
-		if (bit_stream->read<uint8_t>(8) != KI_TEST_BITSTREAM_U8)
+		if (bit_stream->read<uint8_t>() != KI_TEST_BITSTREAM_U8)
 			FAIL();
-		if (bit_stream->read<uint16_t>(16) != KI_TEST_BITSTREAM_U16)
+		if (bit_stream->read<uint16_t>() != KI_TEST_BITSTREAM_U16)
 			FAIL();
-		if (bit_stream->read<uint32_t>(24) != KI_TEST_BITSTREAM_U24)
+		if (bit_stream->read<bui<24>>() != KI_TEST_BITSTREAM_U24)
 			FAIL();
-		if (bit_stream->read<uint32_t>(32) != KI_TEST_BITSTREAM_U32)
+		if (bit_stream->read<uint32_t>() != KI_TEST_BITSTREAM_U32)
 			FAIL();
-		if (bit_stream->read<uint64_t>(64) != KI_TEST_BITSTREAM_U64)
+		if (bit_stream->read<uint64_t>() != KI_TEST_BITSTREAM_U64)
 			FAIL();
 
 		SUCCEED();
