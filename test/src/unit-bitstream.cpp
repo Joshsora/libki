@@ -12,6 +12,7 @@
 #define KI_TEST_BITSTREAM_BUI5 0b10101
 #define KI_TEST_BITSTREAM_BUI6 0b101010
 #define KI_TEST_BITSTREAM_BUI7 0b0101010
+#define KI_TEST_BITSTREAM_BOOL true
 #define KI_TEST_BITSTREAM_U8 0x01
 #define KI_TEST_BITSTREAM_U16 0x0302
 #define KI_TEST_BITSTREAM_U24 0x060504
@@ -117,6 +118,7 @@ TEST_CASE("BitStream Functionality", "[bit-stream]")
 	SECTION("Writing values with a size greater than 8 bits")
 	{
 		// Write some values
+		bit_stream->write<bool>(KI_TEST_BITSTREAM_BOOL);
 		bit_stream->write<uint8_t>(KI_TEST_BITSTREAM_U8);
 		bit_stream->write<uint16_t>(KI_TEST_BITSTREAM_U16);
 		bit_stream->write<bui<24>>(KI_TEST_BITSTREAM_U24);
@@ -125,7 +127,7 @@ TEST_CASE("BitStream Functionality", "[bit-stream]")
 
 		// Make sure tell is reporting the right position
 		auto position = bit_stream->tell();
-		if (position.get_byte() != 18 || position.get_bit() != 0)
+		if (position.get_byte() != 19 || position.get_bit() != 0)
 			FAIL();
 		const auto size = position.get_byte();
 
@@ -197,6 +199,8 @@ TEST_CASE("BitStream Functionality", "[bit-stream]")
 		sample.read((char *)bit_stream->data(), size);
 
 		// Read the values and check they are what we are expecting
+		if (bit_stream->read<bool>() != KI_TEST_BITSTREAM_BOOL)
+			FAIL();
 		if (bit_stream->read<uint8_t>() != KI_TEST_BITSTREAM_U8)
 			FAIL();
 		if (bit_stream->read<uint16_t>() != KI_TEST_BITSTREAM_U16)
