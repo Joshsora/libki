@@ -65,8 +65,10 @@ namespace pclass
 		define_primitive<bi<24>>("s24");
 		define_primitive<bui<24>>("u24");
 
-		// TODO: Define bit integer types
-		// TODO: Define floating point types
+		// Define floating point types
+		define_primitive<float>("float");
+		define_primitive<double>("double");
+
 		// TODO: Define bit floating point types
 		// TODO: Define string types
 	}

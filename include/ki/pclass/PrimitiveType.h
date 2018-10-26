@@ -69,3 +69,4 @@ namespace pclass
 
 // Include all template specializations
 #include "ki/pclass/types/IntegralPrimitiveType.h"
+#include "ki/pclass/types/FloatingPointPrimitiveType.h"

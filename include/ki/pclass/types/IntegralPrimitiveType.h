@@ -1,5 +1,6 @@
 #pragma once
 #include <type_traits>
+#include "ki/util/BitTypes.h"
 
 namespace ki
 {
