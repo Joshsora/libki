@@ -1,4 +1,5 @@
 #include "ki/pclass/HashCalculator.h"
+#include <string>
 
 namespace ki
 {
@@ -35,16 +36,13 @@ namespace pclass
 		return result;
 	}
 
-	hash_t WizardHashCalculator::calculate_property_hash(const std::string& name, const hash_t type_hash) const
+	hash_t WizardHashCalculator::calculate_property_hash(const std::string& name) const
 	{
 		// Find the hash of the property name
 		hash_t result = 0x1505;
 		for (auto it = name.begin(); it != name.end(); ++it)
 			result = (0x21 * result) + *it;
-		result &= 0x7FFFFFFF;
-
-		// Add the type hash onto it
-		return result + type_hash;
+		return result & 0x7FFFFFFF;
 	}
 }
 }

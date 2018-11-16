@@ -14,7 +14,7 @@ namespace pclass
 	{
 		static void write_to(BitStream &stream, const ValueT &value)
 		{
-			stream.write<ValueT>(value, bitsizeof<ValueT>::value);
+			stream.write<ValueT>(value);
 		}
 	};
 
@@ -26,7 +26,7 @@ namespace pclass
 	{
 		static void read_from(BitStream &stream, ValueT &value)
 		{
-			value = stream.read<ValueT>(bitsizeof<ValueT>::value);
+			value = stream.read<ValueT>();
 		}
 	};
 }

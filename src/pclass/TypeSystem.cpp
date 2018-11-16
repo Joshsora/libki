@@ -1,4 +1,6 @@
 #include "ki/pclass/TypeSystem.h"
+#include "ki/util/BitTypes.h"
+#include "ki/util/exception.h"
 #include <sstream>
 #include <iomanip>
 
@@ -21,15 +23,7 @@ namespace ki
 {
 namespace pclass
 {
-	TypeSystem& TypeSystem::get_singleton()
-	{
-		if (s_instance == nullptr)
-			// Create the static instance with the default hash calculator
-			s_instance = new TypeSystem(new WizardHashCalculator());
-		return *s_instance;
-	}
-
-	TypeSystem::TypeSystem(HashCalculator* hash_calculator)
+	TypeSystem::TypeSystem(HashCalculator *hash_calculator)
 	{
 		m_hash_calculator = hash_calculator;
 
@@ -69,8 +63,12 @@ namespace pclass
 		define_primitive<float>("float");
 		define_primitive<double>("double");
 
-		// TODO: Define bit floating point types
-		// TODO: Define string types
+		// Define string types
+		define_primitive<std::string>("std::string");
+		define_primitive<std::wstring>("std::wstring");
+
+		// Define the base class for all classes
+		define_class<PropertyClass>("class PropertyClass");
 	}
 
 	TypeSystem::~TypeSystem()
@@ -87,6 +85,15 @@ namespace pclass
 		delete m_hash_calculator;
 	}
 
+	const HashCalculator &TypeSystem::get_hash_calculator() const
+	{
+		// Make sure the hash calculator isn't null
+		if (m_hash_calculator == nullptr)
+			throw runtime_error("TypeSystem::get_hash_calculator() called but hash calculator is null.");
+
+		return *m_hash_calculator;
+	}
+
 	void TypeSystem::set_hash_calculator(HashCalculator* hash_calculator)
 	{
 		// Update the hash calculator
@@ -96,46 +103,47 @@ namespace pclass
 		m_type_hash_lookup.clear();
 		for (auto it = m_types.begin(); it != m_types.end(); ++it)
 		{
-			// Calculate the new hash and update the type
-			auto *type = *it;
-			const auto new_hash = m_hash_calculator->calculate_type_hash(type->get_name());
-			type->set_hash(new_hash);
-
 			// Add the new hash to lookup
-			m_type_hash_lookup[new_hash] = type;
-
-			// Is this type a class?
-			if (type->get_kind() == Type::kind::CLASS)
-			{
-				// TODO: Recalculate property hashes
-			}
+			auto *type = *it;
+			type->update_hash();
+			m_type_hash_lookup[type->get_hash()] = type;
 		}
 	}
 
-	Type& TypeSystem::get_type(const std::string &name) const
+	bool TypeSystem::has_type(const std::string &name) const
+	{
+		return m_type_name_lookup.find(name) != m_type_name_lookup.end();
+	}
+
+	bool TypeSystem::has_type(const hash_t hash) const
+	{
+		return m_type_hash_lookup.find(hash) != m_type_hash_lookup.end();
+	}
+
+	const Type &TypeSystem::get_type(const std::string &name) const
 	{
 		const auto it = m_type_name_lookup.find(name);
 		if (it == m_type_name_lookup.end())
 		{
 			std::ostringstream oss;
 			oss << "Could not find type with name '" << name << "'.";
-			throw std::runtime_error(oss.str());
+			throw runtime_error(oss.str());
 		}
-		return *(it->second);
+		return *it->second;
 	}
 
-	Type& TypeSystem::get_type(const hash_t hash) const
+	const Type &TypeSystem::get_type(const hash_t hash) const
 	{
 		const auto it = m_type_hash_lookup.find(hash);
 		if (it == m_type_hash_lookup.end())
 		{
 			std::ostringstream oss;
-			oss << "Could not find type with hash: " <<
+			oss << "Could not find type with hash: 0x" <<
 				std::hex << std::setw(8) << std::setfill('0') <<
 				std::uppercase << hash << ".";
-			throw std::runtime_error(oss.str());
+			throw runtime_error(oss.str());
 		}
-		return *(it->second);
+		return *it->second;
 	}
 
 	void TypeSystem::define_type(Type *type)
@@ -149,7 +157,7 @@ namespace pclass
 			// Throw an error
 			std::ostringstream oss;
 			oss << "Type '" << type->get_name() << "' is already defined.";
-			throw std::runtime_error(oss.str());
+			throw runtime_error(oss.str());
 		}
 
 		// Does a type with this hash already exist?
@@ -163,7 +171,7 @@ namespace pclass
 			std::ostringstream oss;
 			oss << "Type hash collision between '" << type->get_name()
 				<< "' and '" << other_type.get_name() << "'.";
-			throw std::runtime_error(oss.str());
+			throw runtime_error(oss.str());
 		}
 
 		// This type is safe to add to our lookups

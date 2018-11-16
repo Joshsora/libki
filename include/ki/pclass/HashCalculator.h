@@ -25,11 +25,10 @@ namespace ki
 			virtual hash_t calculate_type_hash(const std::string &name) const = 0;
 
 			/**
-			* Calculate a property hash from the property's name and type.
+			* Calculate a property hash from the property's name.
 			* @param name The name of the property.
-			* @param type_hash The hash of the property's type.
 			*/
-			virtual hash_t calculate_property_hash(const std::string& name, const hash_t type_hash) const = 0;
+			virtual hash_t calculate_property_hash(const std::string& name) const = 0;
 		};
 
 		/**
@@ -40,7 +39,7 @@ namespace ki
 		{
 		public:
 			hash_t calculate_type_hash(const std::string& name) const override;
-			hash_t calculate_property_hash(const std::string& name, const hash_t type_hash) const override;
+			hash_t calculate_property_hash(const std::string& name) const override;
 		};
 	}
 }

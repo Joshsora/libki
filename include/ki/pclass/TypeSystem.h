@@ -1,8 +1,11 @@
 #pragma once
 #include <vector>
 #include <map>
-#include "Type.h"
-#include "PrimitiveType.h"
+#include "ki/pclass/HashCalculator.h"
+#include "ki/pclass/types/Type.h"
+#include "ki/pclass/types/PrimitiveType.h"
+#include "ki/pclass/types/ClassType.h"
+#include "ki/pclass/types/EnumType.h"
 
 namespace ki
 {
@@ -14,52 +17,61 @@ namespace pclass
 	class TypeSystem
 	{
 	public:
-		/**
-		 * @return A singleton instance of TypeSystem with all C++ primitives defined.
-		 */
-		static TypeSystem &get_singleton();
-
 		explicit TypeSystem(HashCalculator *hash_calculator);
 		~TypeSystem();
 
+		const HashCalculator &get_hash_calculator() const;
 		void set_hash_calculator(HashCalculator *hash_calculator);
 
-		Type &get_type(const std::string &name) const;
-		Type &get_type(hash_t hash) const;
+		bool has_type(const std::string &name) const;
+		bool has_type(hash_t hash) const;
+
+		const Type &get_type(const std::string &name) const;
+		const Type &get_type(hash_t hash) const;
 
 		template <typename ValueT>
-		Type &define_primitive(const std::string &name)
+		PrimitiveType<ValueT> &define_primitive(const std::string &name)
 		{
-			auto hash = m_hash_calculator->calculate_type_hash(name);
-			auto *type = new PrimitiveType<ValueT>(name, hash);
+			auto *type = new PrimitiveType<ValueT>(name, *this);
 			define_type(type);
 			return *type;
 		}
 
 		template <class ClassT>
-		Type &define_class(const std::string &name)
+		ClassType<ClassT> &define_class(
+			const std::string &name, const Type *base_class = nullptr)
 		{
-			// Ensure that ClassT inherits PropertyClass
-			static_assert(std::is_base_of<PropertyClass, ClassT>::value, "ClassT must inherit PropertyClass!");
+			// If the caller does not specify a base class, automatically make
+			// ki::pclass::PropertyClass the base class (if it has been defined)
+			if (base_class == nullptr && has_type("class PropertyClass"))
+				base_class = &get_type("class PropertyClass");
 
-			// TODO: Create class types
+			auto *type = new ClassType<ClassT>(name, base_class, *this);
+			define_type(type);
+			return *type;
 		}
 
 		template <typename EnumT>
-		Type &define_enum(const std::string &name)
+		EnumType<EnumT> *define_enum(const std::string &name)
 		{
-			// Ensure that EnumT is an enum
-			static_assert(std::is_enum<EnumT>::value, "EnumT must be an enum!");
+			/*
+			auto *type = new EnumType<EnumT>(name, this);
+			define_type(type);
+			return type;
+			*/
+		}
 
-			// TODO: Create enum types
+		template <typename ClassT>
+		ClassT *instantiate(const std::string &name) const
+		{
+			const auto &type = get_type(name);
+			return dynamic_cast<ClassT *>(type.instantiate());
 		}
 
 	protected:
 		void define_type(Type *type);
 
 	private:
-		static TypeSystem *s_instance;
-
 		TypeList m_types;
 		TypeNameMap m_type_name_lookup;
 		TypeHashMap m_type_hash_lookup;

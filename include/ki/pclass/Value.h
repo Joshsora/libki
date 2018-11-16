@@ -16,7 +16,14 @@ namespace pclass
 		template <typename T>
 		Value(T &value)
 		{
-			m_value_ptr = value;
+			m_value_ptr = static_cast<void *>(&value);
+			m_type_hash = typeid(value).hash_code();
+		}
+
+		template <typename T>
+		Value(const T &value)
+		{
+			m_value_ptr = const_cast<void *>(static_cast<const void *>(&value));
 			m_type_hash = typeid(value).hash_code();
 		}
 
@@ -44,7 +51,7 @@ namespace pclass
 			// Make sure that this is allowed
 			if (!is<T>())
 				throw std::runtime_error("Type mismatch in Value::get<T>() call.");
-			return *(T *)m_value_ptr;
+			return *static_cast<T *>(m_value_ptr);
 		}
 
 		/**
@@ -56,7 +63,7 @@ namespace pclass
 			// Make sure that this is allowed
 			if (!is<T>())
 				throw std::runtime_error("Type mismatch in Value::get<T>() call.");
-			return *(T *)m_value_ptr;
+			return *static_cast<T *>(m_value_ptr);
 		}
 
 	private:

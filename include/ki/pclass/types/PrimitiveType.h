@@ -1,5 +1,5 @@
 #pragma once
-#include "ki/pclass/Type.h"
+#include "ki/pclass/types/Type.h"
 
 namespace ki
 {
@@ -44,8 +44,8 @@ namespace pclass
 	class PrimitiveType : public Type
 	{
 	public:
-		PrimitiveType(const std::string name, const hash_t hash)
-			: Type(name, hash)
+		PrimitiveType(const std::string name, const TypeSystem &type_system)
+			: Type(name, type_system)
 		{
 			m_kind = kind::PRIMITIVE;
 		}
@@ -70,3 +70,4 @@ namespace pclass
 // Include all template specializations
 #include "ki/pclass/types/IntegralPrimitiveType.h"
 #include "ki/pclass/types/FloatingPointPrimitiveType.h"
+#include "ki/pclass/types/StringPrimitiveType.h"
