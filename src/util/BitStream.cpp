@@ -19,6 +19,11 @@ namespace ki
 		set_bit(cp.m_bit);
 	}
 
+	intmax_t BitStream::stream_pos::as_bits() const
+	{
+		return (m_byte * 8) + m_bit;
+	}
+
 	intmax_t BitStream::stream_pos::get_byte() const
 	{
 		return m_byte;
@@ -165,10 +170,47 @@ namespace ki
 		return m_buffer;
 	}
 
+	void BitStream::write_copy(uint8_t *src, const std::size_t bitsize)
+	{
+		// Copy all whole bytes
+		const auto bytes = bitsize / 8;
+		auto written_bytes = 0;
+		while (written_bytes < bytes)
+		{
+			write<uint8_t>(src[written_bytes]);
+			written_bytes++;
+		}
+
+		// Copy left over bits
+		const auto bits = bitsize % 8;
+		if (bits > 0)
+			write<uint8_t>(src[bytes + 1], bits);
+	}
+
+	void BitStream::read_copy(uint8_t *dst, const std::size_t bitsize)
+	{
+		// Copy all whole bytes
+		const auto bytes = bitsize / 8;
+		auto read_bytes = 0;
+		while (read_bytes < bytes)
+		{
+			dst[read_bytes] = read<uint8_t>();
+			read_bytes++;
+		}
+
+		// Copy left over bits
+		const auto bits = bitsize % 8;
+		if (bits > 0)
+			dst[bytes + 1] = read<uint8_t>(bits);
+	}
+
 	void BitStream::expand_buffer()
 	{
 		// Work out a new buffer size
-		auto new_size = (2 << (uint64_t)std::log2(m_position.get_byte()) + 1) + 2;
+		const auto minimum_bits = static_cast<uint64_t>(
+			std::log2(m_position.get_byte())
+		) + 1;
+		auto new_size = (2 << minimum_bits) + 2;
 		if (new_size < m_buffer_size)
 			new_size = std::numeric_limits<size_t>::max();
 
