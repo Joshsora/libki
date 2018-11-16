@@ -65,7 +65,7 @@ namespace serialization
 		const pclass::PropertyClass *m_root_object;
 	};
 }
-
-	// Make sure the flags enum can be used like a bitflag
-	MAKE_FLAGS_ENUM(ki::serialization::SerializerBinary::flags);
 }
+
+// Make sure the flags enum can be used like a bitflag
+MAKE_FLAGS_ENUM(ki::serialization::SerializerBinary::flags);

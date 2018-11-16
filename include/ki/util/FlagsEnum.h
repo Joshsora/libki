@@ -2,8 +2,9 @@
 #include <type_traits>
 
 #define MAKE_FLAGS_ENUM(n) \
-	template <> \
-	struct ki::is_flags_enum<n> : std::true_type {}
+	namespace ki { \
+		template <> \
+		struct is_flags_enum<n> : std::true_type {}; }
 
 #define SET_FLAG(v, f) v |= f
 #define UNSET_FLAG(v, f) v &= ~f
