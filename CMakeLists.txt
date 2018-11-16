@@ -6,6 +6,9 @@ set(RAPIDXML_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/third_party)
 add_library(RapidXML INTERFACE)
 target_include_directories(RapidXML INTERFACE ${RAPIDXML_INCLUDE_DIR})
 
+find_package(ZLIB REQUIRED)
+include_directories(${ZLIB_INCLUDE_DIRS})
+
 add_library(${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME}
 	PROPERTIES
@@ -13,16 +16,15 @@ set_target_properties(${PROJECT_NAME}
 		CXX_STANDARD 11
 )
 target_include_directories(${PROJECT_NAME}
-	PRIVATE
-		${PROJECT_SOURCE_DIR}/include
-	INTERFACE
+	PUBLIC
 		${PROJECT_SOURCE_DIR}/include
 )
-target_link_libraries(${PROJECT_NAME} RapidXML)
+target_link_libraries(${PROJECT_NAME} RapidXML ${ZLIB_LIBRARIES})
 
 add_subdirectory("src/dml")
 add_subdirectory("src/pclass")
 add_subdirectory("src/protocol")
+add_subdirectory("src/serialization")
 add_subdirectory("src/util")
 
 option(COVERALLS "Generate coveralls data" OFF)
