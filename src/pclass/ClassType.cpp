@@ -1,4 +1,5 @@
 #include "ki/pclass/types/ClassType.h"
+#include "ki/pclass/TypeSystem.h"
 
 namespace ki
 {

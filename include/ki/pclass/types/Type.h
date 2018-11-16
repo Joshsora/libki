@@ -10,6 +10,7 @@ namespace ki
 {
 namespace pclass
 {
+	class TypeSystem;
 	class PropertyClass;
 
 	/**
