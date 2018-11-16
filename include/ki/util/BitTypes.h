@@ -37,9 +37,9 @@ namespace ki
 		>::type;
 
 		/**
-		* The integer type that can most efficiently store N bits
-		* without signedness.
-		*/
+		 * The integer type that can most efficiently store N bits
+	 	 * without signedness.
+		 */
 		using uint_type = typename std::conditional<
 			N <= 8,
 			uint8_t,
@@ -162,27 +162,27 @@ namespace ki
 	};
 
 	/**
-	* Represents a signed integer of N bits.
-	*/
+	 * Represents a signed integer of N bits.
+	 */
 	template <uint8_t N>
 	using bi = BitInteger<N, false>;
 
 	/**
-	* Represents an unsigned integer of N bits.
-	*/
+	 * Represents an unsigned integer of N bits.
+	 */
 	template <uint8_t N>
 	using bui = BitInteger<N, true>;
 
 	/**
-	* A utility to calculate the bitsize of a type.
-	*/
+	 * A utility to calculate the bitsize of a type.
+	 */
 	template <typename T, typename Enable = void>
 	struct bitsizeof
 	{
 		/**
-		* The number of bits a type will occupy if written to a BitStream.
-		* This does not reflect the size of the type in memory.
-		*/
+		 * The number of bits a type will occupy if written to a BitStream.
+		 * This does not reflect the size of the type in memory.
+		 */
 		static constexpr std::size_t value = sizeof(T) * 8;
 	};
 

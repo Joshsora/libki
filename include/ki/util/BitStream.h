@@ -21,6 +21,7 @@ namespace ki
 			explicit stream_pos(intmax_t byte = 0, int bit = 0);
 			stream_pos(const stream_pos &cp);
 
+			intmax_t as_bits() const;
 			intmax_t get_byte() const;
 			uint8_t get_bit() const;
 			
@@ -147,6 +148,20 @@ namespace ki
 				seek(tell() + bit_count);
 			}
 		}
+
+		/**
+		 * Copy memory from an external buffer into the bitstream's buffer from the current position.
+		 * @param src The buffer to copy data from.
+		 * @param bitsize The number of bits to copy from the src buffer.
+		 */
+		void write_copy(uint8_t *src, std::size_t bitsize);
+
+		/**
+		 * Copy memory from the bitstream's buffer into an external buffer.
+		 * @param dst The destination buffer to copy data to.
+		 * @param bitsize The number of bits to copy into the dst buffer.
+		 */
+		void read_copy(uint8_t *dst, std::size_t bitsize);
 
 	private:
 		uint8_t *m_buffer;
