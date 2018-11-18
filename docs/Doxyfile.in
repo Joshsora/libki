@@ -1,0 +1,9 @@
+PROJECT_NAME           = "libki"
+STRIP_FROM_PATH        = "@PROJECT_SOURCE_DIR@"
+INPUT                  = "@PROJECT_SOURCE_DIR@/src" \
+						 "@PROJECT_SOURCE_DIR@/include"
+FILE_PATTERNS          = *.h \
+                         *.cpp
+OUTPUT_DIRECTORY	   = "@CMAKE_CURRENT_BINARY_DIR@/docs"
+RECURSIVE              = YES
+GENERATE_LATEX		   = NO
