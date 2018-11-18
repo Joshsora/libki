@@ -23,6 +23,26 @@ target_link_libraries(${PROJECT_NAME} RapidXML)
 add_subdirectory("src/dml")
 add_subdirectory("src/protocol")
 
+find_package(Doxygen)
+option(KI_BUILD_DOCUMENTATION "Determines whether to build the HTML documentation. (via Doxygen)" ${DOXYGEN_FOUND})
+if (KI_BUILD_DOCUMENTATION)
+	if(NOT DOXYGEN_FOUND)
+		message(FATAL_ERROR "Doxygen is needed to build the documentation.")
+	endif()
+
+    set(DOXYFILE_IN ${PROJECT_SOURCE_DIR}/docs/Doxyfile.in)
+    set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+	configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY)
+
+	add_custom_target(
+		doc ALL
+		COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM
+	)
+endif()
+
 option(COVERALLS "Generate coveralls data" OFF)
 if (COVERALLS)
     include(Coveralls)
