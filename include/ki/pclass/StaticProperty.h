@@ -161,12 +161,12 @@ namespace pclass
 	>
 	struct value_rw_helper
 	{
-		static void write(const StaticProperty<ValueT> &prop, BitStream &stream)
+		static void write(const StaticProperty<ValueT> &prop, BitStreamBase &stream)
 		{
 			prop.get_type().write_to(stream, prop.m_value);
 		}
 
-		static void read(StaticProperty<ValueT> &prop, BitStream &stream)
+		static void read(StaticProperty<ValueT> &prop, BitStreamBase &stream)
 		{
 			prop.get_type().read_from(stream, Value(prop.m_value));
 		}
@@ -187,12 +187,12 @@ namespace pclass
 		>::type
 	>
 	{
-		static void write(const StaticProperty<ValueT> &prop, BitStream &stream)
+		static void write(const StaticProperty<ValueT> &prop, BitStreamBase &stream)
 		{
 			prop.get_type().write_to(stream, *prop.m_value);
 		}
 
-		static void read(StaticProperty<ValueT> &prop, BitStream &stream)
+		static void read(StaticProperty<ValueT> &prop, BitStreamBase &stream)
 		{
 			prop.get_type().read_from(stream, Value(*prop.m_value));
 		}
@@ -215,12 +215,12 @@ namespace pclass
 			return value_object_helper<ValueT>::get_object(prop);
 		}
 
-		static void write(const StaticProperty<ValueT> &prop, BitStream &stream)
+		static void write(const StaticProperty<ValueT> &prop, BitStreamBase &stream)
 		{
 			value_rw_helper<ValueT>::write(prop, stream);
 		}
 
-		static void read(StaticProperty<ValueT> &prop, BitStream &stream)
+		static void read(StaticProperty<ValueT> &prop, BitStreamBase &stream)
 		{
 			value_rw_helper<ValueT>::read(prop, stream);
 		}
@@ -260,12 +260,12 @@ namespace pclass
 			return std::is_pointer<ValueT>::value;
 		}
 
-		void write_value_to(BitStream &stream) const override
+		void write_value_to(BitStreamBase &stream) const override
 		{
 			value_helper<ValueT>::write(*this, stream);
 		}
 
-		void read_value_from(BitStream &stream) override
+		void read_value_from(BitStreamBase &stream) override
 		{
 			value_helper<ValueT>::read(*this, stream);
 		}

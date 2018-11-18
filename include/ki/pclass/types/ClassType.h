@@ -45,7 +45,7 @@ namespace pclass
 			return new ClassT(*this, get_type_system());
 		}
 
-		void write_to(BitStream &stream, const Value &value) const override
+		void write_to(BitStreamBase &stream, const Value &value) const override
 		{
 			const auto &object = dynamic_cast<const PropertyClass &>(value.get<ClassT>());
 			const auto &properties = object.get_properties();
@@ -53,7 +53,7 @@ namespace pclass
 				(*it)->write_value_to(stream);
 		}
 
-		void read_from(BitStream &stream, Value &value) const override
+		void read_from(BitStreamBase &stream, Value &value) const override
 		{
 			auto &object = dynamic_cast<PropertyClass &>(value.get<ClassT>());
 			auto &properties = object.get_properties();

@@ -254,3 +254,9 @@ TEST_CASE("BitStream buffer expansion", "[bit-stream]")
 	delete bit_stream;
 	SUCCEED();
 }
+
+/**
+* TODO: Test reading outside of buffer (should throw)
+* TODO: Test read/write copy on BitStream
+* TODO: Test BitStreamSection
+*/

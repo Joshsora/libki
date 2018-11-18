@@ -28,8 +28,8 @@ namespace pclass
 		virtual Value get_value() const = 0;
 		virtual const PropertyClass *get_object() const = 0;
 
-		virtual void write_value_to(BitStream &stream) const = 0;
-		virtual void read_value_from(BitStream &stream) = 0;
+		virtual void write_value_to(BitStreamBase &stream) const = 0;
+		virtual void read_value_from(BitStreamBase &stream) = 0;
 
 	private:
 		std::string m_name;
@@ -53,13 +53,13 @@ namespace pclass
 
 		Value get_value() const final override;
 		const PropertyClass *get_object() const final override;
-		void write_value_to(BitStream &stream) const final override;
-		void read_value_from(BitStream &stream) final override;
+		void write_value_to(BitStreamBase &stream) const final override;
+		void read_value_from(BitStreamBase &stream) final override;
 
 		virtual Value get_value(int index) const = 0;
 		virtual const PropertyClass *get_object(int index) const = 0;
-		virtual void write_value_to(BitStream &stream, int index) const = 0;
-		virtual void read_value_from(BitStream &stream, int index) = 0;
+		virtual void write_value_to(BitStreamBase &stream, int index) const = 0;
+		virtual void read_value_from(BitStreamBase &stream, int index) = 0;
 	};
 }
 }

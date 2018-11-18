@@ -38,17 +38,16 @@ namespace pclass
 		}
 
 		template <class ClassT>
-		ClassType<ClassT> &define_class(
-			const std::string &name, const Type *base_class = nullptr)
+		ClassType<ClassT> &define_class(const std::string &name)
 		{
-			// If the caller does not specify a base class, automatically make
-			// ki::pclass::PropertyClass the base class (if it has been defined)
-			if (base_class == nullptr && has_type("class PropertyClass"))
-				base_class = &get_type("class PropertyClass");
+			return define_class<ClassT>(name, nullptr);
+		}
 
-			auto *type = new ClassType<ClassT>(name, base_class, *this);
-			define_type(type);
-			return *type;
+		template <class ClassT>
+		ClassType<ClassT> &define_class(
+			const std::string &name, const Type &base_class)
+		{
+			return define_class<ClassT>(name, &base_class);
 		}
 
 		template <typename EnumT>
@@ -70,6 +69,20 @@ namespace pclass
 
 	protected:
 		void define_type(Type *type);
+
+		template <class ClassT>
+		ClassType<ClassT> &define_class(
+			const std::string &name, const Type *base_class)
+		{
+			// If the caller does not specify a base class, automatically make
+			// ki::pclass::PropertyClass the base class (if it has been defined)
+			if (base_class == nullptr && has_type("class PropertyClass"))
+				base_class = &get_type("class PropertyClass");
+
+			auto *type = new ClassType<ClassT>(name, base_class, *this);
+			define_type(type);
+			return *type;
+		}
 
 	private:
 		TypeList m_types;

@@ -15,7 +15,7 @@ namespace serialization
 		m_root_object = nullptr;
 	}
 
-	void SerializerBinary::save(const pclass::PropertyClass* object, BitStream& stream)
+	void SerializerBinary::save(const pclass::PropertyClass* object, BitStreamBase &stream)
 	{
 		// Write the serializer flags
 		if (FLAG_IS_SET(m_flags, flags::WRITE_SERIALIZER_FLAGS))
@@ -109,7 +109,7 @@ namespace serialization
 		}
 	}
 
-	void SerializerBinary::presave_object(const pclass::PropertyClass *object, BitStream& stream) const
+	void SerializerBinary::presave_object(const pclass::PropertyClass *object, BitStreamBase &stream) const
 	{
 		// If we have an object, write the type hash, otherwise, write NULL (0).
 		if (object)
@@ -118,7 +118,7 @@ namespace serialization
 			stream.write<uint32_t>(NULL);
 	}
 
-	void SerializerBinary::save_object(const pclass::PropertyClass *object, BitStream& stream) const
+	void SerializerBinary::save_object(const pclass::PropertyClass *object, BitStreamBase &stream) const
 	{
 		// Write any object headers
 		presave_object(object, stream);
@@ -156,7 +156,7 @@ namespace serialization
 		}
 	}
 
-	void SerializerBinary::save_property(const pclass::PropertyBase *prop, BitStream& stream) const
+	void SerializerBinary::save_property(const pclass::PropertyBase *prop, BitStreamBase &stream) const
 	{
 		// Remember where we started writing the property data
 		const auto start_pos = stream.tell();
@@ -227,7 +227,7 @@ namespace serialization
 		}
 	}
 
-	void SerializerBinary::load(pclass::PropertyClass*& dest, BitStream& stream)
+	void SerializerBinary::load(pclass::PropertyClass*& dest, BitStreamBase &stream)
 	{
 		// Read the serializer flags
 		if (FLAG_IS_SET(m_flags, flags::WRITE_SERIALIZER_FLAGS))
@@ -240,17 +240,17 @@ namespace serialization
 		}
 	}
 
-	void SerializerBinary::preload_object(pclass::PropertyClass*& dest, BitStream& stream) const
+	void SerializerBinary::preload_object(pclass::PropertyClass*& dest, BitStreamBase &stream) const
 	{
 		
 	}
 
-	void SerializerBinary::load_object(pclass::PropertyClass*& dest, BitStream& stream) const
+	void SerializerBinary::load_object(pclass::PropertyClass*& dest, BitStreamBase &stream) const
 	{
 		
 	}
 
-	void SerializerBinary::load_property(pclass::PropertyBase* prop, BitStream& stream) const
+	void SerializerBinary::load_property(pclass::PropertyBase* prop, BitStreamBase &stream) const
 	{
 		
 	}

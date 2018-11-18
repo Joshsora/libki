@@ -45,17 +45,17 @@ namespace serialization
 			bool is_file, flags flags);
 		virtual ~SerializerBinary() {}
 
-		void save(const pclass::PropertyClass *object, BitStream &stream);
-		void load(pclass::PropertyClass *&dest, BitStream &stream);
+		void save(const pclass::PropertyClass *object, BitStreamBase &stream);
+		void load(pclass::PropertyClass *&dest, BitStreamBase &stream);
 
 	protected:
-		virtual void presave_object(const pclass::PropertyClass *object, BitStream &stream) const;
-		void save_object(const pclass::PropertyClass *object, BitStream &stream) const;
-		void save_property(const pclass::PropertyBase *prop, BitStream &stream) const;
+		virtual void presave_object(const pclass::PropertyClass *object, BitStreamBase &stream) const;
+		void save_object(const pclass::PropertyClass *object, BitStreamBase &stream) const;
+		void save_property(const pclass::PropertyBase *prop, BitStreamBase &stream) const;
 
-		virtual void preload_object(pclass::PropertyClass *&dest, BitStream &stream) const;
-		void load_object(pclass::PropertyClass *&dest, BitStream &stream) const;
-		void load_property(pclass::PropertyBase *prop, BitStream &stream) const;
+		virtual void preload_object(pclass::PropertyClass *&dest, BitStreamBase &stream) const;
+		void load_object(pclass::PropertyClass *&dest, BitStreamBase &stream) const;
+		void load_property(pclass::PropertyBase *prop, BitStreamBase &stream) const;
 
 	private:
 		const pclass::TypeSystem *m_type_system;

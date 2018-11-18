@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <type_traits>
+#include <sstream>
 #include "ki/util/BitTypes.h"
 
 #define KI_BITSTREAM_DEFAULT_BUFFER_SIZE 0x2000
@@ -8,9 +9,10 @@
 namespace ki
 {
 	/**
-	 * A readable/writeable stream of bits.
+	 * An abstract base class that provides a common interface for
+	 * writing to, reading from, and querying bit streams.
 	 */
-	class BitStream
+	class BitStreamBase
 	{
 	public:
 		/**
@@ -45,33 +47,33 @@ namespace ki
 			void set_bit(int bit);
 		};
 
-		explicit BitStream(std::size_t buffer_size = KI_BITSTREAM_DEFAULT_BUFFER_SIZE);
-		~BitStream();
+		virtual ~BitStreamBase() {}
 
 		/**
-		 * @return The stream's current position.
+		 * @returns The stream's current position.
 		 */
-		stream_pos tell() const;
+		virtual stream_pos tell() const = 0;
 
 		/**
 		 * Sets the position of the stream.
 		 * @param position The new position of the stream.
 		 */
-		void seek(stream_pos position);
+		virtual void seek(stream_pos position) = 0;
 
 		/**
-		 * @return The current size of the internal buffer.
+		 * @returns The current size of the internal buffer.
 		 */
-		std::size_t capacity() const;
+		virtual std::size_t capacity() const = 0;
 
 		/**
-		 * @return A pointer to the start of the internal buffer.
+		 * @returns A pointer to the start of the internal buffer.
 		 */
-		const uint8_t *data() const;
+		virtual const uint8_t *data() const = 0;
 
 		/**
 		 * Reads a value from the buffer given a defined number of bits.
-		 * @param bits The number of bits to read.
+		 * @param[in] bits The number of bits to read. Defaults to the bitsize of IntegerT.
+		 * @returns The value read from the buffer.
 		 */
 		template <
 			typename IntegerT,
@@ -79,42 +81,14 @@ namespace ki
 		>
 		IntegerT read(const uint8_t bits = bitsizeof<IntegerT>::value)
 		{
-			IntegerT value = 0;
-
-			// Iterate until we've read all of the bits
-			auto unread_bits = bits;
-			while (unread_bits > 0)
-			{
-				// Calculate how many bits to read from the current byte based on how many bits 
-				// are left and how many bits we still need to read
-				const uint8_t bits_available = (8 - m_position.get_bit());
-				const auto bit_count = unread_bits < bits_available ? unread_bits : bits_available;
-
-				// Find the bit-mask based on how many bits are being read
-				const uint8_t bit_mask = ((1 << bit_count) - 1) << m_position.get_bit();
-				
-				// Read the bits from the current byte and position them on the least-signficant bit
-				const uint8_t bits_value = (m_buffer[m_position.get_byte()] & bit_mask) >> m_position.get_bit();
-
-				// Position the value of the bits we just read based on how many bits of the value 
-				// we've already read
-				const uint8_t read_bits = bits - unread_bits;
-				value |= (IntegerT)bits_value << read_bits;
-
-				// Remove the bits we just read from the count of unread bits
-				unread_bits -= bit_count;
-
-				// Move forward the number of bits we just read
-				seek(tell() + bit_count);
-			}
-
-			return value;
+			return static_cast<IntegerT>(read(bits));
 		}
 
 		/**
 		 * Writes a value to the buffer that occupies a defined number of bits.
-		 * @param value The value to write.
-		 * @param bits The number of bits to use.
+		 * @tparam IntegerT The type of value (must be an integral type).
+		 * @param[in] value The value to write.
+		 * @param[in] bits The number of bits to use. Defaults to the bitsize of IntegerT.
 		 */
 		template <
 			typename IntegerT,
@@ -122,53 +96,88 @@ namespace ki
 		>
 		void write(IntegerT value, const uint8_t bits = bitsizeof<IntegerT>::value)
 		{
-			// Iterate until we've written all of the bits
-			auto unwritten_bits = bits;
-			while (unwritten_bits > 0)
-			{
-				// Calculate how many bits to write based on how many bits are left in the current byte
-				// and how many bits from the value we still need to write
-				const uint8_t bits_available = (8 - m_position.get_bit());
-				const auto bit_count = unwritten_bits < bits_available ? unwritten_bits : bits_available;
-				
-				// Find the bit-mask based on how many bits are being written, and how many bits we've
-				// already written
-				const uint8_t written_bits = bits - unwritten_bits;
-				IntegerT bit_mask = (IntegerT)((1 << bit_count) - 1) << written_bits;
-
-				// Get the bits from the value and position them at the current bit position
-				uint8_t value_byte = ((value & bit_mask) >> written_bits) & 0xFF;
-				value_byte <<= m_position.get_bit();
-
-				// Write the bits into the byte we're currently at
-				m_buffer[m_position.get_byte()] |= value_byte;
-				unwritten_bits -= bit_count;
-
-				// Move forward the number of bits we just wrote
-				seek(tell() + bit_count);
-			}
+			write(static_cast<uint64_t>(value), bits);
 		}
 
 		/**
 		 * Copy memory from an external buffer into the bitstream's buffer from the current position.
-		 * @param src The buffer to copy data from.
-		 * @param bitsize The number of bits to copy from the src buffer.
+		 * @param[in] src The buffer to copy data from.
+		 * @param[in] bitsize The number of bits to copy from the src buffer.
 		 */
 		void write_copy(uint8_t *src, std::size_t bitsize);
 
 		/**
 		 * Copy memory from the bitstream's buffer into an external buffer.
-		 * @param dst The destination buffer to copy data to.
-		 * @param bitsize The number of bits to copy into the dst buffer.
+		 * @param[out] dst The destination buffer to copy data to.
+		 * @param[in] bitsize The number of bits to copy into the dst buffer.
 		 */
 		void read_copy(uint8_t *dst, std::size_t bitsize);
 
+	protected:
+		virtual uint64_t read(uint8_t bits) = 0;
+		virtual void write(uint64_t value, uint8_t bits) = 0;
+	};
+
+	/**
+	 * A read/write-able stream of bits.
+	 */
+	class BitStream : public BitStreamBase
+	{
+	public:
+		explicit BitStream(std::size_t buffer_size = KI_BITSTREAM_DEFAULT_BUFFER_SIZE);
+		virtual ~BitStream();
+
+		stream_pos tell() const override;
+		void seek(stream_pos position) override;
+		std::size_t capacity() const override;
+		const uint8_t *data() const override;
+
+		/**
+		 * @copydoc BitStreamBase::read<IntegerT>(uint8_t)
+		 * @throws ki::runtime_error Not enough data available to read the specified number of bits.
+		 */
+		template <
+			typename IntegerT,
+			typename = std::enable_if<is_integral<IntegerT>::value>
+		>
+		IntegerT read(const uint8_t bits = bitsizeof<IntegerT>::value)
+		{
+			return BitStreamBase::read<IntegerT>(bits);
+		}
+
+		template <
+			typename IntegerT,
+			typename = std::enable_if<is_integral<IntegerT>::value>
+		>
+		void write(IntegerT value, const uint8_t bits = bitsizeof<IntegerT>::value)
+		{
+			BitStreamBase::write<IntegerT>(value, bits);
+		}
+
+	protected:
+		uint64_t read(uint8_t bits) override;
+		void write(uint64_t value, uint8_t bits) override;
+
 	private:
-		uint8_t *m_buffer;
+		uint8_t * m_buffer;
 		std::size_t m_buffer_size;
 		stream_pos m_position;
 
 		void expand_buffer();
 		void validate_buffer();
+	};
+
+	/**
+	 * TODO: Documentation
+	 */
+	class BitStreamSection : public BitStreamBase
+	{
+	public:
+		explicit BitStreamSection(BitStreamBase &stream, std::size_t size);
+
+	private:
+		BitStreamBase &m_stream;
+		stream_pos m_position;
+		std::size_t m_size;
 	};
 }

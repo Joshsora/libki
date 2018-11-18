@@ -1,8 +1,7 @@
 #include "ki/util/BitStream.h"
+#include "ki/util/exception.h"
 #include <limits>
-#include <exception>
 #include <cstring>
-#include <stdexcept>
 #include <cmath>
 
 namespace ki
@@ -137,6 +136,40 @@ namespace ki
 		return copy;
 	}
 
+	void BitStreamBase::write_copy(uint8_t *src, const std::size_t bitsize)
+	{
+		// Copy all whole bytes
+		const auto bytes = bitsize / 8;
+		auto written_bytes = 0;
+		while (written_bytes < bytes)
+		{
+			write<uint8_t>(src[written_bytes]);
+			written_bytes++;
+		}
+
+		// Copy left over bits
+		const auto bits = bitsize % 8;
+		if (bits > 0)
+			write<uint8_t>(src[bytes + 1], bits);
+	}
+
+	void BitStreamBase::read_copy(uint8_t *dst, const std::size_t bitsize)
+	{
+		// Copy all whole bytes
+		const auto bytes = bitsize / 8;
+		auto read_bytes = 0;
+		while (read_bytes < bytes)
+		{
+			dst[read_bytes] = read<uint8_t>();
+			read_bytes++;
+		}
+
+		// Copy left over bits
+		const auto bits = bitsize % 8;
+		if (bits > 0)
+			dst[bytes + 1] = read<uint8_t>(bits);
+	}
+
 	BitStream::BitStream(const size_t buffer_size)
 	{
 		m_buffer = new uint8_t[buffer_size] { 0 };
@@ -170,38 +203,75 @@ namespace ki
 		return m_buffer;
 	}
 
-	void BitStream::write_copy(uint8_t *src, const std::size_t bitsize)
+	uint64_t BitStream::read(const uint8_t bits)
 	{
-		// Copy all whole bytes
-		const auto bytes = bitsize / 8;
-		auto written_bytes = 0;
-		while (written_bytes < bytes)
+		// Do we have these bits available to read?
+		if ((m_position + bits).as_bits() > m_buffer_size * 8)
 		{
-			write<uint8_t>(src[written_bytes]);
-			written_bytes++;
+			std::ostringstream oss;
+			oss << "Not enough data in buffer to read "
+				<< static_cast<uint16_t>(bits) << "bits.";
+			throw runtime_error(oss.str());
 		}
 
-		// Copy left over bits
-		const auto bits = bitsize % 8;
-		if (bits > 0)
-			write<uint8_t>(src[bytes + 1], bits);
+		// Iterate until we've read all of the bits
+		uint64_t value = 0;
+		auto unread_bits = bits;
+		while (unread_bits > 0)
+		{
+			// Calculate how many bits to read from the current byte based on how many bits 
+			// are left and how many bits we still need to read
+			const uint8_t bits_available = (8 - m_position.get_bit());
+			const auto bit_count = unread_bits < bits_available ? unread_bits : bits_available;
+
+			// Find the bit-mask based on how many bits are being read
+			const uint8_t bit_mask = (1 << bit_count) - 1 << m_position.get_bit();
+
+			// Read the bits from the current byte and position them on the least-signficant bit
+			const uint8_t bits_value = (m_buffer[m_position.get_byte()] & bit_mask) >> m_position.get_bit();
+
+			// Position the value of the bits we just read based on how many bits of the value 
+			// we've already read
+			const uint8_t read_bits = bits - unread_bits;
+			value |= static_cast<uint64_t>(bits_value) << read_bits;
+
+			// Remove the bits we just read from the count of unread bits
+			unread_bits -= bit_count;
+
+			// Move forward the number of bits we just read
+			seek(tell() + bit_count);
+		}
+
+		return value;
 	}
 
-	void BitStream::read_copy(uint8_t *dst, const std::size_t bitsize)
+	void BitStream::write(const uint64_t value, const uint8_t bits)
 	{
-		// Copy all whole bytes
-		const auto bytes = bitsize / 8;
-		auto read_bytes = 0;
-		while (read_bytes < bytes)
+		// Iterate until we've written all of the bits
+		auto unwritten_bits = bits;
+		while (unwritten_bits > 0)
 		{
-			dst[read_bytes] = read<uint8_t>();
-			read_bytes++;
-		}
+			// Calculate how many bits to write based on how many bits are left in the current byte
+			// and how many bits from the value we still need to write
+			const uint8_t bits_available = (8 - m_position.get_bit());
+			const auto bit_count = unwritten_bits < bits_available ? unwritten_bits : bits_available;
 
-		// Copy left over bits
-		const auto bits = bitsize % 8;
-		if (bits > 0)
-			dst[bytes + 1] = read<uint8_t>(bits);
+			// Find the bit-mask based on how many bits are being written, and how many bits we've
+			// already written
+			const uint8_t written_bits = bits - unwritten_bits;
+			const auto bit_mask = static_cast<uint64_t>((1 << bit_count) - 1) << written_bits;
+
+			// Get the bits from the value and position them at the current bit position
+			uint8_t value_byte = ((value & bit_mask) >> written_bits) & 0xFF;
+			value_byte <<= m_position.get_bit();
+
+			// Write the bits into the byte we're currently at
+			m_buffer[m_position.get_byte()] |= value_byte;
+			unwritten_bits -= bit_count;
+
+			// Move forward the number of bits we just wrote
+			seek(tell() + bit_count);
+		}
 	}
 
 	void BitStream::expand_buffer()
@@ -216,7 +286,7 @@ namespace ki
 
 		// Has the buffer reached maximum size?
 		if (new_size == m_buffer_size)
-			throw std::runtime_error("Buffer cannot be expanded as it has reached maximum size.");
+			throw runtime_error("Buffer cannot be expanded as it has reached maximum size.");
 
 		// Allocate a new buffer, copy everything over, and then delete the old buffer
 		auto *new_buffer = new uint8_t[new_size] { 0 };
@@ -230,7 +300,7 @@ namespace ki
 	{
 		// Make sure we haven't underflowed
 		if (m_position.get_byte() < 0)
-			throw std::runtime_error("Position of buffer is less than 0!");
+			throw runtime_error("Position of buffer is less than 0!");
 
 		// Expand the buffer if we've overflowed
 		if (m_position.get_byte() >= m_buffer_size)

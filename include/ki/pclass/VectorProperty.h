@@ -40,14 +40,14 @@ namespace pclass
 			return false;
 		}
 
-		void write_value_to(BitStream &stream, const int index) const override
+		void write_value_to(BitStreamBase &stream, const int index) const override
 		{
 			if (index < 0 || index >= this->size())
 				throw runtime_error("Index out of bounds.");
 			this->get_type().write_to(stream, this->at(index));
 		}
 
-		void read_value_from(BitStream &stream, const int index) override
+		void read_value_from(BitStreamBase &stream, const int index) override
 		{
 			if (index < 0 || index >= this->size())
 				throw runtime_error("Index out of bounds.");
@@ -73,14 +73,14 @@ namespace pclass
 			return true;
 		}
 
-		void write_value_to(BitStream &stream, const int index) const override
+		void write_value_to(BitStreamBase &stream, const int index) const override
 		{
 			if (index < 0 || index >= this->size())
 				throw runtime_error("Index out of bounds.");
 			this->get_type().write_to(stream, *this->at(index));
 		}
 
-		void read_value_from(BitStream &stream, const int index) override
+		void read_value_from(BitStreamBase &stream, const int index) override
 		{
 			if (index < 0 || index >= this->size())
 				throw runtime_error("Index out of bounds.");
