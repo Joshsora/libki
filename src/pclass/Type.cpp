@@ -1,4 +1,5 @@
 #include "ki/pclass/types/Type.h"
+#include "ki/pclass/types/ClassType.h"
 #include "ki/pclass/TypeSystem.h"
 #include "ki/util/exception.h"
 #include <stdexcept>
@@ -64,6 +65,35 @@ namespace pclass
 		m_hash = m_type_system
 			.get_hash_calculator()
 			.calculate_type_hash(m_name);
+	}
+
+	void assert_type_match(
+		const Type &expected,
+		const Type &actual,
+		const bool allow_inheritance
+	)
+	{
+		// Do the types match via inheritance?
+		if (allow_inheritance &&
+			expected.get_kind() == Type::kind::CLASS)
+		{
+			const auto &actual_class = dynamic_cast<const ClassTypeBase &>(actual);
+			if (actual_class.inherits(expected))
+				return;
+		}
+
+		// Do the types match exactly?
+		if (&expected == &actual)
+			return;
+
+		// The types do not match
+		std::ostringstream oss;
+		oss << "Type mismatch. ("
+			<< "expected=" << expected.get_name() << ", "
+			<< "actual=" << actual.get_name() << ", "
+			<< "allow_inheritance=" << allow_inheritance
+			<< ")";
+		throw runtime_error(oss.str());
 	}
 }
 }

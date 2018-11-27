@@ -10,6 +10,7 @@ namespace pclass
 	PropertyBase::PropertyBase(PropertyClass &object,
 		const std::string &name, const Type &type)
 	{
+		m_instance = &object;
 		m_name = name;
 		m_name_hash = type
 			.get_type_system()
@@ -25,6 +26,7 @@ namespace pclass
 	PropertyBase::PropertyBase(PropertyClass &object, 
 		const PropertyBase &that)
 	{
+		m_instance = &object;
 		m_name = that.m_name;
 		m_name_hash = that.m_name_hash;
 		m_full_hash = that.m_full_hash;
@@ -32,6 +34,11 @@ namespace pclass
 
 		// Add this property to the object's property list
 		object.add_property(*this);
+	}
+
+	const PropertyClass &PropertyBase::get_instance() const
+	{
+		return *m_instance;
 	}
 
 	std::string PropertyBase::get_name() const

@@ -71,5 +71,17 @@ namespace pclass
 	typedef std::vector<Type *> TypeList;
 	typedef std::map<std::string, Type *> TypeNameMap;
 	typedef std::map<hash_t, Type *> TypeHashMap;
+
+	/**
+	 * @param[in] expected The Type that is expected to match with the actual Type.
+	 * @param[in] actual The Type that is being checked for a match with the expected Type.
+	 * @param[in] allow_inheritance If false, then the expected and actual types must match exactly.
+	 * @throws ki::runtime_error If the expected and actual types do not match.
+	 */
+	void assert_type_match(
+		const Type &expected,
+		const Type &actual,
+		bool allow_inheritance = false
+	);
 }
 }

@@ -404,21 +404,6 @@ namespace serialization
 						// Read the object as a nested object
 						pclass::PropertyClass *object = nullptr;
 						load_object(object, stream);
-						if (object)
-						{
-							// Does the nested object inherit from the property's type?
-							const auto &object_type =
-								dynamic_cast<const pclass::ClassTypeBase &>(
-									object->get_type()
-									);
-							if (!object_type.inherits(dynamic_property.get_type()))
-							{
-								std::ostringstream oss;
-								oss << "Type '" << object_type.get_name() << "' does not derive from "
-									<< "property type '" << prop.get_type().get_name() << "'.";
-								throw runtime_error(oss.str());
-							}
-						}
 						dynamic_property.set_object(object, i);
 					}
 					else
@@ -438,21 +423,6 @@ namespace serialization
 				// Read the object as a nested object
 				pclass::PropertyClass *object = nullptr;
 				load_object(object, stream);
-				if (object)
-				{
-					// Does the nested object inherit from the property's type?
-					const auto &object_type =
-						dynamic_cast<const pclass::ClassTypeBase &>(
-							object->get_type()
-						);
-					if (!object_type.inherits(prop.get_type()))
-					{
-						std::ostringstream oss;
-						oss << "Type '" << object_type.get_name() << "' does not derive from "
-							<< "property type '" << prop.get_type().get_name() << "'.";
-						throw runtime_error(oss.str());
-					}
-				}
 				prop.set_object(object);
 			}
 			else

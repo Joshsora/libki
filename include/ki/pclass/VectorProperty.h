@@ -13,7 +13,8 @@ namespace pclass
 
 	/// @cond DOXYGEN_SKIP
 	/**
-	 *
+	 * A helper utility that provides the right implementation of copy(),
+	 * get_object() and set_object(), based on characteristics of type: ValueT.
 	 */
 	template <
 		typename ValueT,
@@ -24,6 +25,12 @@ namespace pclass
 	{
 		static ValueT copy(VectorProperty<ValueT> &prop, const int index)
 		{
+			// Ensure index is within bounds
+			if (index < 0 || index >= prop.size())
+				throw runtime_error("Index out of bounds.");
+
+			// In cases where ValueT is not a pointer, and does not derive from PropertyClass,
+			// just call the copy constructor.
 			return ValueT(prop.at(index));
 		}
 
@@ -65,6 +72,12 @@ namespace pclass
 	{
 		static ValueT copy(VectorProperty<ValueT> &prop, const int index)
 		{
+			// Ensure index is within bounds
+			if (index < 0 || index >= prop.size())
+				throw runtime_error("Index out of bounds.");
+
+			// The copy constructor for all pointers is to copy the pointer
+			// without creating a new copy of the object it's pointing to.
 			return prop.at(index);
 		}
 
@@ -94,47 +107,6 @@ namespace pclass
 	struct vector_value_object_helper<
 		ValueT,
 		typename std::enable_if<
-			!std::is_pointer<ValueT>::value
-		>::type,
-		typename std::enable_if<
-			std::is_base_of<
-				PropertyClass,
-				typename std::remove_pointer<ValueT>::type
-			>::value
-		>::type
-	>
-	{
-		static ValueT copy(VectorProperty<ValueT> &prop, const int index)
-		{
-			ValueT *value_ptr = dynamic_cast<ValueT *>(prop.at(index).copy());
-			ValueT value = *value_ptr;
-			delete value_ptr;
-			return value;
-		}
-
-		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
-		{
-			if (index < 0 || index >= prop.size())
-				throw runtime_error("Index out of bounds.");
-			return dynamic_cast<PropertyClass *>(&prop.at(index));
-		}
-
-		static void set_object(VectorProperty<ValueT> &prop, PropertyClass *object, const int index)
-		{
-			if (index < 0 || index >= prop.size())
-				throw runtime_error("Index out of bounds.");
-			prop.at(index) = dynamic_cast<ValueT>(*object);
-			delete object;
-		}
-	};
-
-	/**
-	 *
-	 */
-	template <typename ValueT>
-	struct vector_value_object_helper<
-		ValueT,
-		typename std::enable_if<
 			std::is_pointer<ValueT>::value
 		>::type,
 		typename std::enable_if<
@@ -147,21 +119,97 @@ namespace pclass
 	{
 		static ValueT copy(VectorProperty<ValueT> &prop, const int index)
 		{
+			// The copy constructor for all pointers is to copy the pointer
+			// without creating a new copy of the object it's pointing to.
 			return prop.at(index);
 		}
 
 		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
 		{
+			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
+
+			// ValueT does derive from PropertyClass, and we have a pointer to an instance
+			// of ValueT, so we can cast down to a PropertyClass pointer.
 			return dynamic_cast<PropertyClass *>(prop.at(index));
 		}
 
 		static void set_object(VectorProperty<ValueT> &prop, PropertyClass *object, const int index)
 		{
+			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
+
+			// Ensure that object inherits the type of the property
+			if (object)
+				assert_type_match(prop.get_type(), object->get_type(), true);
+
+			// ValueT does derive from PropertyClass, and we have a pointer to an instance
+			// of PropertyClass, so cast the pointer up to a ValueT.
 			prop.at(index) = dynamic_cast<ValueT>(object);
+		}
+	};
+
+	/**
+	 *
+	 */
+	template <typename ValueT>
+	struct vector_value_object_helper<
+		ValueT,
+		typename std::enable_if<
+			!std::is_pointer<ValueT>::value
+		>::type,
+		typename std::enable_if<
+			std::is_base_of<
+				PropertyClass,
+				typename std::remove_pointer<ValueT>::type
+			>::value
+		>::type
+	>
+	{
+		static ValueT copy(VectorProperty<ValueT> &prop, const int index)
+		{
+			// Ensure index is within bounds
+			if (index < 0 || index >= prop.size())
+				throw runtime_error("Index out of bounds.");
+
+			// Derivitives of PropertyClass implement a clone method that returns
+			// a pointer to a copy.
+			ValueT *value_ptr = dynamic_cast<ValueT *>(prop.at(index).copy());
+			ValueT value = *value_ptr;
+			delete value_ptr;
+			return value;
+		}
+
+		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
+		{
+			// Ensure index is within bounds
+			if (index < 0 || index >= prop.size())
+				throw runtime_error("Index out of bounds.");
+
+			// ValueT does derive from PropertyClass, and we have an instance of ValueT,
+			// so we can cast down to a PropertyClass pointer.
+			return dynamic_cast<PropertyClass *>(&prop.at(index));
+		}
+
+		static void set_object(VectorProperty<ValueT> &prop, PropertyClass *object, const int index)
+		{
+			// Ensure index is within bounds
+			if (index < 0 || index >= prop.size())
+				throw runtime_error("Index out of bounds.");
+
+			// Ensure that object is not nullptr
+			if (!object)
+				throw runtime_error("Value cannot be null.");
+
+			// Ensure that object is exactly the type of the property
+			assert_type_match(prop.get_type(), object->get_type());
+
+			// ValueT does derive from PropertyClass, but we don't store a pointer,
+			// so we need to copy the value in.
+			prop.at(index) = dynamic_cast<ValueT>(*object);
+			delete object;
 		}
 	};
 
@@ -176,6 +224,7 @@ namespace pclass
 	{
 		static void write_value_to(const VectorProperty<ValueT> &prop, BitStream &stream, const int index)
 		{
+			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
 			prop.get_type().write_to(stream, prop.at(index));
@@ -183,6 +232,7 @@ namespace pclass
 
 		static void read_value_from(VectorProperty<ValueT> &prop, BitStream &stream, const int index)
 		{
+			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
 			prop.get_type().read_from(stream, Value(prop.at(index)));
@@ -200,15 +250,19 @@ namespace pclass
 	{
 		static void write_value_to(const VectorProperty<ValueT> &prop, BitStream &stream, const int index)
 		{
+			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
+			
 			prop.get_type().write_to(stream, *prop.at(index));
 		}
 
 		static void read_value_from(VectorProperty<ValueT> &prop, BitStream &stream, const int index)
 		{
+			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
+
 			prop.get_type().read_from(stream, Value(*prop.at(index)));
 		}
 	};

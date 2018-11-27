@@ -12,8 +12,8 @@ namespace pclass
 
 	/// @cond DOXYGEN_SKIP
 	/**
-	 * A helper utility that provides the right implementation of construct()
-	 * and get_object() based on characteristics of type: ValueT.
+	 * A helper utility that provides the right implementation of construct(),
+	 * copy(), get_object() and set_object(), based on characteristics of type: ValueT.
 	 */
 	template <
 		typename ValueT,
@@ -61,8 +61,9 @@ namespace pclass
 	 * - does not derive from PropertyClass
 	 * 
 	 * This should:
-	 * - Construct to a nullptr; and
-	 * - Throw an exception when get_object() is called.
+	 * - Construct to a nullptr;
+	 * - Copy construct to the same pointer as the original; and
+	 * - Throw an exception when get_object() or set_object() is called.
 	 */
 	template <typename ValueT>
 	struct value_object_helper<
@@ -87,7 +88,7 @@ namespace pclass
 		static ValueT copy(const StaticProperty<ValueT> &prop)
 		{
 			// The copy constructor for all pointers is to copy the pointer
-			// without creating a new copy of the object it's pointing too.
+			// without creating a new copy of the object it's pointing to.
 			return prop.m_value;
 		}
 
@@ -116,9 +117,12 @@ namespace pclass
 	 * - does derive from PropertyClass
 	 * 
 	 * This should:
-	 * - Construct to a nullptr; and
+	 * - Construct to a nullptr;
+	 * - Copy construct to the same pointer as the original;
 	 * - Return a pointer to a ValueT instance (as a PropertyClass *)
-	 *   when get_object() is called.
+	 *   when get_object() is called; and
+	 * - Throw an exception when the object supplied to set_object()
+	 *   does not inherit from the property's type, but set m_value otherwise.
 	 */
 	template <typename ValueT>
 	struct value_object_helper<
@@ -143,7 +147,7 @@ namespace pclass
 		static ValueT copy(const StaticProperty<ValueT> &prop)
 		{
 			// The copy constructor for all pointers is to copy the pointer
-			// without creating a new copy of the object it's pointing too.
+			// without creating a new copy of the object it's pointing to.
 			return prop.m_value;
 		}
 
@@ -156,6 +160,10 @@ namespace pclass
 
 		static void set_object(StaticProperty<ValueT> &prop, PropertyClass *object)
 		{
+			// Ensure that object inherits the type of the property
+			if (object)
+				assert_type_match(prop.get_type(), object->get_type(), true);
+
 			// ValueT does derive from PropertyClass, and we have a pointer to an instance
 			// of PropertyClass, so cast the pointer up to a ValueT.
 			prop.m_value = dynamic_cast<ValueT>(object);
@@ -198,7 +206,7 @@ namespace pclass
 		static ValueT copy(const StaticProperty<ValueT> &prop)
 		{
 			// Derivitives of PropertyClass implement a clone method that returns
-			// a clone as a pointer.
+			// a pointer to a copy.
 			ValueT *value_ptr = dynamic_cast<ValueT *>(prop.m_value.clone());
 			ValueT value = *value_ptr;
 			delete value_ptr;
@@ -214,9 +222,17 @@ namespace pclass
 
 		static void set_object(StaticProperty<ValueT> &prop, PropertyClass *object)
 		{
+			// Ensure that object is not nullptr
+			if (!object)
+				throw runtime_error("Value cannot be null.");
+
+			// Ensure that object is exactly the type of the property.
+			assert_type_match(prop.get_type(), object->get_type());
+
 			// ValueT does derive from PropertyClass, but we don't store a pointer,
 			// so we need to copy the value in.
 			prop.m_value = *object;
+			delete object;
 		}
 	};
 	

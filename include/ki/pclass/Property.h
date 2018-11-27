@@ -24,6 +24,7 @@ namespace pclass
 		PropertyBase(PropertyClass &object,
 			const PropertyBase &that);
 
+		const PropertyClass &get_instance() const;
 		std::string get_name() const;
 		hash_t get_name_hash() const;
 		hash_t get_full_hash() const;
@@ -40,6 +41,7 @@ namespace pclass
 		virtual void read_value_from(BitStream &stream) = 0;
 
 	private:
+		const PropertyClass *m_instance;
 		std::string m_name;
 		hash_t m_name_hash;
 		hash_t m_full_hash;
