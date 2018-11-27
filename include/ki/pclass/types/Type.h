@@ -50,8 +50,8 @@ namespace pclass
 		const TypeSystem &get_type_system() const;
 
 		virtual PropertyClass *instantiate() const;
-		virtual void write_to(BitStreamBase &stream, const Value &value) const;
-		virtual void read_from(BitStreamBase &stream, Value &value) const;
+		virtual void write_to(BitStream &stream, const Value &value) const;
+		virtual void read_from(BitStream &stream, Value &value) const;
 
 	protected:
 		kind m_kind;

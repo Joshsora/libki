@@ -12,7 +12,7 @@ namespace pclass
 		typename std::enable_if<is_integral<ValueT>::value>::type
 	>
 	{
-		static void write_to(BitStreamBase &stream, const ValueT &value)
+		static void write_to(BitStream &stream, const ValueT &value)
 		{
 			stream.write<ValueT>(value);
 		}
@@ -24,7 +24,7 @@ namespace pclass
 		typename std::enable_if<is_integral<ValueT>::value>::type
 	>
 	{
-		static void read_from(BitStreamBase &stream, ValueT &value)
+		static void read_from(BitStream &stream, ValueT &value)
 		{
 			value = stream.read<ValueT>();
 		}

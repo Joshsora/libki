@@ -11,7 +11,7 @@ namespace pclass
 	template <typename ValueT, typename Enable = void>
 	struct PrimitiveTypeWriter
 	{
-		static void write_to(BitStreamBase &stream, const ValueT &value)
+		static void write_to(BitStream &stream, const ValueT &value)
 		{
 			// Provide a compiler error if this is not specialized
 			static_assert(
@@ -27,7 +27,7 @@ namespace pclass
 	template <typename ValueT, typename Enable = void>
 	struct PrimitiveTypeReader
 	{
-		static void read_from(BitStreamBase &stream, ValueT &value)
+		static void read_from(BitStream &stream, ValueT &value)
 		{
 			// Provide a compiler error if this is not specialized
 			static_assert(
@@ -50,14 +50,14 @@ namespace pclass
 			m_kind = kind::PRIMITIVE;
 		}
 
-		void write_to(BitStreamBase &stream, const Value &value) const override
+		void write_to(BitStream &stream, const Value &value) const override
 		{
 			if (!value.is<ValueT>())
 				throw std::runtime_error("Invalid call to Type::write_to -- value type does not match ValueT.");
 			PrimitiveTypeWriter<ValueT>::write_to(stream, value.get<ValueT>());
 		}
 
-		void read_from(BitStreamBase &stream, Value &value) const override
+		void read_from(BitStream &stream, Value &value) const override
 		{
 			if (!value.is<ValueT>())
 				throw std::runtime_error("Invalid call to Type::read_from -- value type does not match ValueT.");

@@ -1,5 +1,6 @@
 #include "ki/pclass/types/ClassType.h"
 #include "ki/pclass/TypeSystem.h"
+#include "ki/util/exception.h"
 
 namespace ki
 {
@@ -23,6 +24,8 @@ namespace pclass
 			if (!m_base_class)
 				throw runtime_error("base_class must inherit ClassTypeBase!");
 		}
+		else
+			m_base_class = nullptr;
 	}
 
 	bool ClassTypeBase::inherits(const Type &type) const

@@ -19,7 +19,19 @@ namespace pclass
 		m_type = &type;
 
 		// Add this property to the object's property list
-		object.get_properties().add_property(this);
+		object.add_property(*this);
+	}
+
+	PropertyBase::PropertyBase(PropertyClass &object, 
+		const PropertyBase &that)
+	{
+		m_name = that.m_name;
+		m_name_hash = that.m_name_hash;
+		m_full_hash = that.m_full_hash;
+		m_type = that.m_type;
+
+		// Add this property to the object's property list
+		object.add_property(*this);
 	}
 
 	std::string PropertyBase::get_name() const
@@ -54,7 +66,13 @@ namespace pclass
 
 	DynamicPropertyBase::DynamicPropertyBase(PropertyClass &object,
 		const std::string& name, const Type& type)
-		: PropertyBase(object, name, type) { }
+		: PropertyBase(object, name, type)
+	{}
+
+	DynamicPropertyBase::DynamicPropertyBase(PropertyClass &object,
+		const DynamicPropertyBase &that)
+		: PropertyBase(object, that)
+	{}
 
 	bool DynamicPropertyBase::is_dynamic() const
 	{
@@ -73,13 +91,19 @@ namespace pclass
 		throw runtime_error("Called get_object() on a dynamic property. Use get_object(index) instead.");
 	}
 
-	void DynamicPropertyBase::write_value_to(BitStreamBase &stream) const
+	void DynamicPropertyBase::set_object(PropertyClass *object)
+	{
+		// The caller must specify an index
+		throw runtime_error("Called set_object() on a dynamic property. Use set_object(index) instead.");
+	}
+
+	void DynamicPropertyBase::write_value_to(BitStream &stream) const
 	{
 		// The caller must specify an index
 		throw runtime_error("Called write_value_to() on a dynamic property. Use write_value_to(index) instead.");
 	}
 
-	void DynamicPropertyBase::read_value_from(BitStreamBase &stream)
+	void DynamicPropertyBase::read_value_from(BitStream &stream)
 	{
 		// The caller must specify an index
 		throw runtime_error("Called read_value_from() on a dynamic property. Use read_value_from(index) instead.");

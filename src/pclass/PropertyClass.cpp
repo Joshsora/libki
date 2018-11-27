@@ -7,13 +7,19 @@ namespace pclass
 	PropertyClass::PropertyClass(const Type &type, const TypeSystem &type_system)
 	{
 		m_type = &type;
-		m_properties = new PropertyList();
 	}
 
-	PropertyClass::~PropertyClass()
+	PropertyClass::PropertyClass(const PropertyClass &that)
 	{
-		// Delete the list of properties
-		delete m_properties;
+		m_type = that.m_type;
+		m_properties = PropertyList();
+	}
+
+	PropertyClass &PropertyClass::operator=(const PropertyClass &that)
+	{
+		m_type = that.m_type;
+		m_properties = PropertyList();
+		return *this;
 	}
 
 	const Type& PropertyClass::get_type() const
@@ -23,12 +29,22 @@ namespace pclass
 
 	PropertyList &PropertyClass::get_properties()
 	{
-		return *m_properties;
+		return m_properties;
 	}
 
 	const PropertyList& PropertyClass::get_properties() const
 	{
-		return *m_properties;
+		return m_properties;
+	}
+
+	PropertyClass *PropertyClass::copy() const
+	{
+		return new PropertyClass(*this);
+	}
+
+	void PropertyClass::add_property(PropertyBase &prop)
+	{
+		m_properties.add_property(prop);
 	}
 }
 }

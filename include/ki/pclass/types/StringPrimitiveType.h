@@ -16,7 +16,7 @@ namespace pclass
 		using type = std::basic_string<_Elem, _Traits, _Alloc>;
 
 	public:
-		static void write_to(BitStreamBase &stream, const type &value)
+		static void write_to(BitStream &stream, const type &value)
 		{
 			// Write the length as an unsigned short
 			stream.write<uint16_t>(value.length());
@@ -38,7 +38,7 @@ namespace pclass
 		using type = std::basic_string<_Elem, _Traits, _Alloc>;
 
 	public:
-		static void read_from(BitStreamBase &stream, type &value)
+		static void read_from(BitStream &stream, type &value)
 		{
 			// Read the length and create a new string with the correct capacity
 			auto length = stream.read<uint16_t>();

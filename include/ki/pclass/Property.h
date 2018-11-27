@@ -13,9 +13,16 @@ namespace pclass
 	class PropertyBase
 	{
 	public:
+		// Do not allow copy assignment. Once a property has been constructed,
+		// it shouldn't be able to change.
+		PropertyBase & operator=(const PropertyBase &that) = delete;
+
 		PropertyBase(PropertyClass &object,
 			const std::string &name, const Type &type);
-		virtual ~PropertyBase() { }
+		virtual ~PropertyBase() {}
+
+		PropertyBase(PropertyClass &object,
+			const PropertyBase &that);
 
 		std::string get_name() const;
 		hash_t get_name_hash() const;
@@ -27,9 +34,10 @@ namespace pclass
 
 		virtual Value get_value() const = 0;
 		virtual const PropertyClass *get_object() const = 0;
+		virtual void set_object(PropertyClass *object) = 0;
 
-		virtual void write_value_to(BitStreamBase &stream) const = 0;
-		virtual void read_value_from(BitStreamBase &stream) = 0;
+		virtual void write_value_to(BitStream &stream) const = 0;
+		virtual void read_value_from(BitStream &stream) = 0;
 
 	private:
 		std::string m_name;
@@ -44,22 +52,32 @@ namespace pclass
 	class DynamicPropertyBase : public PropertyBase
 	{
 	public:
+		// Do not allow copy assignment. Once a property has been constructed,
+		// it shouldn't be able to change.
+		DynamicPropertyBase & operator=(const DynamicPropertyBase &that) = delete;
+
 		DynamicPropertyBase(PropertyClass &object,
 			const std::string &name, const Type &type);
 		virtual ~DynamicPropertyBase() {}
 
+		DynamicPropertyBase(PropertyClass &object,
+			const DynamicPropertyBase &that);
+
 		bool is_dynamic() const override;
 		virtual std::size_t get_element_count() const = 0;
+		virtual void set_element_count(std::size_t size) = 0;
 
 		Value get_value() const final override;
 		const PropertyClass *get_object() const final override;
-		void write_value_to(BitStreamBase &stream) const final override;
-		void read_value_from(BitStreamBase &stream) final override;
+		void set_object(PropertyClass *object) final override;
+		void write_value_to(BitStream &stream) const final override;
+		void read_value_from(BitStream &stream) final override;
 
 		virtual Value get_value(int index) const = 0;
 		virtual const PropertyClass *get_object(int index) const = 0;
-		virtual void write_value_to(BitStreamBase &stream, int index) const = 0;
-		virtual void read_value_from(BitStreamBase &stream, int index) = 0;
+		virtual void set_object(PropertyClass *object, int index) = 0;
+		virtual void write_value_to(BitStream &stream, int index) const = 0;
+		virtual void read_value_from(BitStream &stream, int index) = 0;
 	};
 }
 }
