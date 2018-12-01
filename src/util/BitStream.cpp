@@ -6,39 +6,39 @@
 
 namespace ki
 {
-	BitBufferBase::buffer_pos::buffer_pos(const uint32_t byte, const int bit)
+	IBitBuffer::buffer_pos::buffer_pos(const uint32_t byte, const int bit)
 	{
 		m_byte = byte;
 		set_bit(bit);
 	}
 
-	BitBufferBase::buffer_pos::buffer_pos(const buffer_pos& cp)
+	IBitBuffer::buffer_pos::buffer_pos(const buffer_pos& cp)
 	{
 		m_byte = cp.m_byte;
 		set_bit(cp.m_bit);
 	}
 
-	uint32_t BitBufferBase::buffer_pos::as_bytes() const
+	uint32_t IBitBuffer::buffer_pos::as_bytes() const
 	{
 		return m_byte + (m_bit > 0 ? 1 : 0);
 	}
 
-	uint32_t BitBufferBase::buffer_pos::as_bits() const
+	uint32_t IBitBuffer::buffer_pos::as_bits() const
 	{
 		return (m_byte * 8) + m_bit;
 	}
 
-	uint32_t BitBufferBase::buffer_pos::get_byte() const
+	uint32_t IBitBuffer::buffer_pos::get_byte() const
 	{
 		return m_byte;
 	}
 
-	uint8_t BitBufferBase::buffer_pos::get_bit() const
+	uint8_t IBitBuffer::buffer_pos::get_bit() const
 	{
 		return m_bit;
 	}
 
-	void BitBufferBase::buffer_pos::set_bit(int bit)
+	void IBitBuffer::buffer_pos::set_bit(int bit)
 	{
 		if (bit < 0)
 		{
@@ -55,7 +55,7 @@ namespace ki
 			m_bit = bit;
 	}
 
-	BitBufferBase::buffer_pos BitBufferBase::buffer_pos::operator+(
+	IBitBuffer::buffer_pos IBitBuffer::buffer_pos::operator+(
 		const buffer_pos &rhs) const
 	{
 		return buffer_pos(
@@ -63,7 +63,7 @@ namespace ki
 		);
 	}
 
-	BitBufferBase::buffer_pos BitBufferBase::buffer_pos::operator-(
+	IBitBuffer::buffer_pos IBitBuffer::buffer_pos::operator-(
 		const buffer_pos &rhs) const
 	{
 		return buffer_pos(
@@ -71,7 +71,7 @@ namespace ki
 		);
 	}
 
-	BitBufferBase::buffer_pos BitBufferBase::buffer_pos::operator+(
+	IBitBuffer::buffer_pos IBitBuffer::buffer_pos::operator+(
 		const int& rhs) const
 	{
 		return buffer_pos(
@@ -79,7 +79,7 @@ namespace ki
 		);
 	}
 
-	BitBufferBase::buffer_pos BitBufferBase::buffer_pos::operator-(
+	IBitBuffer::buffer_pos IBitBuffer::buffer_pos::operator-(
 		const int& rhs) const
 	{
 		return buffer_pos(
@@ -87,7 +87,7 @@ namespace ki
 		);
 	}
 
-	BitBufferBase::buffer_pos& BitBufferBase::buffer_pos::operator+=(
+	IBitBuffer::buffer_pos& IBitBuffer::buffer_pos::operator+=(
 		const buffer_pos rhs)
 	{
 		m_byte += rhs.m_byte;
@@ -95,7 +95,7 @@ namespace ki
 		return *this;
 	}
 
-	BitBufferBase::buffer_pos& BitBufferBase::buffer_pos::operator-=(
+	IBitBuffer::buffer_pos& IBitBuffer::buffer_pos::operator-=(
 		const buffer_pos rhs)
 	{
 		m_byte -= rhs.m_byte;
@@ -103,51 +103,51 @@ namespace ki
 		return *this;
 	}
 
-	BitBufferBase::buffer_pos& BitBufferBase::buffer_pos::operator+=(const int bits)
+	IBitBuffer::buffer_pos& IBitBuffer::buffer_pos::operator+=(const int bits)
 	{
 		set_bit(m_bit + bits);
 		return *this;
 	}
 
-	BitBufferBase::buffer_pos& BitBufferBase::buffer_pos::operator-=(const int bits)
+	IBitBuffer::buffer_pos& IBitBuffer::buffer_pos::operator-=(const int bits)
 	{
 		set_bit(m_bit - bits);
 		return *this;
 	}
 
-	BitBufferBase::buffer_pos& BitBufferBase::buffer_pos::operator++()
+	IBitBuffer::buffer_pos& IBitBuffer::buffer_pos::operator++()
 	{
 		set_bit(m_bit + 1);
 		return *this;
 	}
 
-	BitBufferBase::buffer_pos& BitBufferBase::buffer_pos::operator--()
+	IBitBuffer::buffer_pos& IBitBuffer::buffer_pos::operator--()
 	{
 		set_bit(m_bit - 1);
 		return *this;
 	}
 
-	BitBufferBase::buffer_pos BitBufferBase::buffer_pos::operator++(int increment)
+	IBitBuffer::buffer_pos IBitBuffer::buffer_pos::operator++(int increment)
 	{
 		auto copy(*this);
 		++(*this);
 		return copy;
 	}
 
-	BitBufferBase::buffer_pos BitBufferBase::buffer_pos::operator--(int increment)
+	IBitBuffer::buffer_pos IBitBuffer::buffer_pos::operator--(int increment)
 	{
 		auto copy(*this);
 		--(*this);
 		return copy;
 	}
 
-	BitBufferSegment *BitBufferBase::segment(
+	BitBufferSegment *IBitBuffer::segment(
 		const buffer_pos from, const std::size_t bitsize)
 	{
 		return new BitBufferSegment(*this, from, bitsize);
 	}
 
-	void BitBufferBase::write_copy(uint8_t *src,
+	void IBitBuffer::write_copy(uint8_t *src,
 		buffer_pos position, const std::size_t bitsize)
 	{
 		auto bits_left = bitsize;
@@ -160,7 +160,7 @@ namespace ki
 		}
 	}
 
-	void BitBufferBase::read_copy(uint8_t *dst,
+	void IBitBuffer::read_copy(uint8_t *dst,
 		buffer_pos position, const std::size_t bitsize) const
 	{
 		auto bits_left = bitsize;
@@ -242,7 +242,8 @@ namespace ki
 			const uint8_t bit_mask = (1 << bit_count) - 1 << position.get_bit();
 
 			// Read the bits from the current byte and position them on the least-signficant bit
-			const uint8_t bits_value = (m_buffer[position.get_byte()] & bit_mask) >> position.get_bit();
+			const auto &buffer_value = m_buffer[position.get_byte()];
+			const uint8_t bits_value = (buffer_value & bit_mask) >> position.get_bit();
 
 			// Position the value of the bits we just read based on how many bits of the value 
 			// we've already read
@@ -274,14 +275,17 @@ namespace ki
 			// Find the bit-mask based on how many bits are being written, and how many bits we've
 			// already written
 			const uint8_t written_bits = bits - unwritten_bits;
-			const auto bit_mask = static_cast<uint64_t>((1 << bit_count) - 1) << written_bits;
+			auto bit_mask_abs = static_cast<uint64_t>((1 << bit_count) - 1);
+			const auto bit_mask_rel = bit_mask_abs << written_bits;
 
 			// Get the bits from the value and position them at the current bit position
-			uint8_t value_byte = ((value & bit_mask) >> written_bits) & 0xFF;
+			uint8_t value_byte = ((value & bit_mask_rel) >> written_bits) & 0xFF;
 			value_byte <<= position.get_bit();
+			bit_mask_abs <<= position.get_bit();
 
 			// Write the bits into the byte we're currently at
-			m_buffer[position.get_byte()] |= value_byte;
+			auto &current_value = m_buffer[position.get_byte()];
+			current_value = current_value & (~bit_mask_abs & 0xFF) | value_byte;
 			unwritten_bits -= bit_count;
 
 			// Move forward the number of bits we just wrote
@@ -289,7 +293,7 @@ namespace ki
 		}
 	}
 
-	BitBufferSegment::BitBufferSegment(BitBufferBase& buffer,
+	BitBufferSegment::BitBufferSegment(IBitBuffer& buffer,
 		const buffer_pos from, const std::size_t bitsize)
 	{
 		m_buffer = &buffer;
@@ -343,7 +347,7 @@ namespace ki
 		m_buffer->write(value, m_from + position, bits);
 	}
 
-	BitStream::BitStream(BitBufferBase &buffer)
+	BitStream::BitStream(IBitBuffer &buffer)
 	{
 		m_buffer = &buffer;
 		m_position = stream_pos(0, 0);
@@ -367,7 +371,7 @@ namespace ki
 		return *this;
 	}
 
-	BitBufferBase::buffer_pos BitStream::tell() const
+	IBitBuffer::buffer_pos BitStream::tell() const
 	{
 		return m_position;
 	}
@@ -384,7 +388,7 @@ namespace ki
 		return m_buffer->size();
 	}
 
-	BitBufferBase &BitStream::buffer() const
+	IBitBuffer &BitStream::buffer() const
 	{
 		return *m_buffer;
 	}

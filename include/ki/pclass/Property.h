@@ -10,19 +10,19 @@ namespace pclass
 	/**
  	 * TODO: Documentation
 	 */
-	class PropertyBase
+	class IProperty
 	{
 	public:
 		// Do not allow copy assignment. Once a property has been constructed,
 		// it shouldn't be able to change.
-		PropertyBase & operator=(const PropertyBase &that) = delete;
+		virtual IProperty &operator=(const IProperty &that) = delete;
 
-		PropertyBase(PropertyClass &object,
+		IProperty(PropertyClass &object,
 			const std::string &name, const Type &type);
-		virtual ~PropertyBase() {}
+		virtual ~IProperty() {}
 
-		PropertyBase(PropertyClass &object,
-			const PropertyBase &that);
+		IProperty(PropertyClass &object,
+			const IProperty &that);
 
 		const PropertyClass &get_instance() const;
 		std::string get_name() const;
@@ -51,19 +51,19 @@ namespace pclass
 	/**
 	 * TODO: Documentation
 	 */
-	class DynamicPropertyBase : public PropertyBase
+	class IDynamicProperty : public IProperty
 	{
 	public:
 		// Do not allow copy assignment. Once a property has been constructed,
 		// it shouldn't be able to change.
-		DynamicPropertyBase & operator=(const DynamicPropertyBase &that) = delete;
+		IDynamicProperty & operator=(const IDynamicProperty &that) = delete;
 
-		DynamicPropertyBase(PropertyClass &object,
+		IDynamicProperty(PropertyClass &object,
 			const std::string &name, const Type &type);
-		virtual ~DynamicPropertyBase() {}
+		virtual ~IDynamicProperty() {}
 
-		DynamicPropertyBase(PropertyClass &object,
-			const DynamicPropertyBase &that);
+		IDynamicProperty(PropertyClass &object,
+			const IDynamicProperty &that);
 
 		bool is_dynamic() const override;
 		virtual std::size_t get_element_count() const = 0;

@@ -90,24 +90,7 @@ namespace pclass
 		// Make sure the hash calculator isn't null
 		if (m_hash_calculator == nullptr)
 			throw runtime_error("TypeSystem::get_hash_calculator() called but hash calculator is null.");
-
 		return *m_hash_calculator;
-	}
-
-	void TypeSystem::set_hash_calculator(HashCalculator* hash_calculator)
-	{
-		// Update the hash calculator
-		m_hash_calculator = hash_calculator;
-
-		// Iterate through all types and recalculate their hash
-		m_type_hash_lookup.clear();
-		for (auto it = m_types.begin(); it != m_types.end(); ++it)
-		{
-			// Add the new hash to lookup
-			auto *type = *it;
-			type->update_hash();
-			m_type_hash_lookup[type->get_hash()] = type;
-		}
 	}
 
 	bool TypeSystem::has_type(const std::string &name) const

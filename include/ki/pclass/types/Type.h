@@ -18,8 +18,6 @@ namespace pclass
 	 */
 	class Type
 	{
-		friend class TypeSystem;
-
 	public:
 		enum class kind
 		{
@@ -42,7 +40,7 @@ namespace pclass
 		};
 
 		Type(const std::string &name, const TypeSystem &type_system);
-		virtual ~Type() { }
+		virtual ~Type() {}
 
 		std::string get_name() const;
 		hash_t get_hash() const;
@@ -60,12 +58,6 @@ namespace pclass
 		std::string m_name;
 		hash_t m_hash;
 		const TypeSystem &m_type_system;
-
-		/**
-		 * Called by a TypeSystem instance when it's HashCalculator
-		 * is changed.
-		 */
-		virtual void update_hash();
 	};
 
 	typedef std::vector<Type *> TypeList;

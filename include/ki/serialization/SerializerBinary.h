@@ -41,7 +41,7 @@ namespace serialization
 		 * @param is_file Determines whether or not to write type sizes, and property headers.
 		 * @param flags Determines how serialized data is formatted.
 		 */
-		explicit SerializerBinary(const pclass::TypeSystem *type_system,
+		explicit SerializerBinary(const pclass::TypeSystem &type_system,
 			bool is_file, flags flags);
 		virtual ~SerializerBinary() {}
 
@@ -51,11 +51,11 @@ namespace serialization
 	protected:
 		virtual void presave_object(const pclass::PropertyClass *object, BitStream &stream) const;
 		void save_object(const pclass::PropertyClass *object, BitStream &stream) const;
-		void save_property(const pclass::PropertyBase &prop, BitStream &stream) const;
+		void save_property(const pclass::IProperty &prop, BitStream &stream) const;
 
 		virtual void preload_object(pclass::PropertyClass *&dest, BitStream &stream) const;
 		void load_object(pclass::PropertyClass *&dest, BitStream &stream) const;
-		void load_property(pclass::PropertyBase &prop, BitStream &stream) const;
+		void load_property(pclass::IProperty &prop, BitStream &stream) const;
 
 	private:
 		const pclass::TypeSystem *m_type_system;

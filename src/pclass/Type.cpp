@@ -60,13 +60,6 @@ namespace pclass
 		throw runtime_error(oss.str());
 	}
 
-	void Type::update_hash()
-	{
-		m_hash = m_type_system
-			.get_hash_calculator()
-			.calculate_type_hash(m_name);
-	}
-
 	void assert_type_match(
 		const Type &expected,
 		const Type &actual,
@@ -77,7 +70,7 @@ namespace pclass
 		if (allow_inheritance &&
 			expected.get_kind() == Type::kind::CLASS)
 		{
-			const auto &actual_class = dynamic_cast<const ClassTypeBase &>(actual);
+			const auto &actual_class = dynamic_cast<const IClassType &>(actual);
 			if (actual_class.inherits(expected))
 				return;
 		}

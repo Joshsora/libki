@@ -15,7 +15,7 @@ namespace ki
 	/**
 	 *
 	 */
-	class BitBufferBase
+	class IBitBuffer
 	{
 		friend BitBufferSegment;
 
@@ -53,7 +53,7 @@ namespace ki
 			void set_bit(int bit);
 		};
 
-		virtual ~BitBufferBase() {};
+		virtual ~IBitBuffer() {};
 
 		/**
 		 * @returns 
@@ -153,9 +153,9 @@ namespace ki
 	};
 
 	/**
-	 * 
+	 * TODO: Documentation
 	 */
-	class BitBuffer : public BitBufferBase
+	class BitBuffer : public IBitBuffer
 	{
 	public:
 		explicit BitBuffer(std::size_t buffer_size = KI_BITBUFFER_DEFAULT_SIZE);
@@ -176,23 +176,23 @@ namespace ki
 		void resize(std::size_t new_size) override;
 
 		/**
-		 * @copydoc BitBufferBase::read<ValueT>(buffer_pos, uint8_t)
+		 * @copydoc IBitBuffer::read<ValueT>(buffer_pos, uint8_t)
 		 */
 		template <typename ValueT>
 		ValueT read(const buffer_pos position,
 			const uint8_t bits = bitsizeof<ValueT>::value) const
 		{
-			return BitBufferBase::read<ValueT>(position, bits);
+			return IBitBuffer::read<ValueT>(position, bits);
 		}
 
 		/**
-		 * @copydoc BitBufferBase::write<ValueT>(ValueT, buffer_pos, uint8_t)
+		 * @copydoc IBitBuffer::write<ValueT>(ValueT, buffer_pos, uint8_t)
 		 */
 		template <typename ValueT>
 		void write(const ValueT value, const buffer_pos position,
 			const uint8_t bits = bitsizeof<ValueT>::value)
 		{
-			return BitBufferBase::write<ValueT>(value, position, bits);
+			return IBitBuffer::write<ValueT>(value, position, bits);
 		}
 
 	protected:
@@ -205,12 +205,12 @@ namespace ki
 	};
 	
 	/**
-	 *
+	 * TODO: Documentation
 	 */
-	class BitBufferSegment : public BitBufferBase
+	class BitBufferSegment : public IBitBuffer
 	{
 	public:
-		BitBufferSegment(BitBufferBase &buffer, buffer_pos from, std::size_t bitsize);
+		BitBufferSegment(IBitBuffer &buffer, buffer_pos from, std::size_t bitsize);
 
 		std::size_t size() const override;
 		void resize(std::size_t new_size) override;
@@ -218,23 +218,23 @@ namespace ki
 		BitBufferSegment *segment(buffer_pos from, std::size_t bitsize) override;
 
 		/**
-		 * @copydoc BitBufferBase::read<ValueT>(buffer_pos, uint8_t)
+		 * @copydoc IBitBuffer::read<ValueT>(buffer_pos, uint8_t)
 		 */
 		template <typename ValueT>
 		ValueT read(const buffer_pos position,
 			const uint8_t bits = bitsizeof<ValueT>::value) const
 		{
-			return BitBufferBase::read<ValueT>(position, bits);
+			return IBitBuffer::read<ValueT>(position, bits);
 		}
 
 		/**
-		 * @copydoc BitBufferBase::write<ValueT>(ValueT, buffer_pos, uint8_t)
+		 * @copydoc IBitBuffer::write<ValueT>(ValueT, buffer_pos, uint8_t)
 		 */
 		template <typename ValueT>
 		void write(const ValueT value, const buffer_pos position,
 			const uint8_t bits = bitsizeof<ValueT>::value)
 		{
-			return BitBufferBase::write<ValueT>(value, position, bits);
+			return IBitBuffer::write<ValueT>(value, position, bits);
 		}
 
 	protected:
@@ -242,7 +242,7 @@ namespace ki
 		void write(uint64_t value, buffer_pos position, uint8_t bits) override;
 
 	private:
-		BitBufferBase *m_buffer;
+		IBitBuffer *m_buffer;
 		buffer_pos m_from;
 		std::size_t m_bitsize;
 	};
@@ -255,7 +255,7 @@ namespace ki
 	public:
 		using stream_pos = BitBuffer::buffer_pos;
 
-		explicit BitStream(BitBufferBase &buffer);
+		explicit BitStream(IBitBuffer &buffer);
 		virtual ~BitStream();
 
 		BitStream(const BitStream &that);
@@ -281,7 +281,7 @@ namespace ki
 		/**
 		* @returns The BitBuffer that the stream is reading/writing to.
 		*/
-		BitBufferBase &buffer() const;
+		IBitBuffer &buffer() const;
 
 		/**
 		 * Reads a value from the buffer.
@@ -333,7 +333,7 @@ namespace ki
 		void write_copy(uint8_t *src, std::size_t bitsize);
 
 	private:
-		BitBufferBase *m_buffer;
+		IBitBuffer *m_buffer;
 		stream_pos m_position;
 
 		/**

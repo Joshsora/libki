@@ -326,7 +326,7 @@ namespace pclass
 	 * TODO: Documentation
 	 */
 	template <typename ValueT>
-	class StaticProperty : public PropertyBase
+	class StaticProperty : public IProperty
 	{
 		// Allow helper utilities access to m_value
 		friend value_object_helper<ValueT>;
@@ -339,19 +339,19 @@ namespace pclass
 
 		StaticProperty(PropertyClass &object,
 			const std::string &name, const Type &type)
-			: PropertyBase(object, name, type)
+			: IProperty(object, name, type)
 			, m_value(value_helper<ValueT>::construct(type))
 		{}
 
 		StaticProperty(PropertyClass &object,
 			const std::string &name, const Type &type, ValueT value)
-			: PropertyBase(object, name, type)
+			: IProperty(object, name, type)
 		{
 			m_value = value;
 		}
 
 		StaticProperty(PropertyClass &object, const StaticProperty<ValueT> &that)
-			: PropertyBase(object, that)
+			: IProperty(object, that)
 			, m_value(value_helper<ValueT>::copy(that))
 		{}
 

@@ -8,12 +8,12 @@ namespace ki
 {
 namespace pclass
 {
-	PropertyBase &PropertyList::iterator::operator*() const
+	IProperty &PropertyList::iterator::operator*() const
 	{
 		return m_list->get_property(m_index);
 	}
 
-	PropertyBase *PropertyList::iterator::operator->() const
+	IProperty *PropertyList::iterator::operator->() const
 	{
 		return &operator*();
 	}
@@ -48,12 +48,12 @@ namespace pclass
 		m_index = index;
 	}
 
-	const PropertyBase &PropertyList::const_iterator::operator*() const
+	const IProperty &PropertyList::const_iterator::operator*() const
 	{
 		return m_list->get_property(m_index);
 	}
 
-	const PropertyBase *PropertyList::const_iterator::operator->() const
+	const IProperty *PropertyList::const_iterator::operator->() const
 	{
 		return &operator*();
 	}
@@ -105,7 +105,7 @@ namespace pclass
 			!= m_property_hash_lookup.end();
 	}
 
-	PropertyBase &PropertyList::get_property(const int index)
+	IProperty &PropertyList::get_property(const int index)
 	{
 		if (index >= 0 && index < m_properties.size())
 			return *m_properties[index];
@@ -116,7 +116,7 @@ namespace pclass
 		throw runtime_error(oss.str());
 	}
 
-	PropertyBase& PropertyList::get_property(const std::string& name)
+	IProperty& PropertyList::get_property(const std::string& name)
 	{
 		const auto it = m_property_name_lookup.find(name);
 		if (it != m_property_name_lookup.end())
@@ -127,7 +127,7 @@ namespace pclass
 		throw runtime_error(oss.str());
 	}
 
-	PropertyBase& PropertyList::get_property(const hash_t hash)
+	IProperty& PropertyList::get_property(const hash_t hash)
 	{
 		const auto it = m_property_hash_lookup.find(hash);
 		if (it != m_property_hash_lookup.end())
@@ -140,7 +140,7 @@ namespace pclass
 		throw runtime_error(oss.str());
 	}
 
-	const PropertyBase &PropertyList::get_property(const int index) const
+	const IProperty &PropertyList::get_property(const int index) const
 	{
 		if (index >= 0 && index < m_properties.size())
 			return *m_properties[index];
@@ -151,7 +151,7 @@ namespace pclass
 		throw runtime_error(oss.str());
 	}
 
-	const PropertyBase& PropertyList::get_property(const std::string &name) const
+	const IProperty& PropertyList::get_property(const std::string &name) const
 	{
 		const auto it = m_property_name_lookup.find(name);
 		if (it != m_property_name_lookup.end())
@@ -162,7 +162,7 @@ namespace pclass
 		throw runtime_error(oss.str());
 	}
 
-	const PropertyBase &PropertyList::get_property(const hash_t hash) const
+	const IProperty &PropertyList::get_property(const hash_t hash) const
 	{
 		const auto it = m_property_hash_lookup.find(hash);
 		if (it != m_property_hash_lookup.end())
@@ -195,7 +195,7 @@ namespace pclass
 		return const_iterator(*this, m_properties.size());
 	}
 
-	void PropertyList::add_property(PropertyBase &prop)
+	void PropertyList::add_property(IProperty &prop)
 	{
 		// Make sure a property with the same name as another isn't being added
 		if (has_property(prop.get_name()))

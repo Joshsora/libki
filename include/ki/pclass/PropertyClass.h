@@ -19,7 +19,7 @@
 	: base(that)
 
 #define DERIVED_PCLASS(derived, base) class derived : public base
-#define PCLASS(n) DERIVED_PCLASS(n, _KI_PCLASS)
+#define PCLASS(derived) DERIVED_PCLASS(derived, _KI_PCLASS)
 
 #define PCLASS_CONSTRUCTOR(derived) \
 _KI_PCLASS_CONSTRUCTOR(derived) \
@@ -60,7 +60,7 @@ namespace pclass
 	 */
 	class PropertyClass
 	{
-		friend PropertyBase;
+		friend IProperty;
 
 	public:
 		explicit PropertyClass(const Type &type, const TypeSystem &type_system);
@@ -77,7 +77,7 @@ namespace pclass
 		virtual void on_created() const {}
 
 	protected:
-		void add_property(PropertyBase &prop);
+		void add_property(IProperty &prop);
 
 	private:
 		const Type *m_type;

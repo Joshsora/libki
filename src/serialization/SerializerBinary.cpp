@@ -6,16 +6,16 @@ namespace ki
 {
 namespace serialization
 {
-	SerializerBinary::SerializerBinary(const pclass::TypeSystem* type_system,
+	SerializerBinary::SerializerBinary(const pclass::TypeSystem &type_system,
 		const bool is_file, const flags flags)
 	{
-		m_type_system = type_system;
+		m_type_system = &type_system;
 		m_is_file = is_file;
 		m_flags = flags;
 		m_root_object = nullptr;
 	}
 
-	void SerializerBinary::save(const pclass::PropertyClass* object, BitStream &stream)
+	void SerializerBinary::save(const pclass::PropertyClass *object, BitStream &stream)
 	{
 		// Write the serializer flags
 		if (FLAG_IS_SET(m_flags, flags::WRITE_SERIALIZER_FLAGS))
@@ -164,7 +164,7 @@ namespace serialization
 		stream.seek(BitStream::stream_pos(stream.tell().as_bytes(), 0));
 	}
 
-	void SerializerBinary::save_property(const pclass::PropertyBase &prop, BitStream &stream) const
+	void SerializerBinary::save_property(const pclass::IProperty &prop, BitStream &stream) const
 	{
 		// Remember where we started writing the property data
 		const auto start_pos = stream.tell();
@@ -181,9 +181,9 @@ namespace serialization
 		auto &property_type = prop.get_type();
 		if (prop.is_dynamic())
 		{
-			// Cast the property to a DynamicPropertyBase
+			// Cast the property to a IDynamicProperty
 			const auto &dynamic_property =
-				dynamic_cast<const pclass::DynamicPropertyBase &>(prop);
+				dynamic_cast<const pclass::IDynamicProperty &>(prop);
 
 			// Write the number of elements
 			stream.write<uint32_t>(dynamic_property.get_element_count());
@@ -239,7 +239,7 @@ namespace serialization
 		BitStream &stream, const std::size_t size)
 	{
 		// Create a new stream that reads a segment of the stream given to us
-		BitBufferBase *buffer = stream.buffer().segment(stream.tell(), size * 8);
+		IBitBuffer *buffer = stream.buffer().segment(stream.tell(), size * 8);
 		auto segment_stream = BitStream(*buffer);
 		stream.seek(stream.tell() + size * 8, false);
 
@@ -380,13 +380,13 @@ namespace serialization
 		stream.seek(BitStream::stream_pos(stream.tell().as_bytes(), 0), false);
 	}
 
-	void SerializerBinary::load_property(pclass::PropertyBase &prop, BitStream &stream) const
+	void SerializerBinary::load_property(pclass::IProperty &prop, BitStream &stream) const
 	{
 		auto &property_type = prop.get_type();
 		if (prop.is_dynamic())
 		{
 			auto &dynamic_property =
-				dynamic_cast<pclass::DynamicPropertyBase &>(prop);
+				dynamic_cast<pclass::IDynamicProperty &>(prop);
 
 			// How many elements are there in this dynamic property?
 			const auto element_count = stream.read<uint32_t>();

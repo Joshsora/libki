@@ -26,7 +26,7 @@ namespace pclass
 		static_assert(std::is_enum<EnumT>::value, "EnumT must be an enum!");
 
 	public:
-		EnumType(std::string name, hash_t hash, TypeSystem *type_system);
+		EnumType(const std::string &name, const TypeSystem &type_system);
 	};
 }
 }

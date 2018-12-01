@@ -42,7 +42,7 @@ namespace pclass
 		return new PropertyClass(*this);
 	}
 
-	void PropertyClass::add_property(PropertyBase &prop)
+	void PropertyClass::add_property(IProperty &prop)
 	{
 		m_properties.add_property(prop);
 	}

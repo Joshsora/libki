@@ -300,8 +300,11 @@ namespace pclass
 	};
 	/// @endcond
 
+	/**
+	 *
+	 */
 	template <typename ValueT>
-	class VectorProperty : public std::vector<ValueT>, public DynamicPropertyBase
+	class VectorProperty : public std::vector<ValueT>, public IDynamicProperty
 	{
 	public:
 		// Do not allow copy assignment. Once a property has been constructed,
@@ -310,12 +313,12 @@ namespace pclass
 
 		VectorProperty(PropertyClass &object,
 			const std::string &name, const Type &type)
-			: DynamicPropertyBase(object, name, type)
+			: IDynamicProperty(object, name, type)
 		{}
 
 		VectorProperty(PropertyClass &object,
 			const VectorProperty<ValueT> &that)
-			: DynamicPropertyBase(object, that)
+			: IDynamicProperty(object, that)
 		{
 			// Copy vector values into this vector
 			for (auto i = 0; i < this->size(); i++)

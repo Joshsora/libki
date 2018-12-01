@@ -21,7 +21,6 @@ namespace pclass
 		~TypeSystem();
 
 		const HashCalculator &get_hash_calculator() const;
-		void set_hash_calculator(HashCalculator *hash_calculator);
 
 		bool has_type(const std::string &name) const;
 		bool has_type(hash_t hash) const;
@@ -51,7 +50,7 @@ namespace pclass
 		}
 
 		template <typename EnumT>
-		EnumType<EnumT> *define_enum(const std::string &name)
+		EnumType<EnumT> &define_enum(const std::string &name)
 		{
 			/*
 			auto *type = new EnumType<EnumT>(name, this);
@@ -70,6 +69,12 @@ namespace pclass
 	protected:
 		void define_type(Type *type);
 
+	private:
+		TypeList m_types;
+		TypeNameMap m_type_name_lookup;
+		TypeHashMap m_type_hash_lookup;
+		HashCalculator *m_hash_calculator;
+
 		template <class ClassT>
 		ClassType<ClassT> &define_class(
 			const std::string &name, const Type *base_class)
@@ -83,12 +88,6 @@ namespace pclass
 			define_type(type);
 			return *type;
 		}
-
-	private:
-		TypeList m_types;
-		TypeNameMap m_type_name_lookup;
-		TypeHashMap m_type_hash_lookup;
-		HashCalculator *m_hash_calculator;
 	};
 }
 }
