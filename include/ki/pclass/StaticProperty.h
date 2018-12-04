@@ -231,7 +231,7 @@ namespace pclass
 
 			// ValueT does derive from PropertyClass, but we don't store a pointer,
 			// so we need to copy the value in.
-			prop.m_value = *object;
+			prop.m_value = *dynamic_cast<ValueT *>(object);
 			delete object;
 		}
 	};

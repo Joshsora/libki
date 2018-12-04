@@ -190,7 +190,7 @@ namespace pclass
 
 			// ValueT does derive from PropertyClass, and we have an instance of ValueT,
 			// so we can cast down to a PropertyClass pointer.
-			return dynamic_cast<PropertyClass *>(&prop.at(index));
+			return dynamic_cast<const PropertyClass *>(&prop.at(index));
 		}
 
 		static void set_object(VectorProperty<ValueT> &prop, PropertyClass *object, const int index)
@@ -208,7 +208,7 @@ namespace pclass
 
 			// ValueT does derive from PropertyClass, but we don't store a pointer,
 			// so we need to copy the value in.
-			prop.at(index) = dynamic_cast<ValueT>(*object);
+			prop.at(index) = *dynamic_cast<ValueT *>(object);
 			delete object;
 		}
 	};
