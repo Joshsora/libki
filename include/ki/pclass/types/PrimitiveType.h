@@ -52,16 +52,30 @@ namespace pclass
 
 		void write_to(BitStream &stream, const Value &value) const override
 		{
-			if (!value.is<ValueT>())
-				throw std::runtime_error("Invalid call to Type::write_to -- value type does not match ValueT.");
-			PrimitiveTypeWriter<ValueT>::write_to(stream, value.get<ValueT>());
+			try
+			{
+				PrimitiveTypeWriter<ValueT>::write_to(stream, value.get<ValueT>());
+			}
+			catch (runtime_error &e)
+			{
+				std::ostringstream oss;
+				oss << "Invalid call to Type::write_to -- " << e.what();
+				throw runtime_error(oss.str());
+			}
 		}
 
 		void read_from(BitStream &stream, Value &value) const override
 		{
-			if (!value.is<ValueT>())
-				throw std::runtime_error("Invalid call to Type::read_from -- value type does not match ValueT.");
-			PrimitiveTypeReader<ValueT>::read_from(stream, value.get<ValueT>());
+			try
+			{
+				PrimitiveTypeReader<ValueT>::read_from(stream, value.get<ValueT>());
+			}
+			catch (runtime_error &e)
+			{
+				std::ostringstream oss;
+				oss << "Invalid call to Type::read_from -- " << e.what();
+				throw runtime_error(oss.str());
+			}
 		}
 	};
 }

@@ -21,14 +21,14 @@ namespace pclass
 		struct value_caster_base
 		{
 			virtual ~value_caster_base() {}
-			virtual Value cast(const type_info &dst_type, Value &v) const = 0;
+			virtual Value cast(const std::type_info &dst_type, Value &v) const = 0;
 
 		protected:
 			/**
 			 * Provides a nice way for specialized casters to throw with a
 			 * consistent error when casting is not possible.
 			 */
-			Value bad_cast(const type_info &src_type, const type_info &dst_type) const;
+			Value bad_cast(const std::type_info &src_type, const std::type_info &dst_type) const;
 		};
 
 		/**
@@ -45,7 +45,7 @@ namespace pclass
 			 * @returns A Value with a reference that has been casted to the destination type.
 			 */
 			template <typename DstT>
-			Value cast(Value &value) const;
+			Value cast(const Value &value) const;
 			
 		private:
 			value_caster_base *m_caster;
@@ -137,7 +137,7 @@ namespace pclass
 	namespace detail
 	{
 		inline Value value_caster_base::bad_cast(
-			const type_info& src_type, const type_info& dst_type) const
+			const std::type_info& src_type, const std::type_info& dst_type) const
 		{
 			std::ostringstream oss;
 			oss << "Cannot cast Value from " << src_type.name()
@@ -146,9 +146,9 @@ namespace pclass
 		}
 
 		template <typename DstT>
-		Value value_caster::cast(Value& value) const
+		Value value_caster::cast(const Value &value) const
 		{
-			return m_caster->cast(typeid(DstT), value);
+			return m_caster->cast(typeid(DstT), const_cast<Value &>(value));
 		}
 
 		/**
@@ -157,7 +157,7 @@ namespace pclass
 		template <typename SrcT>
 		struct value_caster_helper : value_caster_base
 		{
-			Value cast(const type_info &dst_type, Value& value) const override
+			Value cast(const std::type_info &dst_type, Value& value) const override
 			{
 				return bad_cast(typeid(SrcT), dst_type);
 			}
