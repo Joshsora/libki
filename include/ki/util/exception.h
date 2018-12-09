@@ -23,7 +23,7 @@ namespace ki
 			m_what = oss.str();
 		}
 
-		char const* what() const override
+		char const* what() const noexcept override
 		{
 			return m_what.c_str();
 		}
