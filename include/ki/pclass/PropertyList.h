@@ -37,7 +37,7 @@ namespace pclass
 			PropertyList *m_list;
 			int m_index;
 
-			explicit iterator(PropertyList &list, const int index = 0);
+			explicit iterator(PropertyList &list, int index = 0);
 		};
 
 		/**
@@ -59,7 +59,7 @@ namespace pclass
 			const PropertyList *m_list;
 			int m_index;
 
-			explicit const_iterator(const PropertyList &list, const int index = 0);
+			explicit const_iterator(const PropertyList &list, int index = 0);
 		};
 
 		std::size_t get_property_count() const;
@@ -82,13 +82,12 @@ namespace pclass
 		iterator end();
 		const_iterator end() const;
 
-	protected:
-		void add_property(IProperty &prop);
-
 	private:
 		std::vector<IProperty *> m_properties;
 		std::map<std::string, IProperty *> m_property_name_lookup;
 		std::map<hash_t, IProperty *> m_property_hash_lookup;
+
+		void add_property(IProperty &prop);
 	};
 }
 }

@@ -254,7 +254,7 @@ namespace pclass
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
 			
-			prop.get_type().write_to(stream, *prop.at(index));
+			prop.get_type().write_to(stream, Value::make_reference(*prop.at(index)));
 		}
 
 		static void read_value_from(VectorProperty<ValueT> &prop, BitStream &stream, const int index)
@@ -263,7 +263,7 @@ namespace pclass
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
 
-			prop.get_type().read_from(stream, Value(*prop.at(index)));
+			prop.get_type().read_from(stream, Value::make_reference(*prop.at(index)));
 		}
 	};
 
@@ -344,7 +344,7 @@ namespace pclass
 		{
 			if (index < 0 || index >= this->size())
 				throw runtime_error("Index out of bounds.");
-			return this->at(index);
+			return Value::make_reference(this->at(index));
 		}
 
 		const PropertyClass *get_object(const int index) const override

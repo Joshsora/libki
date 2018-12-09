@@ -248,12 +248,12 @@ namespace pclass
 	{
 		static void write(const StaticProperty<ValueT> &prop, BitStream &stream)
 		{
-			prop.get_type().write_to(stream, prop.m_value);
+			prop.get_type().write_to(stream, Value::make_reference(prop.m_value));
 		}
 
 		static void read(StaticProperty<ValueT> &prop, BitStream &stream)
 		{
-			prop.get_type().read_from(stream, Value(prop.m_value));
+			prop.get_type().read_from(stream, Value::make_reference(prop.m_value));
 		}
 	};
 
@@ -274,12 +274,12 @@ namespace pclass
 	{
 		static void write(const StaticProperty<ValueT> &prop, BitStream &stream)
 		{
-			prop.get_type().write_to(stream, *prop.m_value);
+			prop.get_type().write_to(stream, Value::make_reference(*prop.m_value));
 		}
 
 		static void read(StaticProperty<ValueT> &prop, BitStream &stream)
 		{
-			prop.get_type().read_from(stream, Value(*prop.m_value));
+			prop.get_type().read_from(stream, Value::make_reference(*prop.m_value));
 		}
 	};
 
@@ -367,7 +367,7 @@ namespace pclass
 
 		Value get_value() const override
 		{
-			return m_value;
+			return Value::make_reference(m_value);
 		}
 
 		const PropertyClass *get_object() const override

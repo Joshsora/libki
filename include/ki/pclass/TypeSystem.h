@@ -50,13 +50,11 @@ namespace pclass
 		}
 
 		template <typename EnumT>
-		EnumType<EnumT> &define_enum(const std::string &name)
+		CppEnumType<EnumT> &define_enum(const std::string &name)
 		{
-			/*
-			auto *type = new EnumType<EnumT>(name, this);
+			auto *type = new CppEnumType<EnumT>(name, *this);
 			define_type(type);
-			return type;
-			*/
+			return *type;
 		}
 
 		template <typename ClassT>
