@@ -1,6 +1,7 @@
 #pragma once
 #include <type_traits>
 #include "ki/pclass/types/Type.h"
+#include "ki/pclass/types/PrimitiveType.h"
 
 namespace ki
 {
