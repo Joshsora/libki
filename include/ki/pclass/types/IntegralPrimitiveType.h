@@ -6,8 +6,10 @@ namespace ki
 {
 namespace pclass
 {
+namespace detail
+{
 	template <typename ValueT>
-	struct PrimitiveTypeWriter<
+	struct primitive_type_helper<
 		ValueT,
 		typename std::enable_if<is_integral<ValueT>::value>::type
 	>
@@ -16,18 +18,14 @@ namespace pclass
 		{
 			stream.write<ValueT>(value);
 		}
-	};
 
-	template <typename ValueT>
-	struct PrimitiveTypeReader<
-		ValueT,
-		typename std::enable_if<is_integral<ValueT>::value>::type
-	>
-	{
-		static void read_from(BitStream &stream, ValueT &value)
+		static Value read_from(BitStream &stream)
 		{
-			value = stream.read<ValueT>();
+			return Value::make_value<ValueT>(
+				stream.read<ValueT>()
+			);
 		}
 	};
+}
 }
 }

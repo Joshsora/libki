@@ -227,7 +227,11 @@ namespace pclass
 			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
-			prop.get_type().write_to(stream, prop.at(index));
+
+			prop.get_type().write_to(
+				stream,
+				Value::make_reference<ValueT>(prop.at(index))
+			);
 		}
 
 		static void read_value_from(VectorProperty<ValueT> &prop, BitStream &stream, const int index)
@@ -235,7 +239,9 @@ namespace pclass
 			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
-			prop.get_type().read_from(stream, Value(prop.at(index)));
+
+			Value value = prop.get_type().read_from(stream);
+			prop.at(index) = value.get<ValueT>();
 		}
 	};
 
@@ -248,13 +254,18 @@ namespace pclass
 		typename std::enable_if<std::is_pointer<ValueT>::value>::type
 	>
 	{
+		using type = typename std::remove_pointer<ValueT>::type;
+
 		static void write_value_to(const VectorProperty<ValueT> &prop, BitStream &stream, const int index)
 		{
 			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
-			
-			prop.get_type().write_to(stream, Value::make_reference(*prop.at(index)));
+
+			prop.get_type().write_to(
+				stream,
+				Value::make_reference<type>(*prop.at(index))
+			);
 		}
 
 		static void read_value_from(VectorProperty<ValueT> &prop, BitStream &stream, const int index)
@@ -263,7 +274,9 @@ namespace pclass
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
 
-			prop.get_type().read_from(stream, Value::make_reference(*prop.at(index)));
+			Value value = prop.get_type().read_from(stream);
+			ValueT &value_ref = prop.at(index);
+			value_ref = value.take<type>();
 		}
 	};
 

@@ -7,7 +7,7 @@ namespace ki
 {
 namespace pclass
 {
-	typedef uint64_t enum_value_t;
+	typedef uint32_t enum_value_t;
 
 	/**
 	 * TODO: Documentation
@@ -42,8 +42,8 @@ namespace pclass
 
 		EnumType &add_element(const std::string &name, enum_value_t value);
 
-		void write_to(BitStream& stream, const Value& value) const override;
-		void read_from(BitStream& stream, Value& value) const override;
+		void write_to(BitStream &stream, Value value) const override;
+		Value read_from(BitStream &stream) const override;
 
 	private:
 		std::vector<Element *> m_elements;
@@ -68,17 +68,20 @@ namespace pclass
 			m_kind = kind::ENUM;
 		}
 
-		void write_to(BitStream& stream, const Value &value) const override
+		void write_to(BitStream &stream, const Value value) const override
 		{
-			PrimitiveTypeWriter<underlying_type>::write_to(
-				stream, reinterpret_cast<const underlying_type &>(value.get<EnumT>())
-			);
+			auto &enum_reference = value.get<EnumT>();
+			auto &underlying_reference = reinterpret_cast<const underlying_type &>(enum_reference);
+			detail::primitive_type_helper<underlying_type>::write_to(stream, underlying_reference);
 		}
 
-		void read_from(BitStream& stream, Value &value) const override
+		Value read_from(BitStream &stream) const override
 		{
-			PrimitiveTypeReader<underlying_type>::read_from(
-				stream, reinterpret_cast<underlying_type &>(value.get<EnumT>())
+			Value read_result =
+				detail::primitive_type_helper<underlying_type>::read_from(stream);
+			auto underlying_value = read_result.get<underlying_type>();
+			return Value::make_value<EnumT>(
+				static_cast<EnumT>(underlying_value)
 			);
 		}
 	};

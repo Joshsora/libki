@@ -45,16 +45,22 @@ struct Vector3D
 
 	void write_to(BitStream &stream) const
 	{
-		pclass::PrimitiveTypeWriter<float>::write_to(stream, m_x);
-		pclass::PrimitiveTypeWriter<float>::write_to(stream, m_y);
-		pclass::PrimitiveTypeWriter<float>::write_to(stream, m_z);
+		pclass::detail::primitive_type_helper<float>
+			::write_to(stream, m_x);
+		pclass::detail::primitive_type_helper<float>
+			::write_to(stream, m_y);
+		pclass::detail::primitive_type_helper<float>
+			::write_to(stream, m_z);
 	}
 
 	void read_from(BitStream &stream)
 	{
-		pclass::PrimitiveTypeReader<float>::read_from(stream, m_x);
-		pclass::PrimitiveTypeReader<float>::read_from(stream, m_y);
-		pclass::PrimitiveTypeReader<float>::read_from(stream, m_z);
+		m_x = pclass::detail::primitive_type_helper<float>
+			::read_from(stream).get<float>();
+		m_y = pclass::detail::primitive_type_helper<float>
+			::read_from(stream).get<float>();
+		m_z = pclass::detail::primitive_type_helper<float>
+			::read_from(stream).get<float>();
 	}
 
 private:
@@ -63,29 +69,34 @@ private:
 	float m_z;
 };
 
-/**
- * Type Writer for custom primitive type (Vector3D).
- */
-template <>
-struct pclass::PrimitiveTypeWriter<Vector3D>
+namespace ki
 {
-	static void write_to(BitStream &stream, const Vector3D &value)
+namespace pclass
+{
+namespace detail
+{
+	/**
+	 * Helper for custom primitive type (Vector3D).
+	 * Provides write_to and read_from implementations for PrimitiveType.
+	 */
+	template <>
+	struct primitive_type_helper<Vector3D>
 	{
-		value.write_to(stream);
-	}
-};
+		static void write_to(BitStream &stream, const Vector3D &value)
+		{
+			value.write_to(stream);
+		}
 
-/**
- * Type Reader for custom primitive type (Vector3D).
- */
-template <>
-struct pclass::PrimitiveTypeReader<Vector3D>
-{
-	static void read_from(BitStream &stream, Vector3D &value)
-	{
-		value.read_from(stream);
-	}
-};
+		static Value read_from(BitStream &stream)
+		{
+			Vector3D value;
+			value.read_from(stream);
+			return Value::make_value<Vector3D>(value);
+		}
+	};
+}
+}
+}
 
 /**
  * Enumeration used to test enum serialization.

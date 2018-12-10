@@ -1,6 +1,7 @@
 #include "ki/pclass/types/EnumType.h"
 #include "ki/util/exception.h"
 #include <sstream>
+#include "ki/pclass/Enum.h"
 
 namespace ki
 {
@@ -109,14 +110,17 @@ namespace pclass
 		return *this;
 	}
 
-	void EnumType::write_to(BitStream& stream, const Value &value) const
+	void EnumType::write_to(BitStream &stream, const Value value) const
 	{
-		// TODO: Extend Value to get IEnum values
+		// Get an Enum reference and use it to write to the stream
+		value.get<Enum>().write_to(stream);
 	}
 
-	void EnumType::read_from(BitStream& stream, Value &value) const
+	Value EnumType::read_from(BitStream &stream) const
 	{
-		// TODO: Extend Value to get IEnum values
+		auto value = Enum(*this);
+		value.read_from(stream);
+		return Value::make_value<Enum>(value);
 	}
 }
 }

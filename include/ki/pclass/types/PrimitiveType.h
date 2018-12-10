@@ -5,37 +5,42 @@ namespace ki
 {
 namespace pclass
 {
-	/**
-	 * TODO: Documentation
-	 */
-	template <typename ValueT, typename Enable = void>
-	struct PrimitiveTypeWriter
+	namespace detail
 	{
-		static void write_to(BitStream &stream, const ValueT &value)
+		/**
+		 * TODO: Documentation
+		 */
+		template <typename ValueT, typename Enable = void>
+		struct primitive_type_helper
 		{
-			// Provide a compiler error if this is not specialized
-			static_assert(
-				sizeof(ValueT) == 0,
-				"Missing specialization of PrimitiveTypeWriter::write_to"
-			);
-		}
-	};
+			/**
+			 * TODO: Documentation
+			 */
+			static void write_to(BitStream &stream, const ValueT &value)
+			{
+				// Provide a compiler error if this is not specialized
+				static_assert(
+					sizeof(ValueT) == 0,
+					"Missing specialization of primitive_type_writer::write_to"
+				);
+			}
 
-	/**
-	 * TODO: Documentation
-	 */
-	template <typename ValueT, typename Enable = void>
-	struct PrimitiveTypeReader
-	{
-		static void read_from(BitStream &stream, ValueT &value)
-		{
-			// Provide a compiler error if this is not specialized
-			static_assert(
-				sizeof(ValueT) == 0,
-				"Missing specialization of PrimitiveTypeReader::read_from"
-			);
-		}
-	};
+			/**
+			 * TODO: Documentation
+			 */
+			static Value read_from(BitStream &stream)
+			{
+				// Provide a compiler error if this is not specialized
+				static_assert(
+					sizeof(ValueT) == 0,
+					"Missing specialization of PrimitiveTypeReader::read_from"
+				);
+
+				// This should be impossible to reach.
+				throw runtime_error("Missing specialization of PrimitiveTypeReader::read_from");
+			}
+		};
+	}
 	
 	/**
 	 * TODO: Documentation
@@ -50,11 +55,16 @@ namespace pclass
 			m_kind = kind::PRIMITIVE;
 		}
 
-		void write_to(BitStream &stream, const Value &value) const override
+		void write_to(BitStream &stream, const Value value) const override
 		{
 			try
 			{
-				PrimitiveTypeWriter<ValueT>::write_to(stream, value.get<ValueT>());
+				// Dereference the value to the correct type
+				Value deref_value = value.dereference<ValueT>();
+				detail::primitive_type_helper<ValueT>::write_to(
+					stream,
+					deref_value.get<ValueT>()
+				);
 			}
 			catch (runtime_error &e)
 			{
@@ -64,11 +74,11 @@ namespace pclass
 			}
 		}
 
-		void read_from(BitStream &stream, Value &value) const override
+		Value read_from(BitStream &stream) const override
 		{
 			try
 			{
-				PrimitiveTypeReader<ValueT>::read_from(stream, value.get<ValueT>());
+				return detail::primitive_type_helper<ValueT>::read_from(stream);
 			}
 			catch (runtime_error &e)
 			{

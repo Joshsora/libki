@@ -200,7 +200,17 @@ namespace pclass
 		~Value();
 
 		/**
-		 * @return Whether or not the value being held is of type T.
+		 * @returns Whether or the not the value is holding a reference or a value.
+		 */
+		bool is_reference() const
+		{
+			// If the pointer isn't owned, then it isn't this Value's responsibility
+			// to clean it up, so we say it's referencing something.
+			return !m_ptr_is_owned;
+		}
+
+		/**
+		 * @returns Whether or not the value being held is of type T.
 		 */
 		template <typename T>
 		bool is() const
@@ -208,29 +218,72 @@ namespace pclass
 			// Do the type hashes match?
 			return m_type_hash == typeid(T).hash_code();
 		}
+		
+		/**
+		 * @tparam T 
+		 * @returns A new Value instance that owns it's value.
+		 */
+		template <typename T>
+		Value dereference() const
+		{
+			// Do we need to attempt casting?
+			if (!is<T>())
+				return m_caster->cast_value<T>(*this);
+			return Value::make_value<T>(*static_cast<T *>(m_value_ptr));
+		}
 
 		/**
-		 * @return A reference to the value being held as the specified type.
+		 * @tparam T The expected type.
+		 * @returns A reference to the value being held.
+		 * @throws ki::runtime_error The expected type and the type of the value being held are not the same.
 		 */
 		template <typename T>
 		const T &get() const
 		{
-			// Do we need to attempt casting?
+			// Make sure they requested the correct type
 			if (!is<T>())
-				return m_caster->cast_value<T>(*this).get<T>();
+				throw runtime_error("Invalid call to Value::get<T>.");
+
+			// Return a reference to the value being held
 			return *static_cast<T *>(m_value_ptr);
 		}
 
 		/**
-		 * @return A reference to the value being held as the specified type.
+		 * @tparam T The expected type.
+		 * @returns A reference to the value being held.
+		 * @throws ki::runtime_error If the expected type and the type of the value being held are not the same.
 		 */
 		template <typename T>
 		T &get()
 		{
-			// Do we need to attempt casting?
+			// Make sure they requested the correct type
 			if (!is<T>())
-				return m_caster->cast_value<T>(*this).get<T>();
+				throw runtime_error("Invalid call to Value::get<T>.");
+
+			// Return a reference to the value being held
 			return *static_cast<T *>(m_value_ptr);
+		}
+
+		/**
+		 * @tparam T The expected type.
+		 * @returns A pointer to the value being held (that the caller takes ownership of).
+	 	 * @throws ki::runtime_error If the Value is a reference.
+		 * @throws ki::runtime_error If the expected type and the type of the value being held are not the same.
+		 */
+		template <typename T>
+		T *take()
+		{
+			// Make sure this Value is not a reference
+			if (is_reference())
+				throw runtime_error("Cannot take ownership from a reference Value.");
+
+			// Make sure they requested the correct type
+			if (!is<T>())
+				throw runtime_error("Invalid call to Value::get<T>.");
+
+			// Give up the pointer (this Value becomes a reference)
+			m_ptr_is_owned = false;
+			return static_cast<T *>(m_value_ptr);
 		}
 
 		/**
@@ -278,11 +331,7 @@ namespace pclass
 	private:
 		void *m_value_ptr;
 		bool m_ptr_is_owned;
-
 		std::size_t m_type_hash;
-		bool m_value_is_object;
-		bool m_value_is_enum;
-
 		ValueCaster *m_caster;
 		detail::ValueDeallocator m_deallocator;
 
@@ -295,15 +344,6 @@ namespace pclass
 		template <typename T>
 		void construct()
 		{
-			m_value_is_object = std::is_base_of<
-				PropertyClass,
-				typename std::decay<T>::type
-			>::value;
-			m_value_is_enum = std::is_base_of<
-				IEnum,
-				typename std::decay<T>::type
-			>::value;
-
 			m_type_hash = typeid(T).hash_code();
 			m_caster = &ValueCaster::get<T>();
 			m_deallocator = detail::ValueDeallocator::make<T>();

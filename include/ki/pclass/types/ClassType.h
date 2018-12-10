@@ -1,9 +1,9 @@
 #pragma once
 #include <type_traits>
 #include <string>
-#include "ki/pclass/Property.h"
 #include "ki/pclass/types/Type.h"
 #include "ki/pclass/PropertyClass.h"
+#include "ki/pclass/Property.h"
 
 namespace ki
 {
@@ -19,14 +19,10 @@ namespace pclass
 			const Type *base_class, const TypeSystem &type_system);
 		virtual ~IClassType() {}
 
-		void write_to(BitStream &stream, const Value &value) const override;
-		void read_from(BitStream &stream, Value &value) const override;
-
 		bool inherits(const Type &type) const;
 
-	protected:
-		virtual const PropertyClass &get_object_from_value(const Value &value) const = 0;
-		virtual PropertyClass &get_object_from_value(Value &value) const = 0;
+		void write_to(BitStream &stream, Value value) const override = 0;
+		Value read_from(BitStream &stream) const override = 0;
 
 	private:
 		const IClassType *m_base_class;
@@ -44,21 +40,29 @@ namespace pclass
 	public:
 		ClassType(const std::string &name,
 			const Type *base_class, const TypeSystem &type_system)
-			: IClassType(name, base_class, type_system) {}
+			: IClassType(name, base_class, type_system)
+		{}
 
 		PropertyClass *instantiate() const override
 		{
 			return new ClassT(*this, get_type_system());
 		}
 
-		const PropertyClass& get_object_from_value(const Value& value) const override
+		void write_to(BitStream &stream, Value value) const override
 		{
-			return dynamic_cast<const PropertyClass &>(value.get<ClassT>());
+			const auto &object = value.get<ClassT>();
+			const auto &properties = object.get_properties();
+			for (auto it = properties.begin(); it != properties.end(); ++it)
+				it->write_value_to(stream);
 		}
 
-		PropertyClass& get_object_from_value(Value& value) const override
+		Value read_from(BitStream &stream) const override
 		{
-			return dynamic_cast<PropertyClass &>(value.get<ClassT>());
+			auto object = ClassT(*this, get_type_system());
+			auto &properties = object.get_properties();
+			for (auto it = properties.begin(); it != properties.end(); ++it)
+				it->read_value_from(stream);
+			return Value::make_value<ClassT>(object);
 		}
 	};
 }

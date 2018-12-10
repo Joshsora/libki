@@ -69,8 +69,6 @@ namespace pclass
 		m_value_ptr = value_ptr;
 		m_ptr_is_owned = owned;
 		m_type_hash = 0;
-		m_value_is_object = false;
-		m_value_is_enum = false;
 		m_caster = nullptr;
 		m_deallocator = detail::ValueDeallocator();
 	}
@@ -82,9 +80,6 @@ namespace pclass
 		m_value_ptr = that.m_value_ptr;
 		m_ptr_is_owned = that.m_ptr_is_owned;
 		that.m_ptr_is_owned = false;
-
-		m_value_is_object = that.m_value_is_object;
-		m_value_is_enum = that.m_value_is_enum;
 		m_type_hash = that.m_type_hash;
 		m_caster = that.m_caster;
 		m_deallocator = std::move(that.m_deallocator);
@@ -101,9 +96,6 @@ namespace pclass
 		m_value_ptr = that.m_value_ptr;
 		m_ptr_is_owned = that.m_ptr_is_owned;
 		that.m_ptr_is_owned = false;
-
-		m_value_is_object = that.m_value_is_object;
-		m_value_is_enum = that.m_value_is_enum;
 		m_type_hash = that.m_type_hash;
 		m_caster = that.m_caster;
 		m_deallocator = std::move(that.m_deallocator);

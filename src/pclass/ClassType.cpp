@@ -28,22 +28,6 @@ namespace pclass
 			m_base_class = nullptr;
 	}
 
-	void IClassType::write_to(BitStream &stream, const Value &value) const
-	{
-		const auto &object = get_object_from_value(value);
-		const auto &properties = object.get_properties();
-		for (auto it = properties.begin(); it != properties.end(); ++it)
-			it->write_value_to(stream);
-	}
-
-	void IClassType::read_from(BitStream &stream, Value &value) const
-	{
-		auto &object = get_object_from_value(value);
-		auto &properties = object.get_properties();
-		for (auto it = properties.begin(); it != properties.end(); ++it)
-			it->read_value_from(stream);
-	}
-
 	bool IClassType::inherits(const Type &type) const
 	{
 		// Types do not technically inherit from themselves, but it is more useful

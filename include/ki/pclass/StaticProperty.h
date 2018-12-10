@@ -248,12 +248,16 @@ namespace pclass
 	{
 		static void write(const StaticProperty<ValueT> &prop, BitStream &stream)
 		{
-			prop.get_type().write_to(stream, Value::make_reference(prop.m_value));
+			prop.get_type().write_to(
+				stream,
+				Value::make_reference<ValueT>(prop.m_value)
+			);
 		}
 
 		static void read(StaticProperty<ValueT> &prop, BitStream &stream)
 		{
-			prop.get_type().read_from(stream, Value::make_reference(prop.m_value));
+			Value value = prop.get_type().read_from(stream);
+			prop.m_value = value.get<ValueT>();
 		}
 	};
 
@@ -272,14 +276,20 @@ namespace pclass
 		>::type
 	>
 	{
+		using type = typename std::remove_pointer<ValueT>::type;
+
 		static void write(const StaticProperty<ValueT> &prop, BitStream &stream)
 		{
-			prop.get_type().write_to(stream, Value::make_reference(*prop.m_value));
+			prop.get_type().write_to(
+				stream,
+				Value::make_reference<type>(*prop.m_value)
+			);
 		}
 
 		static void read(StaticProperty<ValueT> &prop, BitStream &stream)
 		{
-			prop.get_type().read_from(stream, Value::make_reference(*prop.m_value));
+			Value value = prop.get_type().read_from(stream);
+			prop.m_value = value.take<type>();
 		}
 	};
 

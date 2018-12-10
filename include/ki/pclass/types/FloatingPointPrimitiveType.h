@@ -6,8 +6,10 @@ namespace ki
 {
 namespace pclass
 {
+namespace detail
+{
 	template <typename ValueT>
-	struct PrimitiveTypeWriter<
+	struct primitive_type_helper<
 		ValueT,
 		typename std::enable_if<std::is_floating_point<ValueT>::value>::type
 	>
@@ -21,6 +23,12 @@ namespace pclass
 			stream.write<uint_type>(v, bitsizeof<ValueT>::value);
 		}
 
+		static Value read_from(BitStream &stream)
+		{
+			uint_type uint_value = stream.read<uint_type>(bitsizeof<ValueT>::value);
+			return Value::make_value<ValueT>(*reinterpret_cast<ValueT *>(&uint_value));
+		}
+
 	private:
 		/**
           * An unsigned integer type with the same size as the floating point type
@@ -28,28 +36,6 @@ namespace pclass
 		  */
 		using uint_type = typename bits<bitsizeof<ValueT>::value>::uint_type;
 	};
-
-	template <typename ValueT>
-	struct PrimitiveTypeReader<
-		ValueT,
-		typename std::enable_if<std::is_floating_point<ValueT>::value>::type
-	>
-	{
-		static void read_from(BitStream &stream, ValueT &value)
-		{
-			// Reinterpret the reference as a reference to an integer
-			uint_type &v = *(
-				reinterpret_cast<uint_type *>(&value)
-			);
-			v = stream.read<uint_type>(bitsizeof<ValueT>::value);
-		}
-
-	private:
-		/**
-		 * An unsigned integer type with the same size as the floating point type
-		 * ValueT.
-		 */
-		using uint_type = typename bits<bitsizeof<ValueT>::value>::uint_type;
-	};
+}
 }
 }
