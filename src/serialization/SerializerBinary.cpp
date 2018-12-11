@@ -44,12 +44,13 @@ namespace serialization
 			const auto size_bytes = (end_pos - start_pos).as_bytes();
 
 			// Make a copy of the uncompressed data
-			auto *uncompressed = new uint8_t[size_bytes]{0};
+			auto *uncompressed = new uint8_t[size_bytes] {0};
+			stream.seek(start_pos);
 			stream.read_copy(uncompressed, size_bits);
 
 			// Setup compression
 			static const std::size_t bufsize = 1024;
-			auto *temp_buffer = new uint8_t[bufsize]{0};
+			uint8_t temp_buffer[bufsize] {0};
 			std::vector<uint8_t> compressed;
 			z_stream z;
 			z.zalloc = nullptr;
@@ -96,7 +97,6 @@ namespace serialization
 
 			// Cleanup temporary buffers
 			delete[] uncompressed;
-			delete[] temp_buffer;
 
 			// Write the compression header
 			const auto use_compression = compressed.size() < size_bytes;
@@ -264,7 +264,7 @@ namespace serialization
 			{
 				// Create a buffer for the compressed data and read it in
 				BitBuffer compressed(data_available_bytes);
-				segment_stream.read_copy(compressed.data(), data_available_bytes);
+				segment_stream.read_copy(compressed.data(), data_available_bytes * 8);
 
 				// Uncompress the compressed buffer
 				auto *uncompressed = new BitBuffer(uncompressed_size);

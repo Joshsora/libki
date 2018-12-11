@@ -488,8 +488,6 @@ TEST_CASE("Serialization tests", "[serialization]")
 			);
 			test_serializer(test_object, serializer, "_file");
 		}
-		/*
-		TODO: Test compression
 		SECTION("Regular format with compression")
 		{
 			serialization::SerializerBinary serializer(
@@ -507,7 +505,6 @@ TEST_CASE("Serialization tests", "[serialization]")
 			);
 			test_serializer(test_object, serializer, "_file_compressed");
 		}
-		*/
 	}
 
 	// If one of the above sections leaves test_object set, then
