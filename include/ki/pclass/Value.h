@@ -125,7 +125,8 @@ namespace pclass
 		template <typename SrcT, typename DestT>
 		static void declare()
 		{
-			ValueCaster::get<SrcT>().add_caster<SrcT, DestT>();
+			ValueCaster &caster = ValueCaster::get<SrcT>();
+			caster.add_caster<SrcT, DestT>();
 		}
 
 		/**
@@ -355,7 +356,7 @@ namespace pclass
 	{
 		const auto it = s_caster_lookup.find(src_type.hash_code());
 		if (it != s_caster_lookup.end())
-			return it->second.cast<DestT>(value);
+			return it->second->cast_value<DestT>(value);
 		throw cast_error(src_type, typeid(DestT));
 	}
 
@@ -363,7 +364,8 @@ namespace pclass
 	Value ValueCaster::cast(const Value& value)
 	{
 		ValueCaster::declare<SrcT, DestT>();
-		return ValueCaster::get<SrcT>().cast<DestT>(value);
+		ValueCaster &caster = ValueCaster::get<SrcT>();
+		return caster.cast_value<DestT>(value);
 	}
 
 	template <typename DestT>

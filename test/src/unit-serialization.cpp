@@ -213,7 +213,7 @@ public:
 
 	// Test strings
 	pclass::StaticProperty<std::string> string;
-	pclass::StaticProperty<std::wstring> wstring;
+	pclass::StaticProperty<std::u16string> wstring;
 
 	// Test single precision and double precision floating point integers
 	pclass::StaticProperty<float> float32;
@@ -268,7 +268,7 @@ void define_types()
 #define EXPECTED_uint32 0x0708090A
 #define EXPECTED_uint64 0x0B0C0D0E0F101112
 #define EXPECTED_string "This is a test value"
-#define EXPECTED_wstring L"This is a test value"
+#define EXPECTED_wstring u"This is a test value"
 #define EXPECTED_float32 3.1415927410125732421875f
 #define EXPECTED_float64 3.141592653589793115997963468544185161590576171875
 #define EXPECTED_vector3d Vector3D(24.0f, 61.0f, 3.62f)

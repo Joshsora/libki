@@ -65,7 +65,7 @@ namespace pclass
 
 		// Define string types
 		define_primitive<std::string>("std::string");
-		define_primitive<std::wstring>("std::wstring");
+		define_primitive<std::u16string>("std::wstring");
 
 		// Define the base class for all classes
 		define_class<PropertyClass>("class PropertyClass");
