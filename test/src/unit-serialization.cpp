@@ -146,9 +146,22 @@ DERIVED_PCLASS(NestedTestObjectA, NestedTestObject)
 {
 public:
 	DERIVED_PCLASS_CONSTRUCTOR(NestedTestObjectA, NestedTestObject)
+		INIT_PROPERTY(extra_value, "int")
 	{
 		m_kind = NestedObjectKind::OBJECT_A;
+		extra_value = 10;
 	}
+
+	NestedTestObjectA &operator=(const NestedTestObjectA &that)
+	{
+		m_kind.get() = that.m_kind.get();
+		extra_value.get() = that.extra_value.get();
+		return *this;
+	}
+
+	// Define an extra property so that we have something to validate this object
+	// more specifically.
+	pclass::StaticProperty<int> extra_value;
 };
 
 /**
@@ -190,8 +203,12 @@ public:
 		INIT_PROPERTY(float32, "float")
 		INIT_PROPERTY(float64, "double")
 		INIT_PROPERTY(vector3d, "struct Vector3D")
+		INIT_PROPERTY(int_ptr, "int")
+		INIT_PROPERTY(value_object, "class NestedTestObjectA")
 		INIT_PROPERTY(not_null_object, "class NestedTestObject")
 		INIT_PROPERTY(null_object, "class NestedTestObject")
+		INIT_PROPERTY(collection, "int")
+		INIT_PROPERTY(ptr_collection, "int")
 		INIT_PROPERTY(objects, "class NestedTestObject")
 	{}
 
@@ -222,9 +239,17 @@ public:
 	// Test writing custom defined primitives
 	pclass::StaticProperty<Vector3D> vector3d;
 
+	// Test dereferencing when writing pointers to primitives
+	pclass::StaticProperty<int *> int_ptr;
+
 	// Test writing a single instance of another object
+	pclass::StaticProperty<NestedTestObjectA> value_object;
 	pclass::StaticProperty<NestedTestObject *> not_null_object;
 	pclass::StaticProperty<NestedTestObject *> null_object;
+
+	// Test writing collections of primitives
+	pclass::VectorProperty<int> collection;
+	pclass::VectorProperty<int *> ptr_collection;
 
 	// Test writing multiple instances of another object
 	pclass::VectorProperty<NestedTestObject *> objects;
@@ -272,6 +297,9 @@ void define_types()
 #define EXPECTED_float32 3.1415927410125732421875f
 #define EXPECTED_float64 3.141592653589793115997963468544185161590576171875
 #define EXPECTED_vector3d Vector3D(24.0f, 61.0f, 3.62f)
+#define EXPECTED_int_ptr 52
+#define EXPECTED_value_object_extra_value 20
+#define EXPECTED_collection_size 100
 #define SET_EXPECTED(object, identifier) object.identifier = EXPECTED_##identifier
 #define IS_EXPECTED(object, identifier) object.identifier.get() == EXPECTED_##identifier
 
@@ -298,8 +326,17 @@ void configure_test_object(TestObject &object)
 	SET_EXPECTED(object, float32);
 	SET_EXPECTED(object, float64);
 	SET_EXPECTED(object, vector3d);
+	object.int_ptr = new int(EXPECTED_int_ptr);
 	
+	// Configure the collection of integers
+	for (auto i = 0; i < EXPECTED_collection_size; ++i)
+	{
+		object.collection.push_back(i);
+		object.ptr_collection.push_back(new int(i));
+	}
+
 	// Configure nested objects
+	object.value_object.get().extra_value = EXPECTED_value_object_extra_value;
 	object.not_null_object = g_type_system->instantiate<NestedTestObject>("class NestedTestObject");
 	object.null_object = nullptr;
 	object.objects.push_back(
@@ -333,8 +370,19 @@ void validate_test_object(TestObject &object)
 	REQUIRE(IS_EXPECTED(object, float32));
 	REQUIRE(IS_EXPECTED(object, float64));
 	REQUIRE(IS_EXPECTED(object, vector3d));
+	REQUIRE(*object.int_ptr == EXPECTED_int_ptr);
+
+	// Validate both collections
+	REQUIRE(object.collection.size() == EXPECTED_collection_size);
+	REQUIRE(object.ptr_collection.size() == EXPECTED_collection_size);
+	for (auto i = 0; i < EXPECTED_collection_size; i++)
+	{
+		REQUIRE(object.collection[i] == i);
+		REQUIRE(*object.ptr_collection[i] == i);
+	}
 
 	// Validate nested objects
+	REQUIRE(object.value_object.get().extra_value == EXPECTED_value_object_extra_value);
 	REQUIRE(object.not_null_object.get() != nullptr);
 	REQUIRE(object.not_null_object.get()->get_kind() == NestedObjectKind::OBJECT);
 	REQUIRE(object.null_object.get() == nullptr);
@@ -387,7 +435,6 @@ void test_serializer(
 
 		// Validate the contents of the stream
 		const auto stream_size = (end_pos - start_pos).as_bytes();
-
 		REQUIRE(stream_size == sample_size);
 		auto *stream_data = new uint8_t[stream_size];
 		stream.seek(start_pos);
