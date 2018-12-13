@@ -6,7 +6,7 @@ namespace pclass
 {
 	namespace detail
 	{
-		Value value_caster_base::cast(const Value& v) const
+		Value value_caster_base::cast(const Value &v) const
 		{
 			throw runtime_error("Unimplemented cast.");
 		}
@@ -39,7 +39,7 @@ namespace pclass
 			delete m_deallocator;
 		}
 
-		void ValueDeallocator::deallocate(void* ptr) const
+		void ValueDeallocator::deallocate(void *ptr) const
 		{
 			m_deallocator->deallocate(ptr);
 		}
@@ -59,7 +59,7 @@ namespace pclass
 		}
 	}
 
-	ValueCaster::ValueCaster(const std::type_info& src_type)
+	ValueCaster::ValueCaster(const std::type_info &src_type)
 	{
 		m_src_type = &src_type;
 	}
@@ -73,7 +73,7 @@ namespace pclass
 		m_deallocator = detail::ValueDeallocator();
 	}
 
-	Value::Value(Value&& that) noexcept
+	Value::Value(Value &&that) noexcept
 	{
 		// Move pointer to this Value object, and take ownership if
 		// the other Value previously owned it.
@@ -85,7 +85,7 @@ namespace pclass
 		m_deallocator = std::move(that.m_deallocator);
 	}
 
-	Value &Value::operator=(Value&& that) noexcept
+	Value &Value::operator=(Value &&that) noexcept
 	{
 		// If the current pointer is owned, deallocate it
 		if (m_ptr_is_owned)
@@ -111,6 +111,6 @@ namespace pclass
 	}
 
 	// Initialize the static lookup map
-	std::map<std::size_t, ValueCaster *> ValueCaster::s_caster_lookup = {};
+	std::unordered_map<std::size_t, ValueCaster *> ValueCaster::s_caster_lookup = {};
 }
 }

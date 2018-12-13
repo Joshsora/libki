@@ -2,7 +2,7 @@
 #include <utility>
 #include <typeinfo>
 #include <sstream>
-#include <map>
+#include <unordered_map>
 #include "ki/util/exception.h"
 
 namespace ki
@@ -160,18 +160,18 @@ namespace pclass
 		 * A static lookup used to find appropriate casters at runtime.
 		 * Contains SrcT -> Caster elements.
 		 */
-		static std::map<std::size_t, ValueCaster *> s_caster_lookup;
+		static std::unordered_map<std::size_t, ValueCaster *> s_caster_lookup;
 
 		const std::type_info *m_src_type;
-		std::map<std::size_t, detail::value_caster_base *> m_casts;
+		std::unordered_map<std::size_t, detail::value_caster_base *> m_casts;
 
 		ValueCaster();
 		explicit ValueCaster(const std::type_info &src_type);
 
 		/**
-		* @tparam SrcT The cast source type.
-		* @returns The ValueCaster instance responsible for casting values of type SrcT.
-		*/
+		 * @tparam SrcT The cast source type.
+		 * @returns The ValueCaster instance responsible for casting values of type SrcT.
+		 */
 		template <typename SrcT>
 		static ValueCaster &get()
 		{
@@ -394,7 +394,9 @@ namespace pclass
 			Value cast(const Value &value) const override
 			{
 				// By default, just attempt to static_cast from SrcT to DestT.
-				return static_cast<DestT>(value.get<SrcT>());
+				return Value::make_value<DestT>(
+					static_cast<DestT>(value.get<SrcT>())
+				);
 			}
 		};
 	}

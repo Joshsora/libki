@@ -9,20 +9,29 @@
 	define_primitive<st>("signed " n); \
 	define_primitive<ut>("unsigned " n)
 
-#define DEFINE_BI_PRIMITIVE(n) \
-	define_primitive< bi<n> >("bi" #n)
-
-#define DEFINE_BUI_PRIMITIVE(n) \
-	define_primitive< bui<n> >("bui" #n)
-
-#define DEFINE_BIT_INTEGER_PRIMITIVE(n) \
-	DEFINE_BI_PRIMITIVE(n); \
-	DEFINE_BUI_PRIMITIVE(n)
-
 namespace ki
 {
 namespace pclass
 {
+	template <int N>
+	void define_bit_integer_primitive(pclass::TypeSystem &type_system)
+	{
+		define_bit_integer_primitive<N - 1>(type_system);
+
+		// Define the signed bit integer
+		std::ostringstream oss;
+		oss << "bi" << N;
+		type_system.define_primitive<bi<N>>(oss.str());
+
+		// Define the unsigned bit integer
+		oss = std::ostringstream();
+		oss << "bui" << N;
+		type_system.define_primitive<bui<N>>(oss.str());
+	}
+
+	template <>
+	void define_bit_integer_primitive<0>(TypeSystem &type_system) {}
+
 	TypeSystem::TypeSystem(HashCalculator *hash_calculator)
 	{
 		m_hash_calculator = hash_calculator;
@@ -49,13 +58,7 @@ namespace pclass
 		define_primitive<uint64_t>("gid");
 
 		// Define bit-integer types
-		DEFINE_BIT_INTEGER_PRIMITIVE(1);
-		DEFINE_BIT_INTEGER_PRIMITIVE(2);
-		DEFINE_BIT_INTEGER_PRIMITIVE(3);
-		DEFINE_BIT_INTEGER_PRIMITIVE(4);
-		DEFINE_BIT_INTEGER_PRIMITIVE(5);
-		DEFINE_BIT_INTEGER_PRIMITIVE(6);
-		DEFINE_BIT_INTEGER_PRIMITIVE(7);
+		define_bit_integer_primitive<7>(*this);
 		define_primitive<bi<24>>("s24");
 		define_primitive<bui<24>>("u24");
 
