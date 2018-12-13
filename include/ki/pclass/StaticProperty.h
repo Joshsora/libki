@@ -45,7 +45,8 @@ namespace pclass
 			);
 		}
 
-		static void set_object(StaticProperty<ValueT> &prop, PropertyClass *object)
+		static void set_object(StaticProperty<ValueT> &prop,
+			std::unique_ptr<PropertyClass> &object)
 		{
 			// ValueT does not derive from PropertyClass, and so, this property is not
 			// storing an object.
@@ -101,7 +102,8 @@ namespace pclass
 			);
 		}
 
-		static void set_object(StaticProperty<ValueT> &prop, PropertyClass *object)
+		static void set_object(StaticProperty<ValueT> &prop,
+			std::unique_ptr<PropertyClass> &object)
 		{
 			// ValueT does not derive from PropertyClass, and so, this property is not
 			// storing an object.
@@ -158,7 +160,8 @@ namespace pclass
 			return dynamic_cast<const PropertyClass *>(prop.m_value);
 		}
 
-		static void set_object(StaticProperty<ValueT> &prop, PropertyClass *object)
+		static void set_object(StaticProperty<ValueT> &prop,
+			std::unique_ptr<PropertyClass> &object)
 		{
 			// Ensure that object inherits the type of the property
 			if (object)
@@ -166,7 +169,7 @@ namespace pclass
 
 			// ValueT does derive from PropertyClass, and we have a pointer to an instance
 			// of PropertyClass, so cast the pointer up to a ValueT.
-			prop.m_value = dynamic_cast<ValueT>(object);
+			prop.m_value = dynamic_cast<ValueT>(object.release());
 		}
 	};
 
@@ -220,7 +223,8 @@ namespace pclass
 			return dynamic_cast<const PropertyClass *>(&prop.m_value);
 		}
 
-		static void set_object(StaticProperty<ValueT> &prop, PropertyClass *object)
+		static void set_object(StaticProperty<ValueT> &prop,
+			std::unique_ptr<PropertyClass> &object)
 		{
 			// Ensure that object is not nullptr
 			if (!object)
@@ -231,8 +235,7 @@ namespace pclass
 
 			// ValueT does derive from PropertyClass, but we don't store a pointer,
 			// so we need to copy the value in.
-			prop.m_value = *dynamic_cast<ValueT *>(object);
-			delete object;
+			prop.m_value = *dynamic_cast<ValueT *>(object.get());
 		}
 	};
 	
@@ -315,7 +318,8 @@ namespace pclass
 			return value_object_helper<ValueT>::get_object(prop);
 		}
 
-		static void set_object(StaticProperty<ValueT> &prop, PropertyClass *object)
+		static void set_object(StaticProperty<ValueT> &prop,
+			std::unique_ptr<PropertyClass> &object)
 		{
 			value_object_helper<ValueT>::set_object(prop, object);
 		}
@@ -385,7 +389,7 @@ namespace pclass
 			return value_helper<ValueT>::get_object(*this);
 		}
 
-		void set_object(PropertyClass *object) override
+		void set_object(std::unique_ptr<PropertyClass> &object) override
 		{
 			return value_helper<ValueT>::set_object(*this, object);
 		}

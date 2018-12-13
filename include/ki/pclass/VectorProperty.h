@@ -43,7 +43,8 @@ namespace pclass
 			);
 		}
 
-		static void set_object(VectorProperty<ValueT> &prop, PropertyClass *object, const int index)
+		static void set_object(VectorProperty<ValueT> &prop,
+			std::unique_ptr<PropertyClass> &object, const int index)
 		{
 			// ValueT does not derive from PropertyClass, and so, this property is not
 			// storing an object.
@@ -90,7 +91,8 @@ namespace pclass
 			);
 		}
 
-		static void set_object(VectorProperty<ValueT> &prop, PropertyClass *object, const int index)
+		static void set_object(VectorProperty<ValueT> &prop,
+			std::unique_ptr<PropertyClass> &object, const int index)
 		{
 			// ValueT does not derive from PropertyClass, and so, this property is not
 			// storing an object.
@@ -135,7 +137,8 @@ namespace pclass
 			return dynamic_cast<PropertyClass *>(prop.at(index));
 		}
 
-		static void set_object(VectorProperty<ValueT> &prop, PropertyClass *object, const int index)
+		static void set_object(VectorProperty<ValueT> &prop,
+			std::unique_ptr<PropertyClass> &object, const int index)
 		{
 			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
@@ -147,7 +150,7 @@ namespace pclass
 
 			// ValueT does derive from PropertyClass, and we have a pointer to an instance
 			// of PropertyClass, so cast the pointer up to a ValueT.
-			prop.at(index) = dynamic_cast<ValueT>(object);
+			prop.at(index) = dynamic_cast<ValueT>(object.release());
 		}
 	};
 
@@ -193,7 +196,8 @@ namespace pclass
 			return dynamic_cast<const PropertyClass *>(&prop.at(index));
 		}
 
-		static void set_object(VectorProperty<ValueT> &prop, PropertyClass *object, const int index)
+		static void set_object(VectorProperty<ValueT> &prop,
+			std::unique_ptr<PropertyClass> &object, const int index)
 		{
 			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
@@ -208,8 +212,7 @@ namespace pclass
 
 			// ValueT does derive from PropertyClass, but we don't store a pointer,
 			// so we need to copy the value in.
-			prop.at(index) = *dynamic_cast<ValueT *>(object);
-			delete object;
+			prop.at(index) = *dynamic_cast<ValueT *>(object.get());
 		}
 	};
 
@@ -291,22 +294,26 @@ namespace pclass
 			return vector_value_object_helper<ValueT>::copy(prop, index);
 		}
 
-		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
+		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop,
+			const int index)
 		{
 			return vector_value_object_helper<ValueT>::get_object(prop, index);
 		}
 
-		static void set_object(VectorProperty<ValueT> &prop, PropertyClass *object, const int index)
+		static void set_object(VectorProperty<ValueT> &prop, 
+			std::unique_ptr<PropertyClass> &object, const int index)
 		{
 			vector_value_object_helper<ValueT>::set_object(prop, object, index);
 		}
 
-		static void write_value_to(const VectorProperty<ValueT> &prop, BitStream &stream, const int index)
+		static void write_value_to(const VectorProperty<ValueT> &prop,
+			BitStream &stream, const int index)
 		{
 			vector_value_rw_helper<ValueT>::write_value_to(prop, stream, index);
 		}
 
-		static void read_value_from(VectorProperty<ValueT> &prop, BitStream &stream, const int index)
+		static void read_value_from(VectorProperty<ValueT> &prop,
+			BitStream &stream, const int index)
 		{
 			vector_value_rw_helper<ValueT>::read_value_from(prop, stream, index);
 		}
@@ -365,7 +372,7 @@ namespace pclass
 			return vector_value_helper<ValueT>::get_object(*this, index);
 		}
 
-		void set_object(PropertyClass *object, int index) override
+		void set_object(std::unique_ptr<PropertyClass> &object, int index) override
 		{
 			return vector_value_helper<ValueT>::set_object(*this, object, index);
 		}

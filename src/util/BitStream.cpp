@@ -3,6 +3,7 @@
 #include <limits>
 #include <cstring>
 #include <cmath>
+#include "ki/util/unique.h"
 
 namespace ki
 {
@@ -141,10 +142,10 @@ namespace ki
 		return copy;
 	}
 
-	BitBufferSegment *IBitBuffer::segment(
+	std::unique_ptr<BitBufferSegment> IBitBuffer::segment(
 		const buffer_pos from, const std::size_t bitsize)
 	{
-		return new BitBufferSegment(*this, from, bitsize);
+		return ki::make_unique<BitBufferSegment>(*this, from, bitsize);
 	}
 
 	void IBitBuffer::write_copy(uint8_t *src,
@@ -329,10 +330,12 @@ namespace ki
 		return &m_buffer->data()[m_from.get_byte()];
 	}
 
-	BitBufferSegment *BitBufferSegment::segment(
+	std::unique_ptr<BitBufferSegment> BitBufferSegment::segment(
 		const buffer_pos from, const std::size_t bitsize)
 	{
-		return new BitBufferSegment(*m_buffer, m_from + from, bitsize);
+		return ki::make_unique<BitBufferSegment>(
+			*m_buffer, m_from + from, bitsize
+		);
 	}
 
 	uint64_t BitBufferSegment::read(

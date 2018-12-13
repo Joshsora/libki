@@ -1,9 +1,10 @@
 #pragma once
+#include <memory>
 #include <type_traits>
 #include <string>
+#include "ki/pclass/Property.h"
 #include "ki/pclass/types/Type.h"
 #include "ki/pclass/PropertyClass.h"
-#include "ki/pclass/Property.h"
 
 namespace ki
 {
@@ -43,9 +44,12 @@ namespace pclass
 			: IClassType(name, base_class, type_system)
 		{}
 
-		PropertyClass *instantiate() const override
+		std::unique_ptr<PropertyClass> instantiate() const override
 		{
-			return new ClassT(*this, get_type_system());
+			auto *instance = new ClassT(*this, get_type_system());
+			return std::unique_ptr<PropertyClass>(
+				dynamic_cast<PropertyClass *>(instance)
+			);
 		}
 
 		void write_to(BitStream &stream, Value value) const override

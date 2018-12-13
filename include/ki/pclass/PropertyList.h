@@ -1,5 +1,5 @@
 #pragma once
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include "ki/pclass/HashCalculator.h"
 
@@ -84,8 +84,8 @@ namespace pclass
 
 	private:
 		std::vector<IProperty *> m_properties;
-		std::map<std::string, IProperty *> m_property_name_lookup;
-		std::map<hash_t, IProperty *> m_property_hash_lookup;
+		std::unordered_map<std::string, IProperty *> m_property_name_lookup;
+		std::unordered_map<hash_t, IProperty *> m_property_hash_lookup;
 
 		void add_property(IProperty &prop);
 	};

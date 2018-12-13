@@ -98,7 +98,7 @@ namespace pclass
 		throw runtime_error("Called get_object() on a dynamic property. Use get_object(index) instead.");
 	}
 
-	void IDynamicProperty::set_object(PropertyClass *object)
+	void IDynamicProperty::set_object(std::unique_ptr<PropertyClass> &object)
 	{
 		// The caller must specify an index
 		throw runtime_error("Called set_object() on a dynamic property. Use set_object(index) instead.");

@@ -53,7 +53,7 @@ namespace ki
 			void set_bit(int bit);
 		};
 
-		virtual ~IBitBuffer() {};
+		virtual ~IBitBuffer() {}
 
 		/**
 		 * @returns 
@@ -77,7 +77,9 @@ namespace ki
 		 * @param[in] bitsize The size of the segment in bits.
 		 * @returns A new segment of this buffer.
 		 */
-		virtual BitBufferSegment *segment(buffer_pos from, std::size_t bitsize);
+		virtual std::unique_ptr<BitBufferSegment> segment(
+			buffer_pos from, std::size_t bitsize
+		);
 
 		/**
 		 * Reads a value from the buffer.
@@ -214,8 +216,10 @@ namespace ki
 
 		std::size_t size() const override;
 		void resize(std::size_t new_size) override;
-		uint8_t* data() const override;
-		BitBufferSegment *segment(buffer_pos from, std::size_t bitsize) override;
+		uint8_t *data() const override;
+		std::unique_ptr<BitBufferSegment> segment(
+			buffer_pos from, std::size_t bitsize
+		) override;
 
 		/**
 		 * @copydoc IBitBuffer::read<ValueT>(buffer_pos, uint8_t)

@@ -53,7 +53,7 @@ namespace pclass
 		throw runtime_error(oss.str());
 	}
 
-	PropertyClass *Type::instantiate() const
+	std::unique_ptr<PropertyClass> Type::instantiate() const
 	{
 		std::ostringstream oss;
 		oss << "Type '" << m_name << "' does not implement Type::instantiate.";

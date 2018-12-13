@@ -1,6 +1,7 @@
 #include "ki/serialization/SerializerBinary.h"
 #include <zlib.h>
 #include <cassert>
+#include "ki/util/unique.h"
 
 namespace ki
 {
@@ -235,11 +236,15 @@ namespace serialization
 		}
 	}
 
-	void SerializerBinary::load(pclass::PropertyClass *&dest,
+	void SerializerBinary::load(
+		std::unique_ptr<pclass::PropertyClass> &dest,
 		BitStream &stream, const std::size_t size)
 	{
 		// Create a new stream that reads a segment of the stream given to us
-		IBitBuffer *buffer = stream.buffer().segment(stream.tell(), size * 8);
+		auto segment_buffer = stream.buffer().segment(stream.tell(), size * 8);
+		auto buffer = std::unique_ptr<IBitBuffer>(
+			dynamic_cast<IBitBuffer *>(segment_buffer.release())
+		);
 		auto segment_stream = BitStream(*buffer);
 		stream.seek(stream.tell() + size * 8, false);
 
@@ -267,21 +272,23 @@ namespace serialization
 				segment_stream.read_copy(compressed.data(), data_available_bytes * 8);
 
 				// Uncompress the compressed buffer
-				auto *uncompressed = new BitBuffer(uncompressed_size);
+				auto uncompressed = ki::make_unique<BitBuffer>(uncompressed_size);
 				uLong dest_len = uncompressed_size;
 				uncompress(uncompressed->data(), &dest_len,
 					compressed.data(), data_available_bytes);
 
 				// Delete the old buffer and use the new uncompressed buffer
-				delete buffer;
-				buffer = uncompressed;
+				buffer = std::unique_ptr<IBitBuffer>(
+					dynamic_cast<IBitBuffer *>(uncompressed.release())
+				);
 			}
 			else
 			{
 				// Use a segment of the current buffer as the new buffer
-				auto *segment_buffer = buffer->segment(segment_stream.tell(), data_available_bytes);
-				delete buffer;
-				buffer = segment_buffer;
+				segment_buffer = buffer->segment(segment_stream.tell(), data_available_bytes);
+				buffer = std::unique_ptr<IBitBuffer>(
+					dynamic_cast<IBitBuffer *>(segment_buffer.release())
+				);
 			}
 
 			// Create a new stream to read from the new buffer
@@ -289,21 +296,11 @@ namespace serialization
 		}
 
 		// Load the root object
-		try
-		{
-			load_object(dest, segment_stream);
-		}
-		catch (runtime_error &e)
-		{
-			delete buffer;
-			throw e;
-		}
-
-		// Free resources
-		delete buffer;
+		load_object(dest, segment_stream);
 	}
 
-	void SerializerBinary::preload_object(pclass::PropertyClass *&dest, BitStream &stream) const
+	void SerializerBinary::preload_object(
+		std::unique_ptr<pclass::PropertyClass> &dest, BitStream &stream) const
 	{
 		const auto type_hash = stream.read<pclass::hash_t>();
 		if (type_hash != 0)
@@ -317,7 +314,8 @@ namespace serialization
 			dest = nullptr;
 	}
 
-	void SerializerBinary::load_object(pclass::PropertyClass *&dest, BitStream &stream) const
+	void SerializerBinary::load_object(
+		std::unique_ptr<pclass::PropertyClass> &dest, BitStream &stream) const
 	{
 		// Read the object header
 		preload_object(dest, stream);
@@ -333,11 +331,11 @@ namespace serialization
 			// ensure that data is only read from inside this region.
 			const auto object_size =
 				stream.read<uint32_t>() - bitsizeof<uint32_t>::value;
-			auto *object_buffer = stream.buffer().segment(
+			auto object_buffer = stream.buffer().segment(
 				stream.tell(), object_size
 			);
-			stream.seek(stream.tell() + object_size, false);
 			auto object_stream = BitStream(*object_buffer);
+			stream.seek(stream.tell() + object_size, false);
 
 			// Instead of loading properties sequentially, the file format specifies
 			// the hash of a property before writing its value, so we just need to
@@ -349,7 +347,7 @@ namespace serialization
 				// ensure that data is only read from inside this region.
 				const auto property_size =
 					object_stream.read<uint32_t>() - bitsizeof<uint32_t>::value;
-				auto *property_buffer = object_buffer->segment(
+				const auto property_buffer = object_buffer->segment(
 					object_stream.tell(), property_size
 				);
 				auto property_stream = BitStream(*property_buffer);
@@ -360,9 +358,7 @@ namespace serialization
 				const auto property_hash = property_stream.read<uint32_t>();
 				auto &prop = properties.get_property(property_hash);
 				load_property(prop, property_stream);
-				delete property_buffer;
 			}
-			delete object_buffer;
 		}
 		else
 		{
@@ -402,7 +398,7 @@ namespace serialization
 					if (property_type.get_kind() == pclass::Type::kind::CLASS)
 					{
 						// Read the object as a nested object
-						pclass::PropertyClass *object = nullptr;
+						std::unique_ptr<pclass::PropertyClass> object = nullptr;
 						load_object(object, stream);
 						dynamic_property.set_object(object, i);
 					}
@@ -421,7 +417,7 @@ namespace serialization
 			if (property_type.get_kind() == pclass::Type::kind::CLASS)
 			{
 				// Read the object as a nested object
-				pclass::PropertyClass *object = nullptr;
+				std::unique_ptr<pclass::PropertyClass> object = nullptr;
 				load_object(object, stream);
 				prop.set_object(object);
 			}

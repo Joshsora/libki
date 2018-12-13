@@ -1,5 +1,6 @@
 #pragma once
 #include <type_traits>
+#include <unordered_map>
 #include "ki/pclass/types/Type.h"
 #include "ki/pclass/types/PrimitiveType.h"
 
@@ -47,8 +48,8 @@ namespace pclass
 
 	private:
 		std::vector<Element *> m_elements;
-		std::map<std::string, Element *> m_element_name_lookup;
-		std::map<enum_value_t, Element *> m_element_value_lookup;
+		std::unordered_map<std::string, Element *> m_element_name_lookup;
+		std::unordered_map<enum_value_t, Element *> m_element_value_lookup;
 	};
 
 	/**

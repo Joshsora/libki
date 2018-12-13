@@ -31,9 +31,9 @@ namespace detail
 
 	private:
 		/**
-          * An unsigned integer type with the same size as the floating point type
-		  * ValueT.
-		  */
+         * An unsigned integer type with the same size as the floating point type
+		 * ValueT.
+		 */
 		using uint_type = typename bits<bitsizeof<ValueT>::value>::uint_type;
 	};
 }

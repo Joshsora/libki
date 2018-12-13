@@ -8,6 +8,7 @@
 #include <ki/pclass/StaticProperty.h>
 #include <ki/pclass/VectorProperty.h>
 #include <ki/serialization/SerializerBinary.h>
+#include "ki/util/unique.h"
 
 using namespace ki;
 
@@ -256,8 +257,9 @@ public:
 };
 
 // Setup a global TypeSystem instance
-auto *g_hash_calculator = new pclass::WizardHashCalculator();
-pclass::TypeSystem *g_type_system = new pclass::TypeSystem(g_hash_calculator);
+std::unique_ptr<pclass::HashCalculator> g_hash_calculator
+	= ki::make_unique<pclass::WizardHashCalculator>();
+auto g_type_system = ki::make_unique<pclass::TypeSystem>(g_hash_calculator);
 bool g_types_defined = false;
 
 /**
@@ -337,13 +339,13 @@ void configure_test_object(TestObject &object)
 
 	// Configure nested objects
 	object.value_object.get().extra_value = EXPECTED_value_object_extra_value;
-	object.not_null_object = g_type_system->instantiate<NestedTestObject>("class NestedTestObject");
+	object.not_null_object = g_type_system->instantiate<NestedTestObject>("class NestedTestObject").release();
 	object.null_object = nullptr;
 	object.objects.push_back(
-		g_type_system->instantiate<NestedTestObjectA>("class NestedTestObjectA")
+		g_type_system->instantiate<NestedTestObjectA>("class NestedTestObjectA").release()
 	);
 	object.objects.push_back(
-		g_type_system->instantiate<NestedTestObjectB>("class NestedTestObjectB")
+		g_type_system->instantiate<NestedTestObjectB>("class NestedTestObjectB").release()
 	);
 }
 
@@ -395,7 +397,7 @@ void validate_test_object(TestObject &object)
  * Conduct save/load tests with a SerializerBinary instance.
  */
 void test_serializer(
-	TestObject *&test_object,
+	std::unique_ptr<TestObject> &test_object,
 	serialization::SerializerBinary &serializer,
 	const std::string &file_suffix)
 {
@@ -425,12 +427,11 @@ void test_serializer(
 		// Create a test object, configure it, and write it to our stream
 		test_object = g_type_system->instantiate<TestObject>("class TestObject");
 		configure_test_object(*test_object);
-		serializer.save(test_object, stream);
+		serializer.save(test_object.get(), stream);
 		const auto end_pos = stream.tell();
 
 		// Delete the test object here so that it is not
 		// unnecessarily validated by the caller
-		delete test_object;
 		test_object = nullptr;
 
 		// Validate the contents of the stream
@@ -452,12 +453,14 @@ void test_serializer(
 		stream.seek(start_pos);
 
 		// Load an object from the bit stream's contents
-		pclass::PropertyClass *object = nullptr;
+		std::unique_ptr<pclass::PropertyClass> object = nullptr;
 		serializer.load(object, stream, sample_size);
 
 		// Set test_object so that it is validated by the caller
 		REQUIRE(object != nullptr);
-		test_object = dynamic_cast<TestObject *>(object);
+		test_object = std::unique_ptr<TestObject>(
+			dynamic_cast<TestObject *>(object.release())
+		);
 		REQUIRE(test_object != nullptr);
 	}
 
@@ -467,7 +470,7 @@ void test_serializer(
 
 TEST_CASE("Serialization tests", "[serialization]")
 {
-	TestObject *test_object = nullptr;
+	std::unique_ptr<TestObject> test_object = nullptr;
 	define_types();
 
 	SECTION("SerializerBinary")
@@ -475,7 +478,7 @@ TEST_CASE("Serialization tests", "[serialization]")
 		SECTION("Regular format without compression")
 		{
 			serialization::SerializerBinary serializer(
-				*g_type_system, false,
+				*g_type_system.get(), false,
 				serialization::SerializerBinary::flags::NONE
 			);
 			test_serializer(test_object, serializer, "_regular");
@@ -483,7 +486,7 @@ TEST_CASE("Serialization tests", "[serialization]")
 		SECTION("File format without compression")
 		{
 			serialization::SerializerBinary serializer(
-				*g_type_system, true,
+				*g_type_system.get(), true,
 				serialization::SerializerBinary::flags::WRITE_SERIALIZER_FLAGS
 			);
 			test_serializer(test_object, serializer, "_file");
@@ -491,7 +494,7 @@ TEST_CASE("Serialization tests", "[serialization]")
 		SECTION("Regular format with compression")
 		{
 			serialization::SerializerBinary serializer(
-				*g_type_system, false,
+				*g_type_system.get(), false,
 				serialization::SerializerBinary::flags::COMPRESSED
 			);
 			test_serializer(test_object, serializer, "_regular_compressed");
@@ -499,7 +502,7 @@ TEST_CASE("Serialization tests", "[serialization]")
 		SECTION("File format with compression")
 		{
 			serialization::SerializerBinary serializer(
-				*g_type_system, true,
+				*g_type_system.get(), true,
 				serialization::SerializerBinary::flags::WRITE_SERIALIZER_FLAGS |
 				serialization::SerializerBinary::flags::COMPRESSED
 			);
@@ -512,7 +515,6 @@ TEST_CASE("Serialization tests", "[serialization]")
 	if (test_object)
 	{
 		validate_test_object(*test_object);
-		delete test_object;
 		test_object = nullptr;
 	}
 }

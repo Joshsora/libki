@@ -137,21 +137,19 @@ TEST_CASE("BitBuffer Functionality", "[bit-stream]")
 
 	SECTION("Create valid segment")
 	{
-		auto *segment = bit_buffer.segment(
+		auto segment = bit_buffer.segment(
 			BitBuffer::buffer_pos(0, 0), 8
 		);
 		REQUIRE(segment->size() == 1);
-		delete segment;
 	}
 
 	SECTION("Create invalid segment (invalid position)")
 	{
 		try
 		{
-			auto *segment = bit_buffer.segment(
+			auto segment = bit_buffer.segment(
 				BitBuffer::buffer_pos(1, 0), 8
 			);
-			delete segment;
 			FAIL();
 		}
 		catch (runtime_error &e)
@@ -164,10 +162,9 @@ TEST_CASE("BitBuffer Functionality", "[bit-stream]")
 	{
 		try
 		{
-			auto *segment = bit_buffer.segment(
+			auto segment = bit_buffer.segment(
 				BitBuffer::buffer_pos(0, 0), 16
 			);
-			delete segment;
 			FAIL();
 		}
 		catch (runtime_error &e)

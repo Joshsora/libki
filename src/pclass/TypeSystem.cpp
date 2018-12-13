@@ -32,9 +32,9 @@ namespace pclass
 	template <>
 	void define_bit_integer_primitive<0>(TypeSystem &type_system) {}
 
-	TypeSystem::TypeSystem(HashCalculator *hash_calculator)
+	TypeSystem::TypeSystem(std::unique_ptr<HashCalculator> &hash_calculator)
 	{
-		m_hash_calculator = hash_calculator;
+		m_hash_calculator = std::move(hash_calculator);
 
 		// Pre-define C++ primitive types
 		// Define integer types
@@ -72,20 +72,6 @@ namespace pclass
 
 		// Define the base class for all classes
 		define_class<PropertyClass>("class PropertyClass");
-	}
-
-	TypeSystem::~TypeSystem()
-	{
-		// Delete all type declarations
-		for (auto it = m_types.begin(); it != m_types.end(); ++it)
-			delete *it;
-
-		// Clear lookups
-		m_type_name_lookup.clear();
-		m_type_hash_lookup.clear();
-
-		// Delete the hash calculator
-		delete m_hash_calculator;
 	}
 
 	const HashCalculator &TypeSystem::get_hash_calculator() const
@@ -132,14 +118,11 @@ namespace pclass
 		return *it->second;
 	}
 
-	void TypeSystem::define_type(Type *type)
+	void TypeSystem::define_type(std::unique_ptr<Type> type)
 	{
 		// Does a type with this name already exist?
 		if (m_type_name_lookup.find(type->get_name()) != m_type_name_lookup.end())
 		{
-			// This pointer will become lost since it isn't being added to the lookups.
-			delete type;
-
 			// Throw an error
 			std::ostringstream oss;
 			oss << "Type '" << type->get_name() << "' is already defined.";
@@ -149,9 +132,6 @@ namespace pclass
 		// Does a type with this hash already exist?
 		if (m_type_name_lookup.find(type->get_name()) != m_type_name_lookup.end())
 		{
-			// This pointer will become lost since it isn't being added to the lookups.
-			delete type;
-
 			// Throw an error
 			auto &other_type = get_type(type->get_hash());
 			std::ostringstream oss;
@@ -161,9 +141,9 @@ namespace pclass
 		}
 
 		// This type is safe to add to our lookups
-		m_types.push_back(type);
-		m_type_name_lookup[type->get_name()] = type;
-		m_type_hash_lookup[type->get_hash()] = type;
+		m_type_name_lookup[type->get_name()] = type.get();
+		m_type_hash_lookup[type->get_hash()] = type.get();
+		m_types.push_back(std::move(type));
 	}
 }
 }

@@ -45,16 +45,58 @@ namespace serialization
 			bool is_file, flags flags);
 		virtual ~SerializerBinary() {}
 
+		/**
+		 * @param object 
+		 * @param stream 
+		 */
 		void save(const pclass::PropertyClass *object, BitStream &stream);
-		void load(pclass::PropertyClass *&dest, BitStream &stream, std::size_t size);
+
+		/**
+		 * @param dest 
+		 * @param stream
+		 * @param size
+		 */
+		void load(std::unique_ptr<pclass::PropertyClass> &dest,
+			BitStream &stream, std::size_t size);
 
 	protected:
+		/**
+		 * @param object 
+		 * @param stream 
+		 */
 		virtual void presave_object(const pclass::PropertyClass *object, BitStream &stream) const;
+
+		/**
+		 * @param object
+ 		 * @param stream
+		 */
 		void save_object(const pclass::PropertyClass *object, BitStream &stream) const;
+
+		/**
+		 * @param prop
+		 * @param stream
+		 */
 		void save_property(const pclass::IProperty &prop, BitStream &stream) const;
 
-		virtual void preload_object(pclass::PropertyClass *&dest, BitStream &stream) const;
-		void load_object(pclass::PropertyClass *&dest, BitStream &stream) const;
+		/**
+		 * Read an object header, and instantiate the necessary PropertyClass.
+		 * @param dest 
+		 * @param stream 
+		 */
+		virtual void preload_object(
+			std::unique_ptr<pclass::PropertyClass> &dest, BitStream &stream) const;
+		
+		/**
+		 * @param dest
+		 * @param stream
+		 */
+		void load_object(
+			std::unique_ptr<pclass::PropertyClass> &dest, BitStream &stream) const;
+
+		/**
+		 * @param prop
+		 * @param stream
+		 */
 		void load_property(pclass::IProperty &prop, BitStream &stream) const;
 
 	private:

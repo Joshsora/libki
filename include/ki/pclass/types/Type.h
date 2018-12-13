@@ -1,7 +1,7 @@
 #pragma once
+#include <memory>
 #include <string>
 #include <vector>
-#include <map>
 #include "ki/pclass/HashCalculator.h"
 #include "ki/pclass/Value.h"
 #include "ki/util/BitStream.h"
@@ -47,7 +47,7 @@ namespace pclass
 		kind get_kind() const;
 		const TypeSystem &get_type_system() const;
 
-		virtual PropertyClass *instantiate() const;
+		virtual std::unique_ptr<PropertyClass> instantiate() const;
 		virtual void write_to(BitStream &stream, Value value) const;
 		virtual Value read_from(BitStream &stream) const;
 
@@ -59,10 +59,6 @@ namespace pclass
 		hash_t m_hash;
 		const TypeSystem &m_type_system;
 	};
-
-	typedef std::vector<Type *> TypeList;
-	typedef std::map<std::string, Type *> TypeNameMap;
-	typedef std::map<hash_t, Type *> TypeHashMap;
 
 	/**
 	 * @param[in] expected The Type that is expected to match with the actual Type.
