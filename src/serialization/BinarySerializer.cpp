@@ -1,4 +1,4 @@
-#include "ki/serialization/SerializerBinary.h"
+#include "ki/serialization/BinarySerializer.h"
 #include <zlib.h>
 #include <cassert>
 #include "ki/util/unique.h"
@@ -7,7 +7,7 @@ namespace ki
 {
 namespace serialization
 {
-	SerializerBinary::SerializerBinary(const pclass::TypeSystem &type_system,
+	BinarySerializer::BinarySerializer(const pclass::TypeSystem &type_system,
 		const bool is_file, const flags flags)
 	{
 		m_type_system = &type_system;
@@ -16,7 +16,7 @@ namespace serialization
 		m_root_object = nullptr;
 	}
 
-	void SerializerBinary::save(const pclass::PropertyClass *object, BitStream &stream)
+	void BinarySerializer::save(const pclass::PropertyClass *object, BitStream &stream)
 	{
 		// Write the serializer flags
 		if (FLAG_IS_SET(m_flags, flags::WRITE_SERIALIZER_FLAGS))
@@ -114,7 +114,7 @@ namespace serialization
 		}
 	}
 
-	void SerializerBinary::presave_object(const pclass::PropertyClass *object, BitStream &stream) const
+	void BinarySerializer::presave_object(const pclass::PropertyClass *object, BitStream &stream) const
 	{
 		// If we have an object, write the type hash, otherwise, write NULL (0).
 		if (object)
@@ -123,7 +123,7 @@ namespace serialization
 			stream.write<uint32_t>(NULL);
 	}
 
-	void SerializerBinary::save_object(const pclass::PropertyClass *object, BitStream &stream) const
+	void BinarySerializer::save_object(const pclass::PropertyClass *object, BitStream &stream) const
 	{
 		// Write any object headers
 		presave_object(object, stream);
@@ -165,7 +165,7 @@ namespace serialization
 		stream.seek(BitStream::stream_pos(stream.tell().as_bytes(), 0));
 	}
 
-	void SerializerBinary::save_property(const pclass::IProperty &prop, BitStream &stream) const
+	void BinarySerializer::save_property(const pclass::IProperty &prop, BitStream &stream) const
 	{
 		// Remember where we started writing the property data
 		const auto start_pos = stream.tell();
@@ -236,7 +236,7 @@ namespace serialization
 		}
 	}
 
-	void SerializerBinary::load(
+	void BinarySerializer::load(
 		std::unique_ptr<pclass::PropertyClass> &dest,
 		BitStream &stream, const std::size_t size)
 	{
@@ -299,7 +299,7 @@ namespace serialization
 		load_object(dest, segment_stream);
 	}
 
-	void SerializerBinary::preload_object(
+	void BinarySerializer::preload_object(
 		std::unique_ptr<pclass::PropertyClass> &dest, BitStream &stream) const
 	{
 		const auto type_hash = stream.read<pclass::hash_t>();
@@ -314,7 +314,7 @@ namespace serialization
 			dest = nullptr;
 	}
 
-	void SerializerBinary::load_object(
+	void BinarySerializer::load_object(
 		std::unique_ptr<pclass::PropertyClass> &dest, BitStream &stream) const
 	{
 		// Read the object header
@@ -376,7 +376,7 @@ namespace serialization
 		stream.seek(BitStream::stream_pos(stream.tell().as_bytes(), 0), false);
 	}
 
-	void SerializerBinary::load_property(pclass::IProperty &prop, BitStream &stream) const
+	void BinarySerializer::load_property(pclass::IProperty &prop, BitStream &stream) const
 	{
 		auto &property_type = prop.get_type();
 		if (prop.is_dynamic())

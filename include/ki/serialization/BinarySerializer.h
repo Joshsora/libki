@@ -13,7 +13,7 @@ namespace serialization
 	/**
 	 * TODO: Documentation
 	 */
-	class SerializerBinary
+	class BinarySerializer
 	{
 	public:
 		/**
@@ -41,9 +41,9 @@ namespace serialization
 		 * @param is_file Determines whether or not to write type sizes, and property headers.
 		 * @param flags Determines how serialized data is formatted.
 		 */
-		explicit SerializerBinary(const pclass::TypeSystem &type_system,
+		explicit BinarySerializer(const pclass::TypeSystem &type_system,
 			bool is_file, flags flags);
-		virtual ~SerializerBinary() {}
+		virtual ~BinarySerializer() {}
 
 		/**
 		 * @param object 
@@ -110,4 +110,4 @@ namespace serialization
 }
 
 // Make sure the flags enum can be used like a bitflag
-MAKE_FLAGS_ENUM(ki::serialization::SerializerBinary::flags);
+MAKE_FLAGS_ENUM(ki::serialization::BinarySerializer::flags);

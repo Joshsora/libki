@@ -7,7 +7,7 @@
 #include <ki/pclass/PropertyClass.h>
 #include <ki/pclass/StaticProperty.h>
 #include <ki/pclass/VectorProperty.h>
-#include <ki/serialization/SerializerBinary.h>
+#include <ki/serialization/BinarySerializer.h>
 #include "ki/util/unique.h"
 
 using namespace ki;
@@ -394,11 +394,11 @@ void validate_test_object(TestObject &object)
 }
 
 /**
- * Conduct save/load tests with a SerializerBinary instance.
+ * Conduct save/load tests with a BinarySerializer instance.
  */
 void test_serializer(
 	std::unique_ptr<TestObject> &test_object,
-	serialization::SerializerBinary &serializer,
+	serialization::BinarySerializer &serializer,
 	const std::string &file_suffix)
 {
 	BitBuffer buffer;
@@ -473,38 +473,38 @@ TEST_CASE("Serialization tests", "[serialization]")
 	std::unique_ptr<TestObject> test_object = nullptr;
 	define_types();
 
-	SECTION("SerializerBinary")
+	SECTION("BinarySerializer")
 	{
 		SECTION("Regular format without compression")
 		{
-			serialization::SerializerBinary serializer(
+			serialization::BinarySerializer serializer(
 				*g_type_system.get(), false,
-				serialization::SerializerBinary::flags::NONE
+				serialization::BinarySerializer::flags::NONE
 			);
 			test_serializer(test_object, serializer, "_regular");
 		}
 		SECTION("File format without compression")
 		{
-			serialization::SerializerBinary serializer(
+			serialization::BinarySerializer serializer(
 				*g_type_system.get(), true,
-				serialization::SerializerBinary::flags::WRITE_SERIALIZER_FLAGS
+				serialization::BinarySerializer::flags::WRITE_SERIALIZER_FLAGS
 			);
 			test_serializer(test_object, serializer, "_file");
 		}
 		SECTION("Regular format with compression")
 		{
-			serialization::SerializerBinary serializer(
+			serialization::BinarySerializer serializer(
 				*g_type_system.get(), false,
-				serialization::SerializerBinary::flags::COMPRESSED
+				serialization::BinarySerializer::flags::COMPRESSED
 			);
 			test_serializer(test_object, serializer, "_regular_compressed");
 		}
 		SECTION("File format with compression")
 		{
-			serialization::SerializerBinary serializer(
+			serialization::BinarySerializer serializer(
 				*g_type_system.get(), true,
-				serialization::SerializerBinary::flags::WRITE_SERIALIZER_FLAGS |
-				serialization::SerializerBinary::flags::COMPRESSED
+				serialization::BinarySerializer::flags::WRITE_SERIALIZER_FLAGS |
+				serialization::BinarySerializer::flags::COMPRESSED
 			);
 			test_serializer(test_object, serializer, "_file_compressed");
 		}
