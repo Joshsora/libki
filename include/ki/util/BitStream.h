@@ -2,8 +2,9 @@
 #include <cstdint>
 #include <type_traits>
 #include <sstream>
+#include <memory>
 #include "ki/util/BitTypes.h"
-#include "exception.h"
+#include "ki/util/exception.h"
 
 #define KI_BITBUFFER_DEFAULT_SIZE 0x2000
 
