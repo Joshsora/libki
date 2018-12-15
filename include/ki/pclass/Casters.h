@@ -13,33 +13,6 @@ namespace pclass
 namespace detail
 {
 	/**
-	 * A utility to call ValueCaster::declare<SrcT, DestT> with
-	 * bi<N> and bui<N> as the destination type.
-	 * 
-	 * N is automatically decremented until it reaches 0.
-	 */
-	template <typename T, int N = 7>
-	struct bit_integer_declarer
-	{
-		static void declare()
-		{
-			bit_integer_declarer<T, N - 1>::declare();
-			ValueCaster::declare<T, bi<N>>();
-			ValueCaster::declare<T, bui<N>>();
-		}
-	};
-
-	/**
-	 * Specialization for bit_integer_declarer.
-	 * Stop decrementing N when it reaches 0.
-	 */
-	template <typename T>
-	struct bit_integer_declarer<T, 0>
-	{
-		static void declare() {}
-	};
-
-	/**
 	 * Determines whether a type can be assigned to a
 	 * nlohmann::json object.
 	 */
@@ -200,6 +173,33 @@ namespace detail
 			oss << casted_value;
 			return Value::make_value<std::string>(oss.str());
 		}
+	};
+
+	/**
+	 * A utility to call ValueCaster::declare<SrcT, DestT> with
+	 * bi<N> and bui<N> as the destination type.
+	 * 
+	 * N is automatically decremented until it reaches 0.
+	 */
+	template <typename T, int N = 7>
+	struct bit_integer_declarer
+	{
+		static void declare()
+		{
+			bit_integer_declarer<T, N - 1>::declare();
+			ValueCaster::declare<T, bi<N>>();
+			ValueCaster::declare<T, bui<N>>();
+		}
+	};
+
+	/**
+	 * Specialization for bit_integer_declarer.
+	 * Stop decrementing N when it reaches 0.
+	 */
+	template <typename T>
+	struct bit_integer_declarer<T, 0>
+	{
+		static void declare() {}
 	};
 
 	/**
