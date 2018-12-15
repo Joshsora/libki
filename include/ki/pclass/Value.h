@@ -1,7 +1,6 @@
 #pragma once
 #include <utility>
 #include <typeinfo>
-#include <sstream>
 #include <unordered_map>
 #include "ki/util/exception.h"
 
@@ -44,8 +43,27 @@ namespace pclass
 		template <typename SrcT, typename DestT>
 		struct value_caster_impl : value_caster_base
 		{
+			Value cast(const Value& value) const override;
+			virtual DestT cast_value(const SrcT &value) const = 0;
+
 		protected:
-			static Value bad_cast();
+			static DestT bad_cast();
+		};
+
+		/**
+		 * TODO: Documentation
+		 */
+		template <
+			typename SrcT, typename DestT,
+			typename SrcEnable, typename DestEnable
+		>
+		struct value_caster : value_caster_impl<SrcT, DestT>
+		{
+			DestT cast_value(const SrcT &value) const override
+			{
+				// By default, just attempt to static_cast from SrcT to DestT.
+				return static_cast<DestT>(value);
+			}
 		};
 
 		/**
@@ -386,28 +404,18 @@ namespace pclass
 	namespace detail
 	{
 		template <typename SrcT, typename DestT>
-		Value value_caster_impl<SrcT, DestT>::bad_cast()
+		DestT value_caster_impl<SrcT, DestT>::bad_cast()
 		{
 			throw cast_error(typeid(SrcT), typeid(DestT));
 		}
 
-		/**
-		 * TODO: Documentation
-		 */
-		template <
-			typename SrcT, typename DestT,
-			typename SrcEnable, typename DestEnable
-		>
-		struct value_caster : value_caster_impl<SrcT, DestT>
+		template <typename SrcT, typename DestT>
+		Value value_caster_impl<SrcT, DestT>::cast(const Value& value) const
 		{
-			Value cast(const Value &value) const override
-			{
-				// By default, just attempt to static_cast from SrcT to DestT.
-				return Value::make_value<DestT>(
-					static_cast<DestT>(value.get<SrcT>())
-				);
-			}
-		};
+			return Value::make_value<DestT>(
+				cast_value(value.get<SrcT>())
+			);
+		}
 	}
 }
 }

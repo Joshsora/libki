@@ -3,13 +3,13 @@
 #include <cstdint>
 #include <string>
 #include <catch.hpp>
+#include <ki/util/unique.h>
 #include <ki/pclass/TypeSystem.h>
 #include <ki/pclass/PropertyClass.h>
 #include <ki/pclass/StaticProperty.h>
 #include <ki/pclass/VectorProperty.h>
 #include <ki/serialization/BinarySerializer.h>
-#include "ki/util/unique.h"
-#include "ki/serialization/JsonSerializer.h"
+#include <ki/serialization/JsonSerializer.h>
 
 using namespace ki;
 
@@ -108,15 +108,13 @@ namespace detail
 	struct value_caster<Vector3D, nlohmann::json>
 		: value_caster_impl<Vector3D, nlohmann::json>
 	{
-		Value cast(const Value &value) const override
+		nlohmann::json cast_value(const Vector3D &value) const
 		{
-			auto &vector = value.get<Vector3D>();
-			const nlohmann::json j = {
-				{ "x", vector.m_x },
-				{ "y", vector.m_y },
-				{ "z", vector.m_z }
+			return {
+				{ "x", value.m_x },
+				{ "y", value.m_y },
+				{ "z", value.m_z }
 			};
-			return Value::make_value<nlohmann::json>(j);
 		}
 	};
 
@@ -127,15 +125,12 @@ namespace detail
 	struct value_caster<nlohmann::json, Vector3D>
 		: value_caster_impl<nlohmann::json, Vector3D>
 	{
-		Value cast(const Value &value) const override
+		Vector3D cast_value(const nlohmann::json &value) const
 		{
-			auto &j = value.get<nlohmann::json>();
-			return Value::make_value<Vector3D>(
-				Vector3D(
-					j["x"].get<float>(),
-					j["y"].get<float>(),
-					j["z"].get<float>()
-				)
+			return Vector3D(
+				value["x"].get<float>(),
+				value["y"].get<float>(),
+				value["z"].get<float>()
 			);
 		}
 	};

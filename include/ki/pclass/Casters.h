@@ -2,8 +2,8 @@
 #include <type_traits>
 #include <sstream>
 #include <json.hpp>
-#include "ki/util/BitTypes.h"
 #include "ki/pclass/Value.h"
+#include "ki/util/BitTypes.h"
 #include "ki/pclass/types/EnumType.h"
 
 namespace ki
@@ -45,18 +45,17 @@ namespace detail
 	>
 		: value_caster_impl<SrcT, nlohmann::json>
 	{
-		Value cast(const Value &value) const override
+		nlohmann::json cast_value(const SrcT &value) const override
 		{
-			const nlohmann::json j = value.get<SrcT>();
-			return Value::make_value<nlohmann::json>(j);
+			return value;
 		}
 	};
 
 	/**
-	 * value_caster specialization for casting bi<N> and bui<N>
+	 * value_caster specialization for casting bit integers (bi<N> and bui<N>)
 	 * to a json object.
 	 */
-	template <int N, bool Unsigned>
+	template <uint8_t N, bool Unsigned>
 	struct value_caster<
 		BitInteger<N, Unsigned>, nlohmann::json
 	>
@@ -68,12 +67,29 @@ namespace detail
 			typename bits<N>::int_type
 		>::type;
 
-		Value cast(const Value &value) const override
+		nlohmann::json cast_value(
+			const BitInteger<N, Unsigned> &value) const override
 		{
-			const nlohmann::json j = static_cast<type>(
-				value.get<BitInteger<N, Unsigned>>()
-			);
-			return Value::make_value<nlohmann::json>(j);
+			return static_cast<type>(value);
+		}
+	};
+
+	/**
+	 * value_caster specialization for casting enum to bit integer types 
+	 * (bi<N> and bui<N>).
+	 */
+	template <typename SrcT, uint8_t N, bool Unsigned>
+	struct value_caster<
+		SrcT, BitInteger<N, Unsigned>,
+		typename std::enable_if<std::is_enum<SrcT>::value>::type
+	>
+		: value_caster_impl<SrcT, BitInteger<N, Unsigned>>
+	{
+		using underlying_type = typename std::underlying_type<SrcT>::type;
+	
+		BitInteger<N, Unsigned> cast_value(const SrcT &value) const override
+		{
+			return static_cast<underlying_type>(value);
 		}
 	};
 
@@ -89,36 +105,9 @@ namespace detail
 	{
 		using underlying_type = typename std::underlying_type<SrcT>::type;
 
-		Value cast(const Value &value) const override
+		nlohmann::json cast_value(const SrcT &value) const override
 		{
-			const auto underlying_value =
-				static_cast<underlying_type>(value.get<SrcT>());
-			const nlohmann::json j = underlying_value;
-			return Value::make_value<nlohmann::json>(j);
-		}
-	};
-
-	/**
-	 * value_caster specialization for casting enums to bit integer types.
-	 */
-	template <
-		typename SrcT,
-		int N, bool Unsigned
-	>
-	struct value_caster<
-		SrcT, BitInteger<N, Unsigned>,
-		typename std::enable_if<std::is_enum<SrcT>::value>::type
-	>
-		: value_caster_impl<SrcT, nlohmann::json>
-	{
-		using underlying_type = typename std::underlying_type<SrcT>::type;
-
-		Value cast(const Value &value) const override
-		{
-			const auto underlying_value =
-				static_cast<underlying_type>(value.get<SrcT>());
-			const auto bit_value = BitInteger<N, Unsigned>(underlying_value);
-			return Value::make_value<BitInteger<N, Unsigned>>(bit_value);
+			return static_cast<underlying_type>(value);
 		}
 	};
 
@@ -164,14 +153,13 @@ namespace detail
 	struct value_caster<SrcT, std::string>
 		: value_caster_impl<SrcT, std::string>
 	{
-		Value cast(const Value &value) const override
+		std::string cast_value(const SrcT &value) const override
 		{
 			std::ostringstream oss;
 			auto casted_value = static_cast<
-				typename string_cast_t<SrcT>::type
-			>(value.get<SrcT>());
+				typename string_cast_t<SrcT>::type>(value);
 			oss << casted_value;
-			return Value::make_value<std::string>(oss.str());
+			return oss.str();
 		}
 	};
 
