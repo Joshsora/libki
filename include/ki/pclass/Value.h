@@ -15,7 +15,10 @@ namespace pclass
 
 	namespace detail
 	{
-		template <typename SrcT, typename DestT>
+		template <
+			typename SrcT, typename DestT,
+			typename SrcEnable = void, typename DestEnable = void
+		>
 		struct value_caster;
 
 		/**
@@ -160,7 +163,7 @@ namespace pclass
 		 * A static lookup used to find appropriate casters at runtime.
 		 * Contains SrcT -> Caster elements.
 		 */
-		static std::unordered_map<std::size_t, ValueCaster *> s_caster_lookup;
+		static std::unordered_map<std::size_t, ValueCaster *> *s_caster_lookup;
 
 		const std::type_info *m_src_type;
 		std::unordered_map<std::size_t, detail::value_caster_base *> m_casts;
@@ -175,11 +178,14 @@ namespace pclass
 		template <typename SrcT>
 		static ValueCaster &get()
 		{
+			if (!s_caster_lookup)
+				s_caster_lookup = new std::unordered_map<std::size_t, ValueCaster *>();
+
 			const auto &src_type = typeid(SrcT);
 			const auto src_type_hash = src_type.hash_code();
-			if (s_caster_lookup.find(src_type_hash) == s_caster_lookup.end())
-				s_caster_lookup[src_type_hash] = new ValueCaster(src_type);
-			return *s_caster_lookup[src_type_hash];
+			if (s_caster_lookup->find(src_type_hash) == s_caster_lookup->end())
+				(*s_caster_lookup)[src_type_hash] = new ValueCaster(src_type);
+			return *s_caster_lookup->at(src_type_hash);
 		}
 
 		template <typename SrcT, typename DestT>
@@ -388,7 +394,10 @@ namespace pclass
 		/**
 		 * TODO: Documentation
 		 */
-		template <typename SrcT, typename DestT>
+		template <
+			typename SrcT, typename DestT,
+			typename SrcEnable, typename DestEnable
+		>
 		struct value_caster : value_caster_impl<SrcT, DestT>
 		{
 			Value cast(const Value &value) const override

@@ -36,6 +36,12 @@ namespace pclass
 			return ValueT(prop.m_value);
 		}
 
+		static Value get_value(const StaticProperty<ValueT> &prop)
+		{
+			// Return a reference to the property's value
+			return Value::make_reference<ValueT>(prop.m_value);
+		}
+
 		static const PropertyClass *get_object(const StaticProperty<ValueT> &prop)
 		{
 			// ValueT does not derive from PropertyClass, and so, this property is not
@@ -80,6 +86,8 @@ namespace pclass
 		>::type
 	>
 	{
+		using nonpointer_type = typename std::remove_pointer<ValueT>::type;
+
 		static ValueT construct(const Type &type)
 		{
 			// The default value of pointers is null
@@ -91,6 +99,11 @@ namespace pclass
 			// The copy constructor for all pointers is to copy the pointer
 			// without creating a new copy of the object it's pointing to.
 			return prop.m_value;
+		}
+
+		static Value get_value(const StaticProperty<ValueT> &prop)
+		{
+			return Value::make_reference<nonpointer_type>(*prop.m_value);
 		}
 
 		static const PropertyClass *get_object(const StaticProperty<ValueT> &prop)
@@ -140,6 +153,8 @@ namespace pclass
 		>::type
 	>
 	{
+		using nonpointer_type = typename std::remove_pointer<ValueT>::type;
+
 		static ValueT construct(const Type &type)
 		{
 			// The default value of pointers is null
@@ -151,6 +166,11 @@ namespace pclass
 			// The copy constructor for all pointers is to copy the pointer
 			// without creating a new copy of the object it's pointing to.
 			return prop.m_value;
+		}
+
+		static Value get_value(const StaticProperty<ValueT> &prop)
+		{
+			return Value::make_reference<nonpointer_type>(*prop.m_value);
 		}
 
 		static const PropertyClass *get_object(const StaticProperty<ValueT> &prop)
@@ -214,6 +234,11 @@ namespace pclass
 			ValueT value = *value_ptr;
 			delete value_ptr;
 			return value;
+		}
+		
+		static Value get_value(const StaticProperty<ValueT> &prop)
+		{
+			return Value::make_reference<ValueT>(prop.m_value);
 		}
 
 		static const PropertyClass *get_object(const StaticProperty<ValueT> &prop)
@@ -313,6 +338,11 @@ namespace pclass
 			return value_object_helper<ValueT>::copy(prop);
 		}
 
+		static Value get_value(const StaticProperty<ValueT> &prop)
+		{
+			return value_object_helper<ValueT>::get_value(prop);
+		}
+
 		static const PropertyClass *get_object(const StaticProperty<ValueT> &prop)
 		{
 			return value_object_helper<ValueT>::get_object(prop);
@@ -381,7 +411,7 @@ namespace pclass
 
 		Value get_value() const override
 		{
-			return Value::make_reference(m_value);
+			return value_helper<ValueT>::get_value(*this);
 		}
 
 		const PropertyClass *get_object() const override

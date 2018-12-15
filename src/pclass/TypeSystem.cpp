@@ -13,8 +13,8 @@ namespace ki
 {
 namespace pclass
 {
-	template <int N>
-	void define_bit_integer_primitive(pclass::TypeSystem &type_system)
+	template <int N = 7>
+	void define_bit_integer_primitive(TypeSystem &type_system)
 	{
 		define_bit_integer_primitive<N - 1>(type_system);
 
@@ -29,6 +29,10 @@ namespace pclass
 		type_system.define_primitive<bui<N>>(oss.str());
 	}
 
+	/**
+	 * Specialization for define_bit_integer_primitive.
+	 * Stop decrementing N when it reaches 0.
+	 */
 	template <>
 	void define_bit_integer_primitive<0>(TypeSystem &type_system) {}
 
@@ -58,7 +62,7 @@ namespace pclass
 		define_primitive<uint64_t>("gid");
 
 		// Define bit-integer types
-		define_bit_integer_primitive<7>(*this);
+		define_bit_integer_primitive(*this);
 		define_primitive<bi<24>>("s24");
 		define_primitive<bui<24>>("u24");
 
@@ -116,6 +120,15 @@ namespace pclass
 			throw runtime_error(oss.str());
 		}
 		return *it->second;
+	}
+
+	EnumType &TypeSystem::define_enum(const std::string& name)
+	{
+		auto *type = new EnumType(name, *this);
+		define_type(std::unique_ptr<Type>(
+			dynamic_cast<Type *>(type)
+		));
+		return *type;
 	}
 
 	void TypeSystem::define_type(std::unique_ptr<Type> type)

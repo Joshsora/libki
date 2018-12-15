@@ -6,6 +6,7 @@
 #include "ki/pclass/types/PrimitiveType.h"
 #include "ki/pclass/types/ClassType.h"
 #include "ki/pclass/types/EnumType.h"
+#include "ki/pclass/Casters.h"
 
 namespace ki
 {
@@ -30,6 +31,7 @@ namespace pclass
 		template <typename ValueT>
 		PrimitiveType<ValueT> &define_primitive(const std::string &name)
 		{
+			detail::caster_declarer<ValueT>::declare();
 			auto *type = new PrimitiveType<ValueT>(name, *this);
 			define_type(std::unique_ptr<Type>(
 				dynamic_cast<Type *>(type)
@@ -50,9 +52,12 @@ namespace pclass
 			return define_class<ClassT>(name, &base_class);
 		}
 
+		EnumType &define_enum(const std::string &name);
+
 		template <typename EnumT>
 		CppEnumType<EnumT> &define_enum(const std::string &name)
 		{
+			detail::caster_declarer<EnumT>::declare();
 			auto *type = new CppEnumType<EnumT>(name, *this);
 			define_type(std::unique_ptr<Type>(
 				dynamic_cast<Type *>(type)
@@ -83,6 +88,8 @@ namespace pclass
 		ClassType<ClassT> &define_class(
 			const std::string &name, const Type *base_class)
 		{
+			detail::caster_declarer<ClassT>::declare();
+
 			// If the caller does not specify a base class, automatically make
 			// ki::pclass::PropertyClass the base class (if it has been defined)
 			if (base_class == nullptr && has_type("class PropertyClass"))

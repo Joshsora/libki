@@ -34,6 +34,14 @@ namespace pclass
 			return ValueT(prop.at(index));
 		}
 
+		static Value get_value(const VectorProperty<ValueT> &prop, const int index)
+		{
+			// Ensure index is within bounds
+			if (index < 0 || index >= prop.size())
+				throw runtime_error("Index out of bounds.");
+			return Value::make_reference(prop.at(index));
+		}
+
 		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
 		{
 			// ValueT does not derive from PropertyClass, and so, this property is not
@@ -82,6 +90,14 @@ namespace pclass
 			return prop.at(index);
 		}
 
+		static Value get_value(const VectorProperty<ValueT> &prop, const int index)
+		{
+			// Ensure index is within bounds
+			if (index < 0 || index >= prop.size())
+				throw runtime_error("Index out of bounds.");
+			return Value::make_reference(*prop.at(index));
+		}
+
 		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
 		{
 			// ValueT does not derive from PropertyClass, and so, this property is not
@@ -124,6 +140,14 @@ namespace pclass
 			// The copy constructor for all pointers is to copy the pointer
 			// without creating a new copy of the object it's pointing to.
 			return prop.at(index);
+		}
+
+		static Value get_value(const VectorProperty<ValueT> &prop, const int index)
+		{
+			// Ensure index is within bounds
+			if (index < 0 || index >= prop.size())
+				throw runtime_error("Index out of bounds.");
+			return Value::make_reference(*prop.at(index));
 		}
 
 		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
@@ -183,6 +207,14 @@ namespace pclass
 			ValueT value = *value_ptr;
 			delete value_ptr;
 			return value;
+		}
+
+		static Value get_value(const VectorProperty<ValueT> &prop, const int index)
+		{
+			// Ensure index is within bounds
+			if (index < 0 || index >= prop.size())
+				throw runtime_error("Index out of bounds.");
+			return Value::make_reference(prop.at(index));
 		}
 
 		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
@@ -300,6 +332,12 @@ namespace pclass
 			return vector_value_object_helper<ValueT>::get_object(prop, index);
 		}
 
+		static Value get_value(const VectorProperty<ValueT> &prop,
+			const int index)
+		{
+			return vector_value_object_helper<ValueT>::get_value(prop, index);
+		}
+
 		static void set_object(VectorProperty<ValueT> &prop, 
 			std::unique_ptr<PropertyClass> &object, const int index)
 		{
@@ -364,7 +402,7 @@ namespace pclass
 		{
 			if (index < 0 || index >= this->size())
 				throw runtime_error("Index out of bounds.");
-			return Value::make_reference(this->at(index));
+			return vector_value_helper<ValueT>::get_value(*this, index);
 		}
 
 		const PropertyClass *get_object(const int index) const override

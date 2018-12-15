@@ -4,6 +4,9 @@ namespace ki
 {
 namespace pclass
 {
+	// Initialize the static lookup map
+	std::unordered_map<std::size_t, ValueCaster *> *ValueCaster::s_caster_lookup = nullptr;
+
 	namespace detail
 	{
 		Value value_caster_base::cast(const Value &v) const
@@ -109,8 +112,5 @@ namespace pclass
 			m_deallocator.deallocate(m_value_ptr);
 		m_value_ptr = nullptr;
 	}
-
-	// Initialize the static lookup map
-	std::unordered_map<std::size_t, ValueCaster *> ValueCaster::s_caster_lookup = {};
 }
 }

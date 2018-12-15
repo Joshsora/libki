@@ -5,6 +5,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 set(RAPIDXML_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/third_party)
 add_library(RapidXML INTERFACE)
 target_include_directories(RapidXML INTERFACE ${RAPIDXML_INCLUDE_DIR})
+set(JSON_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/third_party)
+add_library(JSON INTERFACE)
+target_include_directories(JSON INTERFACE ${JSON_INCLUDE_DIR})
 
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
@@ -19,7 +22,7 @@ target_include_directories(${PROJECT_NAME}
 	PUBLIC
 		${PROJECT_SOURCE_DIR}/include
 )
-target_link_libraries(${PROJECT_NAME} RapidXML ${ZLIB_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} RapidXML JSON ${ZLIB_LIBRARIES})
 
 add_subdirectory("src/dml")
 add_subdirectory("src/pclass")

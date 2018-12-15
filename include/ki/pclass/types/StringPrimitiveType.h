@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <string>
 
 namespace ki
@@ -7,6 +8,9 @@ namespace pclass
 {
 namespace detail
 {
+	/**
+	 * primitive_type_helper specialization for string types.
+	 */
 	template <
 		typename _Elem,
 		typename _Traits,
