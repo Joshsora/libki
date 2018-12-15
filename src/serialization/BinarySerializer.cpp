@@ -114,22 +114,20 @@ namespace serialization
 		}
 	}
 
-	void BinarySerializer::presave_object(const pclass::PropertyClass *object, BitStream &stream) const
+	bool BinarySerializer::presave_object(const pclass::PropertyClass *object, BitStream &stream) const
 	{
 		// If we have an object, write the type hash, otherwise, write NULL (0).
 		if (object)
 			stream.write<uint32_t>(object->get_type().get_hash());
 		else
 			stream.write<uint32_t>(NULL);
+		return object != nullptr;
 	}
 
 	void BinarySerializer::save_object(const pclass::PropertyClass *object, BitStream &stream) const
 	{
 		// Write any object headers
-		presave_object(object, stream);
-
-		// Make sure we have an object to write
-		if (!object)
+		if (!presave_object(object, stream))
 			return;
 
 		// Remember where we started writing the object data
@@ -179,39 +177,17 @@ namespace serialization
 		}
 
 		// Is the property dynamic? (holding more than one value)
-		auto &property_type = prop.get_type();
 		if (prop.is_dynamic())
 		{
 			// Cast the property to a IDynamicProperty
 			const auto &dynamic_property =
 				dynamic_cast<const pclass::IDynamicProperty &>(prop);
-
-			// Write the number of elements
-			stream.write<uint32_t>(dynamic_property.get_element_count());
-
-			// Iterate through the elements
-			for (auto i = 0; i < dynamic_property.get_element_count(); i++)
-			{
-				// Is this a collection of pointers?
-				if (prop.is_pointer())
-				{
-					// Is the property a collection of pointers to other objects?
-					if (property_type.get_kind() == pclass::Type::kind::CLASS)
-						// Write the value as a nested object
-						save_object(dynamic_property.get_object(i), stream);
-					else
-						// Write the value as normal (let the property deal with dereferencing)
-						dynamic_property.write_value_to(stream, i);
-				}
-				else
-					// If the value isn't a pointer, and it's not dynamic, just write it as a value
-					dynamic_property.write_value_to(stream, i);
-			}
+			save_dynamic_property(dynamic_property, stream);
 		}
 		else if (prop.is_pointer())
 		{
 			// Does this property hold a pointer to another object?
-			if (property_type.get_kind() == pclass::Type::kind::CLASS)
+			if (prop.get_type().get_kind() == pclass::Type::kind::CLASS)
 				// Write the value as a nested object
 				save_object(prop.get_object(), stream);
 			else
@@ -233,6 +209,32 @@ namespace serialization
 			stream.seek(start_pos);
 			stream.write(size_bits);
 			stream.seek(end_pos);
+		}
+	}
+
+	void BinarySerializer::save_dynamic_property(
+		const pclass::IDynamicProperty& prop, BitStream& stream) const
+	{
+		// Write the number of elements
+		stream.write<uint32_t>(prop.get_element_count());
+
+		// Iterate through the elements
+		for (auto i = 0; i < prop.get_element_count(); i++)
+		{
+			// Is this a collection of pointers?
+			if (prop.is_pointer())
+			{
+				// Is the property a collection of pointers to other objects?
+				if (prop.get_type().get_kind() == pclass::Type::kind::CLASS)
+					// Write the value as a nested object
+					save_object(prop.get_object(i), stream);
+				else
+					// Write the value as normal (let the property deal with dereferencing)
+					prop.write_value_to(stream, i);
+			}
+			else
+				// If the value isn't a pointer, and it's not dynamic, just write it as a value
+				prop.write_value_to(stream, i);
 		}
 	}
 
@@ -378,43 +380,16 @@ namespace serialization
 
 	void BinarySerializer::load_property(pclass::IProperty &prop, BitStream &stream) const
 	{
-		auto &property_type = prop.get_type();
 		if (prop.is_dynamic())
 		{
 			auto &dynamic_property =
 				dynamic_cast<pclass::IDynamicProperty &>(prop);
-
-			// How many elements are there in this dynamic property?
-			const auto element_count = stream.read<uint32_t>();
-			dynamic_property.set_element_count(element_count);
-
-			// Load each of the elements
-			for (uint16_t i = 0; i < element_count; i++)
-			{
-				// Is this a collection of pointers?
-				if (dynamic_property.is_pointer())
-				{
-					// Is the property a collection of pointers to other objects?
-					if (property_type.get_kind() == pclass::Type::kind::CLASS)
-					{
-						// Read the object as a nested object
-						std::unique_ptr<pclass::PropertyClass> object = nullptr;
-						load_object(object, stream);
-						dynamic_property.set_object(object, i);
-					}
-					else
-						// Read the value as normal (let the property deal with dereferencing)
-						dynamic_property.read_value_from(stream, i);
-				}
-				else
-					// If the value isn't a pointer, and it's not dynamic, just read it as a value
-					dynamic_property.read_value_from(stream, i);
-			}
+			load_dynamic_property(dynamic_property, stream);
 		}
 		else if (prop.is_pointer())
 		{
 			// Does this property hold a pointer to another object?
-			if (property_type.get_kind() == pclass::Type::kind::CLASS)
+			if (prop.get_type().get_kind() == pclass::Type::kind::CLASS)
 			{
 				// Read the object as a nested object
 				std::unique_ptr<pclass::PropertyClass> object = nullptr;
@@ -429,5 +404,37 @@ namespace serialization
 			// If the value isn't a pointer, and it's not dynamic, just read it as a value
 			prop.read_value_from(stream);
 	}
+
+	void BinarySerializer::load_dynamic_property(
+		pclass::IDynamicProperty& prop, BitStream& stream) const
+	{
+		// How many elements are there in this dynamic property?
+		const auto element_count = stream.read<uint32_t>();
+		prop.set_element_count(element_count);
+
+		// Load each of the elements
+		for (uint16_t i = 0; i < element_count; i++)
+		{
+			// Is this a collection of pointers?
+			if (prop.is_pointer())
+			{
+				// Is the property a collection of pointers to other objects?
+				if (prop.get_type().get_kind() == pclass::Type::kind::CLASS)
+				{
+					// Read the object as a nested object
+					std::unique_ptr<pclass::PropertyClass> object = nullptr;
+					load_object(object, stream);
+					prop.set_object(object, i);
+				}
+				else
+					// Read the value as normal (let the property deal with dereferencing)
+					prop.read_value_from(stream, i);
+			}
+			else
+				// If the value isn't a pointer, and it's not dynamic, just read it as a value
+				prop.read_value_from(stream, i);
+		}
+	}
+
 }
 }

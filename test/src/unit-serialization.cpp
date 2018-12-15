@@ -9,6 +9,7 @@
 #include <ki/pclass/VectorProperty.h>
 #include <ki/serialization/BinarySerializer.h>
 #include "ki/util/unique.h"
+#include "ki/serialization/JsonSerializer.h"
 
 using namespace ki;
 
@@ -17,7 +18,11 @@ using namespace ki;
  */
 struct Vector3D
 {
-	Vector3D(
+	// Allow json caster to access private members
+	friend pclass::detail::value_caster<Vector3D, nlohmann::json>;
+	friend pclass::detail::value_caster<nlohmann::json, Vector3D>;
+
+	explicit Vector3D(
 		const float x = 0.0f,
 		const float y = 0.0f,
 		const float z = 0.0f)
@@ -93,6 +98,45 @@ namespace detail
 			Vector3D value;
 			value.read_from(stream);
 			return Value::make_value<Vector3D>(value);
+		}
+	};
+
+	/**
+	 * value_caster specialization for casting Vector3D to json object.
+	 */
+	template <>
+	struct value_caster<Vector3D, nlohmann::json>
+		: value_caster_impl<Vector3D, nlohmann::json>
+	{
+		Value cast(const Value &value) const override
+		{
+			auto &vector = value.get<Vector3D>();
+			const nlohmann::json j = {
+				{ "x", vector.m_x },
+				{ "y", vector.m_y },
+				{ "z", vector.m_z }
+			};
+			return Value::make_value<nlohmann::json>(j);
+		}
+	};
+
+	/**
+	 * value_caster specialization for casting json object to Vector3D.
+	 */
+	template <>
+	struct value_caster<nlohmann::json, Vector3D>
+		: value_caster_impl<nlohmann::json, Vector3D>
+	{
+		Value cast(const Value &value) const override
+		{
+			auto &j = value.get<nlohmann::json>();
+			return Value::make_value<Vector3D>(
+				Vector3D(
+					j["x"].get<float>(),
+					j["y"].get<float>(),
+					j["z"].get<float>()
+				)
+			);
 		}
 	};
 }
@@ -276,6 +320,10 @@ void define_types()
 	g_type_system->define_class<NestedTestObjectA>("class NestedTestObjectA", nested_test_object);
 	g_type_system->define_class<NestedTestObjectB>("class NestedTestObjectB", nested_test_object);
 	g_type_system->define_class<TestObject>("class TestObject");
+
+	pclass::ValueCaster::declare<Vector3D, nlohmann::json>();
+	pclass::ValueCaster::declare<nlohmann::json, Vector3D>();
+
 	g_types_defined = true;
 }
 
@@ -407,7 +455,7 @@ void test_serializer(
 
 	// Open the sample data
 	std::ifstream sample(
-		"samples/serialization_binary" + file_suffix + ".bin",
+		"samples/serialization/" + file_suffix + ".bin",
 		std::ios::binary
 	);
 	REQUIRE(sample.is_open());
@@ -468,6 +516,67 @@ void test_serializer(
 	delete[] sample_data;
 }
 
+/**
+* Conduct save/load tests with a BinarySerializer instance.
+*/
+void test_serializer(
+	std::unique_ptr<TestObject> &test_object,
+	serialization::JsonSerializer &serializer,
+	const std::string &file_suffix)
+{
+	// Open the sample data
+	std::ifstream sample_file(
+		"samples/serialization/" + file_suffix + ".json",
+		std::ios::binary
+	);
+	REQUIRE(sample_file.is_open());
+
+	// Load the sample data into a buffer
+	const auto begin = sample_file.tellg();
+	sample_file.seekg(0, std::ios::end);
+	const auto end = sample_file.tellg();
+	const size_t sample_size = end - begin;
+	sample_file.seekg(std::ios::beg);
+	auto *sample_data = new char[sample_size];
+	sample_file.read(sample_data, sample_size);
+	sample_file.close();
+
+	// Load the sample data into a string
+	const auto sample = std::string(sample_data, sample_size);
+	delete[] sample_data;
+
+	SECTION("Saving objects")
+	{
+		// Create a test object, configure it, and write it to our stream
+		test_object = g_type_system->instantiate<TestObject>("class TestObject");
+		configure_test_object(*test_object);
+		const auto json_string = serializer.save(test_object.get());
+
+		// Delete the test object here so that it is not
+		// unnecessarily validated by the caller
+		test_object = nullptr;
+
+		// Validate the JSON string
+		REQUIRE(json_string == sample);
+	}
+
+	SECTION("Loading objects")
+	{
+		// Load an object from the sample
+		std::unique_ptr<pclass::PropertyClass> object = nullptr;
+		serializer.load(object, sample);
+
+		// Set test_object so that it is validated by the caller
+		/*
+		REQUIRE(object != nullptr);
+		test_object = std::unique_ptr<TestObject>(
+			dynamic_cast<TestObject *>(object.release())
+		);
+		REQUIRE(test_object != nullptr);
+		*/
+	}
+}
+
 TEST_CASE("Serialization tests", "[serialization]")
 {
 	std::unique_ptr<TestObject> test_object = nullptr;
@@ -481,7 +590,7 @@ TEST_CASE("Serialization tests", "[serialization]")
 				*g_type_system.get(), false,
 				serialization::BinarySerializer::flags::NONE
 			);
-			test_serializer(test_object, serializer, "_regular");
+			test_serializer(test_object, serializer, "regular");
 		}
 		SECTION("File format without compression")
 		{
@@ -489,7 +598,7 @@ TEST_CASE("Serialization tests", "[serialization]")
 				*g_type_system.get(), true,
 				serialization::BinarySerializer::flags::WRITE_SERIALIZER_FLAGS
 			);
-			test_serializer(test_object, serializer, "_file");
+			test_serializer(test_object, serializer, "file");
 		}
 		SECTION("Regular format with compression")
 		{
@@ -497,7 +606,7 @@ TEST_CASE("Serialization tests", "[serialization]")
 				*g_type_system.get(), false,
 				serialization::BinarySerializer::flags::COMPRESSED
 			);
-			test_serializer(test_object, serializer, "_regular_compressed");
+			test_serializer(test_object, serializer, "regular_compressed");
 		}
 		SECTION("File format with compression")
 		{
@@ -506,7 +615,22 @@ TEST_CASE("Serialization tests", "[serialization]")
 				serialization::BinarySerializer::flags::WRITE_SERIALIZER_FLAGS |
 				serialization::BinarySerializer::flags::COMPRESSED
 			);
-			test_serializer(test_object, serializer, "_file_compressed");
+			test_serializer(test_object, serializer, "file_compressed");
+		}
+	}
+
+	SECTION("JsonSerializer")
+	{
+		SECTION("Regular format")
+		{
+			serialization::JsonSerializer serializer(*g_type_system, false);
+			test_serializer(test_object, serializer, "regular");
+		}
+
+		SECTION("File format")
+		{
+			serialization::JsonSerializer serializer(*g_type_system, true);
+			test_serializer(test_object, serializer, "file");
 		}
 	}
 

@@ -64,19 +64,7 @@ namespace serialization
 		 * @param object 
 		 * @param stream 
 		 */
-		virtual void presave_object(const pclass::PropertyClass *object, BitStream &stream) const;
-
-		/**
-		 * @param object
- 		 * @param stream
-		 */
-		void save_object(const pclass::PropertyClass *object, BitStream &stream) const;
-
-		/**
-		 * @param prop
-		 * @param stream
-		 */
-		void save_property(const pclass::IProperty &prop, BitStream &stream) const;
+		virtual bool presave_object(const pclass::PropertyClass *object, BitStream &stream) const;
 
 		/**
 		 * Read an object header, and instantiate the necessary PropertyClass.
@@ -85,19 +73,6 @@ namespace serialization
 		 */
 		virtual void preload_object(
 			std::unique_ptr<pclass::PropertyClass> &dest, BitStream &stream) const;
-		
-		/**
-		 * @param dest
-		 * @param stream
-		 */
-		void load_object(
-			std::unique_ptr<pclass::PropertyClass> &dest, BitStream &stream) const;
-
-		/**
-		 * @param prop
-		 * @param stream
-		 */
-		void load_property(pclass::IProperty &prop, BitStream &stream) const;
 
 	private:
 		const pclass::TypeSystem *m_type_system;
@@ -105,6 +80,16 @@ namespace serialization
 		flags m_flags;
 
 		const pclass::PropertyClass *m_root_object;
+
+		void save_object(const pclass::PropertyClass *object, BitStream &stream) const;
+		void save_property(const pclass::IProperty &prop, BitStream &stream) const;
+		void save_dynamic_property(
+			const pclass::IDynamicProperty &prop, BitStream &stream) const;
+
+		void load_object(
+			std::unique_ptr<pclass::PropertyClass> &dest, BitStream &stream) const;
+		void load_property(pclass::IProperty &prop, BitStream &stream) const;
+		void load_dynamic_property(pclass::IDynamicProperty &prop, BitStream &stream) const;
 	};
 }
 }
