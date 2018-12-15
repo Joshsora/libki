@@ -360,8 +360,8 @@ namespace pclass
 	template <typename DestT>
 	Value ValueCaster::cast(const std::type_info &src_type, const Value& value)
 	{
-		const auto it = s_caster_lookup.find(src_type.hash_code());
-		if (it != s_caster_lookup.end())
+		const auto it = s_caster_lookup->find(src_type.hash_code());
+		if (it != s_caster_lookup->end())
 			return it->second->cast_value<DestT>(value);
 		throw cast_error(src_type, typeid(DestT));
 	}
