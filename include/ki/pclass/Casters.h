@@ -2,6 +2,7 @@
 #include <type_traits>
 #include <sstream>
 #include <json.hpp>
+#include "ki/util/BitTypes.h"
 #include "ki/pclass/Value.h"
 #include "ki/pclass/types/EnumType.h"
 
