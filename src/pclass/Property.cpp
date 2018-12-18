@@ -92,6 +92,12 @@ namespace pclass
 		throw runtime_error("Called get_value() on a dynamic property. Use get_value(index) instead.");
 	}
 
+	void IDynamicProperty::set_value(Value value)
+	{
+		// The caller must specify an index
+		throw runtime_error("Called set_value() on a dynamic property. Use set_value(index) instead.");
+	}
+
 	const PropertyClass *IDynamicProperty::get_object() const
 	{
 		// The caller must specify an index

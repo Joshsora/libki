@@ -1,4 +1,5 @@
 #include "ki/serialization/JsonSerializer.h"
+#include <sstream>
 
 using namespace nlohmann;
 
@@ -54,7 +55,6 @@ namespace serialization
 	{
 		if (prop.is_dynamic())
 		{
-			// Cast the property to a IDynamicProperty
 			const auto &dynamic_property =
 				dynamic_cast<const pclass::IDynamicProperty &>(prop);
 			return save_dynamic_property(j, dynamic_property);
@@ -94,12 +94,108 @@ namespace serialization
 		j[prop.get_name()] = property_value;
 	}
 
-	void JsonSerializer::load(std::unique_ptr<pclass::PropertyClass>& dest, 
-		const std::string& json_string) const
+	void JsonSerializer::load(std::unique_ptr<pclass::PropertyClass> &dest,
+		const std::string &json_string) const
 	{
-		// TODO: JSON Deserialization
-		auto j = json::parse(json_string);
-		dest = nullptr;
+		try
+		{			
+			auto j = json::parse(json_string);
+			load_object(dest, j);
+		}
+		catch (json::exception &e)
+		{
+			std::ostringstream oss;
+			oss << "Failed to deserialize JSON - " << e.what();
+			throw runtime_error(oss.str());
+		}
+	}
+
+	bool JsonSerializer::preload_object(
+		std::unique_ptr<pclass::PropertyClass>& dest, json& j) const
+	{
+		// If meta information is not present, assume that the type hash is null.
+		if (!j.count("_pclass_meta"))
+			dest = nullptr;
+		else
+		{
+			// Use the type hash to instantiate an object
+			const auto type_hash = j["_pclass_meta"].value("type_hash", NULL);
+			if (type_hash != 0)
+			{
+				const auto &type = m_type_system->get_type(type_hash);
+				dest = type.instantiate();
+			}
+			else
+				dest = nullptr;
+		}
+		return dest != nullptr;
+	}
+
+	void JsonSerializer::load_object(
+		std::unique_ptr<pclass::PropertyClass> &dest, json &j) const
+	{
+		if (!preload_object(dest, j))
+			return;
+
+		auto &property_list = dest->get_properties();
+		for (auto it = property_list.begin();
+			it != property_list.end(); ++it)
+		{
+			auto &prop = *it;
+			load_property(prop, j);
+		}
+	}
+
+	void JsonSerializer::load_property(
+		pclass::IProperty &prop, json &j) const
+	{
+		if (!j.count(prop.get_name()))
+		{
+			std::ostringstream oss;
+			oss << "JSON object missing property: '" << prop.get_name() << "' "
+				<< "(type='" << prop.get_instance().get_type().get_name() << "').";
+			throw runtime_error(oss.str());
+		}
+
+		auto &property_j = j[prop.get_name()];
+		if (prop.is_dynamic())
+		{
+			auto &dynamic_property =
+				dynamic_cast<pclass::IDynamicProperty &>(prop);
+			return load_dynamic_property(dynamic_property, j);
+		}
+
+		if (prop.get_type().get_kind() == pclass::Type::kind::CLASS)
+		{
+			std::unique_ptr<pclass::PropertyClass> other_object = nullptr;
+			load_object(other_object, property_j);
+			prop.set_object(other_object);
+		}
+		else
+			prop.set_value(
+				pclass::Value::make_reference<json>(property_j)
+			);
+	}
+
+	void JsonSerializer::load_dynamic_property(
+		pclass::IDynamicProperty &prop, json &j) const
+	{
+		auto &property_j = j[prop.get_name()];
+		prop.set_element_count(property_j.size());
+
+		for (auto i = 0; i < prop.get_element_count(); ++i)
+		{
+			if (prop.get_type().get_kind() == pclass::Type::kind::CLASS)
+			{
+				std::unique_ptr<pclass::PropertyClass> other_object = nullptr;
+				load_object(other_object, property_j.at(i));
+				prop.set_object(other_object, i);
+			}
+			else
+				prop.set_value(
+					pclass::Value::make_reference<json>(property_j.at(i)), i
+				);
+		}
 	}
 }
 }

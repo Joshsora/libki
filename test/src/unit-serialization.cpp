@@ -108,7 +108,7 @@ namespace detail
 	struct value_caster<Vector3D, nlohmann::json>
 		: value_caster_impl<Vector3D, nlohmann::json>
 	{
-		nlohmann::json cast_value(const Vector3D &value) const
+		nlohmann::json cast_value(const Vector3D &value) const override
 		{
 			return {
 				{ "x", value.m_x },
@@ -125,7 +125,7 @@ namespace detail
 	struct value_caster<nlohmann::json, Vector3D>
 		: value_caster_impl<nlohmann::json, Vector3D>
 	{
-		Vector3D cast_value(const nlohmann::json &value) const
+		Vector3D cast_value(const nlohmann::json &value) const override
 		{
 			return Vector3D(
 				value["x"].get<float>(),
@@ -562,13 +562,11 @@ void test_serializer(
 		serializer.load(object, sample);
 
 		// Set test_object so that it is validated by the caller
-		/*
 		REQUIRE(object != nullptr);
 		test_object = std::unique_ptr<TestObject>(
 			dynamic_cast<TestObject *>(object.release())
 		);
 		REQUIRE(test_object != nullptr);
-		*/
 	}
 }
 

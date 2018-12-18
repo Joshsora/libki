@@ -24,10 +24,21 @@ namespace pclass
 			m_deallocator = deallocator;
 		}
 
+		ValueDeallocator::ValueDeallocator(ValueDeallocator &that)
+		{
+			m_deallocator = that.m_deallocator->copy();
+		}
+
 		ValueDeallocator::ValueDeallocator(ValueDeallocator &&that) noexcept
 		{
 			m_deallocator = that.m_deallocator;
 			that.m_deallocator = nullptr;
+		}
+
+		ValueDeallocator &ValueDeallocator::operator=(ValueDeallocator &that)
+		{
+			m_deallocator = that.m_deallocator->copy();
+			return *this;
 		}
 
 		ValueDeallocator& ValueDeallocator::operator=(ValueDeallocator &&that) noexcept
@@ -76,6 +87,15 @@ namespace pclass
 		m_deallocator = detail::ValueDeallocator();
 	}
 
+	Value::Value(Value& that)
+	{
+		m_value_ptr = that.m_value_ptr;
+		m_ptr_is_owned = false;
+		m_type_hash = that.m_type_hash;
+		m_caster = that.m_caster;
+		m_deallocator = that.m_deallocator;
+	}
+
 	Value::Value(Value &&that) noexcept
 	{
 		// Move pointer to this Value object, and take ownership if
@@ -86,6 +106,17 @@ namespace pclass
 		m_type_hash = that.m_type_hash;
 		m_caster = that.m_caster;
 		m_deallocator = std::move(that.m_deallocator);
+	}
+
+	Value &Value::operator=(Value &that)
+	{
+		m_value_ptr = that.m_value_ptr;
+		m_ptr_is_owned = false;
+		m_type_hash = that.m_type_hash;
+		m_caster = that.m_caster;
+		m_deallocator = that.m_deallocator;
+
+		return *this;
 	}
 
 	Value &Value::operator=(Value &&that) noexcept

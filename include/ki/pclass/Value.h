@@ -79,6 +79,11 @@ namespace pclass
 			 * @param[in] ptr The pointer to deallocate.
 			 */
 			virtual void deallocate(void *ptr) const = 0;
+
+			/**
+			 * Create a copy of this deallocator.
+			 */
+			virtual value_deallocator_base *copy() const = 0;
 		};
 
 		/**
@@ -92,18 +97,25 @@ namespace pclass
 				// By default, now that we have the proper type, just delete it.
 				delete static_cast<T *>(ptr);
 			}
+
+			value_deallocator_base *copy() const override
+			{
+				return new value_deallocator<T>();
+			}
 		};
 
 		/**
-		* TODO: Documentation
-		*/
+		 * TODO: Documentation
+		 */
 		class ValueDeallocator
 		{
 			// Allow Value to call make<T>() and the default constructor
 			friend Value;
 
 		public:
+			ValueDeallocator(ValueDeallocator &that);
 			ValueDeallocator(ValueDeallocator &&that) noexcept;
+			ValueDeallocator &operator=(ValueDeallocator &that);
 			ValueDeallocator &operator=(ValueDeallocator &&that) noexcept;
 			~ValueDeallocator();
 
@@ -220,7 +232,9 @@ namespace pclass
 	class Value
 	{
 	public:
+		Value(Value &that);
 		Value(Value &&that) noexcept;
+		Value &operator=(Value &that);
 		Value &operator=(Value &&that) noexcept;
 		~Value();
 

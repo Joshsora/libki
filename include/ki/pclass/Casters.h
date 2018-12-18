@@ -35,6 +35,12 @@ namespace detail
 	struct is_json_assignable<std::string> : std::true_type {};
 
 	/**
+	 * std::u16string can be assigned to a json object.
+	 */
+	template <>
+	struct is_json_assignable<std::u16string> : std::true_type {};
+
+	/**
 	 * value_caster specialization for the generic case of casting
 	 * any json-assignable value to a json object.
 	 */
@@ -160,6 +166,34 @@ namespace detail
 				typename string_cast_t<SrcT>::type>(value);
 			oss << casted_value;
 			return oss.str();
+		}
+	};
+
+	/**
+	 * Caster implementation for casting from json to any
+	 * primitive type.
+	 */
+	template <typename DestT>
+	struct value_caster<nlohmann::json, DestT>
+		: value_caster_impl<nlohmann::json, DestT>
+	{
+		DestT cast_value(const nlohmann::json &value) const override
+		{
+			return value;
+		}
+	};
+
+	/**
+	 * Caster implementation for casting from json to a
+	 * std::string.
+	 */
+	template <>
+	struct value_caster<nlohmann::json, std::string>
+		: value_caster_impl<nlohmann::json, std::string>
+	{
+		std::string cast_value(const nlohmann::json &value) const override
+		{
+			return value;
 		}
 	};
 

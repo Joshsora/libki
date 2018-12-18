@@ -39,7 +39,15 @@ namespace pclass
 			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
-			return Value::make_reference(prop.at(index));
+			return Value::make_reference<ValueT>(prop.at(index));
+		}
+
+		static void set_value(VectorProperty<ValueT> &prop,
+			Value value, const int index)
+		{
+			prop.at(index) = value
+				.dereference<ValueT>()
+				.get<ValueT>();
 		}
 
 		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
@@ -79,6 +87,8 @@ namespace pclass
 		>::type
 	>
 	{
+		using nonpointer_type = typename std::remove_pointer<ValueT>::type;
+
 		static ValueT copy(VectorProperty<ValueT> &prop, const int index)
 		{
 			// Ensure index is within bounds
@@ -95,7 +105,15 @@ namespace pclass
 			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
-			return Value::make_reference(*prop.at(index));
+			return Value::make_reference<nonpointer_type>(*prop.at(index));
+		}
+
+		static void set_value(VectorProperty<ValueT> &prop,
+			Value value, const int index)
+		{
+			prop.at(index) = value
+				.dereference<nonpointer_type>()
+				.take<nonpointer_type>();
 		}
 
 		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
@@ -135,6 +153,8 @@ namespace pclass
 		>::type
 	>
 	{
+		using nonpointer_type = typename std::remove_pointer<ValueT>::type;
+
 		static ValueT copy(VectorProperty<ValueT> &prop, const int index)
 		{
 			// The copy constructor for all pointers is to copy the pointer
@@ -147,7 +167,15 @@ namespace pclass
 			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
-			return Value::make_reference(*prop.at(index));
+			return Value::make_reference<nonpointer_type>(*prop.at(index));
+		}
+
+		static void set_value(VectorProperty<ValueT> &prop,
+			Value value, const int index)
+		{
+			prop.at(index) = value
+				.dereference<nonpointer_type>()
+				.take<nonpointer_type>();
 		}
 
 		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
@@ -214,7 +242,15 @@ namespace pclass
 			// Ensure index is within bounds
 			if (index < 0 || index >= prop.size())
 				throw runtime_error("Index out of bounds.");
-			return Value::make_reference(prop.at(index));
+			return Value::make_reference<ValueT>(prop.at(index));
+		}
+
+		static void set_value(VectorProperty<ValueT> &prop,
+			Value value, const int index)
+		{
+			prop.at(index) = value
+				.dereference<ValueT>()
+				.get<ValueT>();
 		}
 
 		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
@@ -326,16 +362,22 @@ namespace pclass
 			return vector_value_object_helper<ValueT>::copy(prop, index);
 		}
 
-		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop,
-			const int index)
-		{
-			return vector_value_object_helper<ValueT>::get_object(prop, index);
-		}
-
 		static Value get_value(const VectorProperty<ValueT> &prop,
 			const int index)
 		{
 			return vector_value_object_helper<ValueT>::get_value(prop, index);
+		}
+
+		static void set_value(VectorProperty<ValueT> &prop,
+			Value value, const int index)
+		{
+			vector_value_object_helper<ValueT>::set_value(prop, value, index);
+		}
+
+		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop,
+			const int index)
+		{
+			return vector_value_object_helper<ValueT>::get_object(prop, index);
 		}
 
 		static void set_object(VectorProperty<ValueT> &prop, 
@@ -403,6 +445,13 @@ namespace pclass
 			if (index < 0 || index >= this->size())
 				throw runtime_error("Index out of bounds.");
 			return vector_value_helper<ValueT>::get_value(*this, index);
+		}
+
+		void set_value(Value value, int index) override
+		{
+			if (index < 0 || index >= this->size())
+				throw runtime_error("Index out of bounds.");
+			return vector_value_helper<ValueT>::set_value(*this, value, index);
 		}
 
 		const PropertyClass *get_object(const int index) const override

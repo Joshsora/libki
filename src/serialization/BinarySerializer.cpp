@@ -435,6 +435,5 @@ namespace serialization
 				prop.read_value_from(stream, i);
 		}
 	}
-
 }
 }

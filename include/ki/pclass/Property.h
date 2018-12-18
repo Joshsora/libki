@@ -34,6 +34,8 @@ namespace pclass
 		virtual bool is_dynamic() const;
 
 		virtual Value get_value() const = 0;
+		virtual void set_value(Value value) = 0;
+
 		virtual const PropertyClass *get_object() const = 0;
 		virtual void set_object(std::unique_ptr<PropertyClass> &object) = 0;
 
@@ -70,12 +72,14 @@ namespace pclass
 		virtual void set_element_count(std::size_t size) = 0;
 
 		Value get_value() const final override;
+		void set_value(Value value) final override;
 		const PropertyClass *get_object() const final override;
 		void set_object(std::unique_ptr<PropertyClass> &object) final override;
 		void write_value_to(BitStream &stream) const final override;
 		void read_value_from(BitStream &stream) final override;
 
 		virtual Value get_value(int index) const = 0;
+		virtual void set_value(Value value, int index) = 0;
 		virtual const PropertyClass *get_object(int index) const = 0;
 		virtual void set_object(std::unique_ptr<PropertyClass> &object, int index) = 0;
 		virtual void write_value_to(BitStream &stream, int index) const = 0;

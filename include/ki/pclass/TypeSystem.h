@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <unordered_map>
+#include <json.hpp>
 #include "ki/pclass/HashCalculator.h"
 #include "ki/pclass/Casters.h"
 #include "ki/pclass/types/Type.h"
@@ -32,6 +33,8 @@ namespace pclass
 		PrimitiveType<ValueT> &define_primitive(const std::string &name)
 		{
 			detail::caster_declarer<ValueT>::declare();
+			ValueCaster::declare<nlohmann::json, ValueT>();
+
 			auto *type = new PrimitiveType<ValueT>(name, *this);
 			define_type(std::unique_ptr<Type>(
 				dynamic_cast<Type *>(type)
@@ -58,6 +61,8 @@ namespace pclass
 		CppEnumType<EnumT> &define_enum(const std::string &name)
 		{
 			detail::caster_declarer<EnumT>::declare();
+			ValueCaster::declare<nlohmann::json, EnumT>();
+
 			auto *type = new CppEnumType<EnumT>(name, *this);
 			define_type(std::unique_ptr<Type>(
 				dynamic_cast<Type *>(type)

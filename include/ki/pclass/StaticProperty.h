@@ -1,5 +1,6 @@
 #pragma once
 #include "ki/pclass/Property.h"
+#include "ki/pclass/PropertyClass.h"
 #include "ki/util/exception.h"
 
 namespace ki
@@ -40,6 +41,13 @@ namespace pclass
 		{
 			// Return a reference to the property's value
 			return Value::make_reference<ValueT>(prop.m_value);
+		}
+
+		static void set_value(StaticProperty<ValueT> &prop, Value value)
+		{
+			prop.m_value = value
+				.dereference<ValueT>()
+				.get<ValueT>();
 		}
 
 		static const PropertyClass *get_object(const StaticProperty<ValueT> &prop)
@@ -104,6 +112,13 @@ namespace pclass
 		static Value get_value(const StaticProperty<ValueT> &prop)
 		{
 			return Value::make_reference<nonpointer_type>(*prop.m_value);
+		}
+
+		static void set_value(StaticProperty<ValueT> &prop, Value value)
+		{
+			prop.m_value = value
+				.dereference<nonpointer_type>()
+				.take<nonpointer_type>();
 		}
 
 		static const PropertyClass *get_object(const StaticProperty<ValueT> &prop)
@@ -173,6 +188,13 @@ namespace pclass
 			return Value::make_reference<nonpointer_type>(*prop.m_value);
 		}
 
+		static void set_value(StaticProperty<ValueT> &prop, Value value)
+		{
+			prop.m_value = value
+				.dereference<nonpointer_type>()
+				.take<nonpointer_type>();
+		}
+
 		static const PropertyClass *get_object(const StaticProperty<ValueT> &prop)
 		{
 			// ValueT does derive from PropertyClass, and we have a pointer to an instance
@@ -239,6 +261,13 @@ namespace pclass
 		static Value get_value(const StaticProperty<ValueT> &prop)
 		{
 			return Value::make_reference<ValueT>(prop.m_value);
+		}
+
+		static void set_value(StaticProperty<ValueT> &prop, Value value)
+		{
+			prop.m_value = value
+				.dereference<ValueT>()
+				.get<ValueT>();
 		}
 
 		static const PropertyClass *get_object(const StaticProperty<ValueT> &prop)
@@ -343,6 +372,11 @@ namespace pclass
 			return value_object_helper<ValueT>::get_value(prop);
 		}
 
+		static void set_value(StaticProperty<ValueT> &prop, Value value)
+		{
+			return value_object_helper<ValueT>::set_value(prop, value);
+		}
+
 		static const PropertyClass *get_object(const StaticProperty<ValueT> &prop)
 		{
 			return value_object_helper<ValueT>::get_object(prop);
@@ -412,6 +446,11 @@ namespace pclass
 		Value get_value() const override
 		{
 			return value_helper<ValueT>::get_value(*this);
+		}
+
+		void set_value(Value value) override
+		{
+			value_helper<ValueT>::set_value(*this, value);
 		}
 
 		const PropertyClass *get_object() const override
