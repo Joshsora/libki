@@ -73,7 +73,6 @@ namespace pclass
 		PropertyList &get_properties();
 		const PropertyList &get_properties() const;
 
-		virtual PropertyClass *copy() const;
 		virtual void on_created() const {}
 
 	protected:

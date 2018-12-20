@@ -71,55 +71,14 @@ namespace pclass
 		return false;
 	}
 
-	IDynamicProperty::IDynamicProperty(PropertyClass &object,
-		const std::string& name, const Type& type)
-		: IProperty(object, name, type)
-	{}
-
-	IDynamicProperty::IDynamicProperty(PropertyClass &object,
-		const IDynamicProperty &that)
-		: IProperty(object, that)
-	{}
-
-	bool IDynamicProperty::is_dynamic() const
+	bool IProperty::is_array() const
 	{
-		return true;
+		return false;
 	}
 
-	Value IDynamicProperty::get_value() const
+	std::size_t IProperty::get_element_count() const
 	{
-		// The caller must specify an index
-		throw runtime_error("Called get_value() on a dynamic property. Use get_value(index) instead.");
-	}
-
-	void IDynamicProperty::set_value(Value value)
-	{
-		// The caller must specify an index
-		throw runtime_error("Called set_value() on a dynamic property. Use set_value(index) instead.");
-	}
-
-	const PropertyClass *IDynamicProperty::get_object() const
-	{
-		// The caller must specify an index
-		throw runtime_error("Called get_object() on a dynamic property. Use get_object(index) instead.");
-	}
-
-	void IDynamicProperty::set_object(std::unique_ptr<PropertyClass> &object)
-	{
-		// The caller must specify an index
-		throw runtime_error("Called set_object() on a dynamic property. Use set_object(index) instead.");
-	}
-
-	void IDynamicProperty::write_value_to(BitStream &stream) const
-	{
-		// The caller must specify an index
-		throw runtime_error("Called write_value_to() on a dynamic property. Use write_value_to(index) instead.");
-	}
-
-	void IDynamicProperty::read_value_from(BitStream &stream)
-	{
-		// The caller must specify an index
-		throw runtime_error("Called read_value_from() on a dynamic property. Use read_value_from(index) instead.");
+		return 0;
 	}
 }
 }

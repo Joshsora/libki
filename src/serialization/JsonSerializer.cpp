@@ -50,48 +50,28 @@ namespace serialization
 		return j;
 	}
 
-	void JsonSerializer::save_property(json& j,
-		const pclass::IProperty &prop) const
+	void JsonSerializer::save_property(
+		json& j, const pclass::IProperty &prop) const
 	{
-		if (prop.is_dynamic())
-		{
-			const auto &dynamic_property =
-				dynamic_cast<const pclass::IDynamicProperty &>(prop);
-			return save_dynamic_property(j, dynamic_property);
-		}
-		
-		if (prop.get_type().get_kind() == pclass::Type::kind::CLASS)
-		{
-			auto *other_object = prop.get_object();
-			j[prop.get_name()] = save_object(other_object);
-		}
-		else
-		{
-			auto value = prop.get_value().dereference<json>();
-			j[prop.get_name()] = value.get<json>();
-		}
-	}
-
-	void JsonSerializer::save_dynamic_property(json& j,
-		const pclass::IDynamicProperty &prop) const
-	{
-		json property_value;
-
-		for (auto i = 0; i < prop.get_element_count(); ++i)
+		for (std::size_t i = 0; i < prop.get_element_count(); ++i)
 		{
 			if (prop.get_type().get_kind() == pclass::Type::kind::CLASS)
 			{
 				auto *other_object = prop.get_object(i);
-				property_value.push_back(save_object(other_object));
+				if (prop.is_array())
+					j[prop.get_name()].push_back(save_object(other_object));
+				else
+					j[prop.get_name()] = save_object(other_object);
 			}
 			else
 			{
-				auto value = prop.get_value(i).dereference<json>();
-				property_value.push_back(value.get<json>());
+				auto value = prop.get_value(i).as<json>();
+				if (prop.is_array())
+					j[prop.get_name()].push_back(value.get<json>());
+				else
+					j[prop.get_name()] = value.get<json>();
 			}
 		}
-
-		j[prop.get_name()] = property_value;
 	}
 
 	void JsonSerializer::load(std::unique_ptr<pclass::PropertyClass> &dest,
@@ -159,42 +139,30 @@ namespace serialization
 
 		auto &property_j = j[prop.get_name()];
 		if (prop.is_dynamic())
-		{
-			auto &dynamic_property =
-				dynamic_cast<pclass::IDynamicProperty &>(prop);
-			return load_dynamic_property(dynamic_property, j);
-		}
+			prop.set_element_count(property_j.size());
 
-		if (prop.get_type().get_kind() == pclass::Type::kind::CLASS)
-		{
-			std::unique_ptr<pclass::PropertyClass> other_object = nullptr;
-			load_object(other_object, property_j);
-			prop.set_object(other_object);
-		}
-		else
-			prop.set_value(
-				pclass::Value::make_reference<json>(property_j)
-			);
-	}
-
-	void JsonSerializer::load_dynamic_property(
-		pclass::IDynamicProperty &prop, json &j) const
-	{
-		auto &property_j = j[prop.get_name()];
-		prop.set_element_count(property_j.size());
-
-		for (auto i = 0; i < prop.get_element_count(); ++i)
+		for (std::size_t i = 0; i < prop.get_element_count(); ++i)
 		{
 			if (prop.get_type().get_kind() == pclass::Type::kind::CLASS)
 			{
 				std::unique_ptr<pclass::PropertyClass> other_object = nullptr;
-				load_object(other_object, property_j.at(i));
+				if (prop.is_array())
+					load_object(other_object, property_j.at(i));
+				else
+					load_object(other_object, property_j);
 				prop.set_object(other_object, i);
 			}
 			else
-				prop.set_value(
-					pclass::Value::make_reference<json>(property_j.at(i)), i
-				);
+			{
+				if (prop.is_array())
+					prop.set_value(
+						pclass::Value::make_reference<json>(property_j.at(i)), i
+					);
+				else
+					prop.set_value(
+						pclass::Value::make_reference<json>(property_j), i
+					);
+			}
 		}
 	}
 }

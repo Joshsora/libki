@@ -29,12 +29,10 @@ namespace serialization
 		virtual bool presave_object(nlohmann::json &j, const pclass::PropertyClass *object) const;
 		nlohmann::json save_object(const pclass::PropertyClass *object) const;
 		void save_property(nlohmann::json &j, const pclass::IProperty &prop) const;
-		void save_dynamic_property(nlohmann::json &j, const pclass::IDynamicProperty &prop) const;
 
 		virtual bool preload_object(std::unique_ptr<pclass::PropertyClass> &dest, nlohmann::json &j) const;
 		void load_object(std::unique_ptr<pclass::PropertyClass> &dest, nlohmann::json &j) const;
 		void load_property(pclass::IProperty &prop, nlohmann::json &j) const;
-		void load_dynamic_property(pclass::IDynamicProperty &prop, nlohmann::json &j) const;
 	};
 }
 }

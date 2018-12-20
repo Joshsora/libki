@@ -16,7 +16,7 @@ namespace pclass
 	{
 		template <
 			typename SrcT, typename DestT,
-			typename SrcEnable = void, typename DestEnable = void
+			typename Enable = void
 		>
 		struct value_caster;
 
@@ -53,10 +53,7 @@ namespace pclass
 		/**
 		 * TODO: Documentation
 		 */
-		template <
-			typename SrcT, typename DestT,
-			typename SrcEnable, typename DestEnable
-		>
+		template <typename SrcT, typename DestT, typename Enable>
 		struct value_caster : value_caster_impl<SrcT, DestT>
 		{
 			DestT cast_value(const SrcT &value) const override
@@ -239,16 +236,6 @@ namespace pclass
 		~Value();
 
 		/**
-		 * @returns Whether or the not the value is holding a reference or a value.
-		 */
-		bool is_reference() const
-		{
-			// If the pointer isn't owned, then it isn't this Value's responsibility
-			// to clean it up, so we say it's referencing something.
-			return !m_ptr_is_owned;
-		}
-
-		/**
 		 * @returns Whether or not the value being held is of type T.
 		 */
 		template <typename T>
@@ -257,34 +244,40 @@ namespace pclass
 			// Do the type hashes match?
 			return m_type_hash == typeid(T).hash_code();
 		}
+
+		/**
+		 * @returns Whether or the not the value is holding a reference or a value.
+		 */
+		bool is_reference() const
+		{
+			// If the pointer isn't owned, then it isn't this Value's responsibility
+			// to clean it up, so we say it's referencing something.
+			return !m_ptr_is_owned;
+		}
 		
 		/**
-		 * @tparam T 
+		 * @tparam T The expected type.
 		 * @returns A new Value instance that owns it's value.
 		 */
 		template <typename T>
 		Value dereference() const
 		{
-			// Do we need to attempt casting?
 			if (!is<T>())
-				return m_caster->cast_value<T>(*this);
+				throw runtime_error("Invalid call to Value::dereference<T>.");
 			return Value::make_value<T>(*static_cast<T *>(m_value_ptr));
 		}
 
 		/**
-		 * @tparam T The expected type.
-		 * @returns A reference to the value being held.
-		 * @throws ki::runtime_error The expected type and the type of the value being held are not the same.
+		 * @tparam T The type to cast to.
+		 * @returns A new Value instance holding a T value.
 		 */
 		template <typename T>
-		const T &get() const
+		Value as() const
 		{
-			// Make sure they requested the correct type
+			// Do we need to cast?
 			if (!is<T>())
-				throw runtime_error("Invalid call to Value::get<T>.");
-
-			// Return a reference to the value being held
-			return *static_cast<T *>(m_value_ptr);
+				return m_caster->cast_value<T>(*this);
+			return Value::make_value<T>(*static_cast<T *>(m_value_ptr));
 		}
 
 		/**
@@ -305,16 +298,32 @@ namespace pclass
 
 		/**
 		 * @tparam T The expected type.
+		 * @returns A reference to the value being held.
+		 * @throws ki::runtime_error The expected type and the type of the value being held are not the same.
+		 */
+		template <typename T>
+		const T &get() const
+		{
+			// Make sure they requested the correct type
+			if (!is<T>())
+				throw runtime_error("Invalid call to Value::get<T>.");
+
+			// Return a reference to the value being held
+			return *static_cast<T *>(m_value_ptr);
+		}
+
+		/**
+		 * @tparam T The expected type.
 		 * @returns A pointer to the value being held (that the caller takes ownership of).
 	 	 * @throws ki::runtime_error If the Value is a reference.
 		 * @throws ki::runtime_error If the expected type and the type of the value being held are not the same.
 		 */
 		template <typename T>
-		T *take()
+		T *release()
 		{
 			// Make sure this Value is not a reference
 			if (is_reference())
-				throw runtime_error("Cannot take ownership from a reference Value.");
+				throw runtime_error("Cannot release ownership from a reference Value.");
 
 			// Make sure they requested the correct type
 			if (!is<T>())
@@ -335,7 +344,7 @@ namespace pclass
 		{
 			auto *ptr = static_cast<void *>(new T(value));
 			auto val = Value(ptr, true);
-			val.construct<T>();
+			val.set_type<T>();
 			return val;
 		}
 
@@ -349,7 +358,7 @@ namespace pclass
 		{
 			auto *ptr = static_cast<void *>(&value);
 			auto val = Value(ptr);
-			val.construct<T>();
+			val.set_type<T>();
 			return val;
 		}
 
@@ -363,7 +372,7 @@ namespace pclass
 		{
 			auto *ptr = const_cast<void *>(static_cast<const void *>(&value));
 			auto val = Value(ptr);
-			val.construct<T>();
+			val.set_type<T>();
 			return val;
 		}
 
@@ -381,7 +390,7 @@ namespace pclass
 		 * @tparam T The type that is being held.
 		 */
 		template <typename T>
-		void construct()
+		void set_type()
 		{
 			m_type_hash = typeid(T).hash_code();
 			m_caster = &ValueCaster::get<T>();

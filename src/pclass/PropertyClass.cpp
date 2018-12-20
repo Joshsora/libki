@@ -37,11 +37,6 @@ namespace pclass
 		return m_properties;
 	}
 
-	PropertyClass *PropertyClass::copy() const
-	{
-		return new PropertyClass(*this);
-	}
-
 	void PropertyClass::add_property(IProperty &prop)
 	{
 		m_properties.add_property(prop);

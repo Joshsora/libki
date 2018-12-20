@@ -46,50 +46,47 @@ namespace serialization
 		virtual ~BinarySerializer() {}
 
 		/**
-		 * @param object 
-		 * @param stream 
+		 * @param object The object to write to the stream.
+		 * @param stream The stream to write the object to.
 		 */
 		void save(const pclass::PropertyClass *object, BitStream &stream);
 
 		/**
-		 * @param dest 
-		 * @param stream
-		 * @param size
+		 * @param dest Where to load the PropertyClass instance into.
+		 * @param stream The stream to read the object from.
+		 * @param size The size of the stream's available data.
 		 */
 		void load(std::unique_ptr<pclass::PropertyClass> &dest,
 			BitStream &stream, std::size_t size);
 
 	protected:
 		/**
-		 * @param object 
-		 * @param stream 
+		 * @param object The object that is being saved.
+		 * @param stream The stream to write the object header to.
+		 * @returns Whether or not the object is null.
 		 */
 		virtual bool presave_object(const pclass::PropertyClass *object, BitStream &stream) const;
 
 		/**
 		 * Read an object header, and instantiate the necessary PropertyClass.
-		 * @param dest 
-		 * @param stream 
+		 * @param dest Where to instantiate the PropertyClass.
+		 * @param stream The stream to read the object header from.
 		 */
 		virtual void preload_object(
 			std::unique_ptr<pclass::PropertyClass> &dest, BitStream &stream) const;
 
 	private:
+		const pclass::PropertyClass *m_root_object;
 		const pclass::TypeSystem *m_type_system;
 		bool m_is_file;
 		flags m_flags;
 
-		const pclass::PropertyClass *m_root_object;
-
 		void save_object(const pclass::PropertyClass *object, BitStream &stream) const;
 		void save_property(const pclass::IProperty &prop, BitStream &stream) const;
-		void save_dynamic_property(
-			const pclass::IDynamicProperty &prop, BitStream &stream) const;
 
 		void load_object(
 			std::unique_ptr<pclass::PropertyClass> &dest, BitStream &stream) const;
 		void load_property(pclass::IProperty &prop, BitStream &stream) const;
-		void load_dynamic_property(pclass::IDynamicProperty &prop, BitStream &stream) const;
 	};
 }
 }

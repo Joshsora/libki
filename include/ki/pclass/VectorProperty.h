@@ -46,7 +46,7 @@ namespace pclass
 			Value value, const int index)
 		{
 			prop.at(index) = value
-				.dereference<ValueT>()
+				.as<ValueT>()
 				.get<ValueT>();
 		}
 
@@ -112,8 +112,8 @@ namespace pclass
 			Value value, const int index)
 		{
 			prop.at(index) = value
-				.dereference<nonpointer_type>()
-				.take<nonpointer_type>();
+				.as<nonpointer_type>()
+				.release<nonpointer_type>();
 		}
 
 		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
@@ -174,8 +174,8 @@ namespace pclass
 			Value value, const int index)
 		{
 			prop.at(index) = value
-				.dereference<nonpointer_type>()
-				.take<nonpointer_type>();
+				.as<nonpointer_type>()
+				.release<nonpointer_type>();
 		}
 
 		static const PropertyClass *get_object(const VectorProperty<ValueT> &prop, const int index)
@@ -249,7 +249,7 @@ namespace pclass
 			Value value, const int index)
 		{
 			prop.at(index) = value
-				.dereference<ValueT>()
+				.as<ValueT>()
 				.get<ValueT>();
 		}
 
@@ -347,7 +347,7 @@ namespace pclass
 
 			Value value = prop.get_type().read_from(stream);
 			ValueT &value_ref = prop.at(index);
-			value_ref = value.take<type>();
+			value_ref = value.release<type>();
 		}
 	};
 
@@ -404,7 +404,7 @@ namespace pclass
 	 *
 	 */
 	template <typename ValueT>
-	class VectorProperty : public std::vector<ValueT>, public IDynamicProperty
+	class VectorProperty : public std::vector<ValueT>, public IProperty
 	{
 	public:
 		// Do not allow copy assignment. Once a property has been constructed,
@@ -413,12 +413,12 @@ namespace pclass
 
 		VectorProperty(PropertyClass &object,
 			const std::string &name, const Type &type)
-			: IDynamicProperty(object, name, type)
+			: IProperty(object, name, type)
 		{}
 
 		VectorProperty(PropertyClass &object,
 			const VectorProperty<ValueT> &that)
-			: IDynamicProperty(object, that)
+			: IProperty(object, that)
 		{
 			// Copy vector values into this vector
 			for (auto i = 0; i < this->size(); i++)
@@ -428,6 +428,16 @@ namespace pclass
 		constexpr bool is_pointer() const override
 		{
 			return std::is_pointer<ValueT>::value;
+		}
+
+		bool is_dynamic() const override
+		{
+			return true;
+		}
+
+		bool is_array() const override
+		{
+			return true;
 		}
 
 		std::size_t get_element_count() const override
@@ -440,36 +450,36 @@ namespace pclass
 			this->resize(size);
 		}
 
-		Value get_value(int index) const override
+		Value get_value(std::size_t index) const override
 		{
 			if (index < 0 || index >= this->size())
 				throw runtime_error("Index out of bounds.");
 			return vector_value_helper<ValueT>::get_value(*this, index);
 		}
 
-		void set_value(Value value, int index) override
+		void set_value(Value value, std::size_t index) override
 		{
 			if (index < 0 || index >= this->size())
 				throw runtime_error("Index out of bounds.");
 			return vector_value_helper<ValueT>::set_value(*this, value, index);
 		}
 
-		const PropertyClass *get_object(const int index) const override
+		const PropertyClass *get_object(const std::size_t index) const override
 		{
 			return vector_value_helper<ValueT>::get_object(*this, index);
 		}
 
-		void set_object(std::unique_ptr<PropertyClass> &object, int index) override
+		void set_object(std::unique_ptr<PropertyClass> &object, std::size_t index) override
 		{
 			return vector_value_helper<ValueT>::set_object(*this, object, index);
 		}
 
-		void write_value_to(BitStream &stream, const int index) const override
+		void write_value_to(BitStream &stream, const std::size_t index) const override
 		{
 			vector_value_helper<ValueT>::write_value_to(*this, stream, index);
 		}
 
-		void read_value_from(BitStream &stream, const int index) override
+		void read_value_from(BitStream &stream, const std::size_t index) override
 		{
 			vector_value_helper<ValueT>::read_value_from(*this, stream, index);
 		}

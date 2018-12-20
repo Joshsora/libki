@@ -32,15 +32,18 @@ namespace pclass
 
 		virtual bool is_pointer() const;
 		virtual bool is_dynamic() const;
+		virtual bool is_array() const;
+		virtual std::size_t get_element_count() const;
+		virtual void set_element_count(std::size_t size) = 0;
 
-		virtual Value get_value() const = 0;
-		virtual void set_value(Value value) = 0;
+		virtual Value get_value(std::size_t index = 0) const = 0;
+		virtual void set_value(Value value, std::size_t index = 0) = 0;
 
-		virtual const PropertyClass *get_object() const = 0;
-		virtual void set_object(std::unique_ptr<PropertyClass> &object) = 0;
+		virtual const PropertyClass *get_object(std::size_t index = 0) const = 0;
+		virtual void set_object(std::unique_ptr<PropertyClass> &object, std::size_t index = 0) = 0;
 
-		virtual void write_value_to(BitStream &stream) const = 0;
-		virtual void read_value_from(BitStream &stream) = 0;
+		virtual void write_value_to(BitStream &stream, std::size_t index = 0) const = 0;
+		virtual void read_value_from(BitStream &stream, std::size_t index = 0) = 0;
 
 	private:
 		const PropertyClass *m_instance;
@@ -48,42 +51,6 @@ namespace pclass
 		hash_t m_name_hash;
 		hash_t m_full_hash;
 		const Type *m_type;
-	};
-
-	/**
-	 * TODO: Documentation
-	 */
-	class IDynamicProperty : public IProperty
-	{
-	public:
-		// Do not allow copy assignment. Once a property has been constructed,
-		// it shouldn't be able to change.
-		IDynamicProperty & operator=(const IDynamicProperty &that) = delete;
-
-		IDynamicProperty(PropertyClass &object,
-			const std::string &name, const Type &type);
-		IDynamicProperty(PropertyClass &object,
-			const IDynamicProperty &that);
-
-		virtual ~IDynamicProperty() {}
-
-		bool is_dynamic() const override;
-		virtual std::size_t get_element_count() const = 0;
-		virtual void set_element_count(std::size_t size) = 0;
-
-		Value get_value() const final override;
-		void set_value(Value value) final override;
-		const PropertyClass *get_object() const final override;
-		void set_object(std::unique_ptr<PropertyClass> &object) final override;
-		void write_value_to(BitStream &stream) const final override;
-		void read_value_from(BitStream &stream) final override;
-
-		virtual Value get_value(int index) const = 0;
-		virtual void set_value(Value value, int index) = 0;
-		virtual const PropertyClass *get_object(int index) const = 0;
-		virtual void set_object(std::unique_ptr<PropertyClass> &object, int index) = 0;
-		virtual void write_value_to(BitStream &stream, int index) const = 0;
-		virtual void read_value_from(BitStream &stream, int index) = 0;
 	};
 }
 }
