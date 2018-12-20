@@ -184,6 +184,24 @@ namespace detail
 	};
 
 	/**
+	 * Caster implementation for casting from json to
+	 * bit integers (bi<N> and bui<N>)
+	 */
+	template <uint8_t N, bool Unsigned>
+	struct value_caster<nlohmann::json, BitInteger<N, Unsigned>>
+		: value_caster_impl<nlohmann::json, BitInteger<N, Unsigned>>
+	{
+		using type = typename BitInteger<N, Unsigned>::type;
+
+		BitInteger<N, Unsigned> cast_value(const nlohmann::json &value) const override
+		{
+			return BitInteger<N, Unsigned>(
+				static_cast<type>(value)
+			);
+		}
+	};
+
+	/**
 	 * Caster implementation for casting from json to a
 	 * std::string.
 	 */
