@@ -80,5 +80,19 @@ namespace pclass
 	{
 		return 0;
 	}
+
+	void IProperty::write_value_to(BitStream& stream, const std::size_t index) const
+	{
+		if (index < 0 || index >= get_element_count())
+			throw runtime_error("Index out of bounds.");
+		get_type().write_to(stream, get_value(index));
+	}
+
+	void IProperty::read_value_from(BitStream& stream, const std::size_t index)
+	{
+		if (index < 0 || index >= get_element_count())
+			throw runtime_error("Index out of bounds.");
+		set_value(get_type().read_from(stream), index);
+	}
 }
 }

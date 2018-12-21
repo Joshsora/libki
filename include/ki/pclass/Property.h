@@ -1,5 +1,9 @@
 #pragma once
+#include <string>
 #include "ki/pclass/types/Type.h"
+#include "ki/pclass/HashCalculator.h"
+#include "ki/pclass/Value.h"
+#include "ki/util/BitStream.h"
 
 namespace ki
 {
@@ -42,8 +46,8 @@ namespace pclass
 		virtual const PropertyClass *get_object(std::size_t index = 0) const = 0;
 		virtual void set_object(std::unique_ptr<PropertyClass> &object, std::size_t index = 0) = 0;
 
-		virtual void write_value_to(BitStream &stream, std::size_t index = 0) const = 0;
-		virtual void read_value_from(BitStream &stream, std::size_t index = 0) = 0;
+		virtual void write_value_to(BitStream &stream, std::size_t index = 0) const;
+		virtual void read_value_from(BitStream &stream, std::size_t index = 0);
 
 	private:
 		const PropertyClass *m_instance;

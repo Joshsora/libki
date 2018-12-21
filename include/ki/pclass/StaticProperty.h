@@ -78,8 +78,10 @@ namespace pclass
 		};
 
 		/**
-		 * Provides default implementations of construct() and copy()
-		 * for static_object_helper where ValueT is a pointer type.
+		 * Provides default implementations of construct(), copy()
+		 * get_object(), and set_object() for static_object_helper where
+		 * ValueT is a pointer type.
+		 * @tparam ValueT The type of the value (as a non-pointer type).
 		 */
 		template <typename ValueT>
 		struct pointer_static_object_helper
@@ -340,7 +342,8 @@ namespace pclass
 
 			static void set_value(StaticProperty<ValueT> &prop, Value value, int index)
 			{
-				prop.m_value = value.as<ValueT>().get<ValueT>();
+				Value casted_value = value.as<ValueT>();
+				prop.m_value = casted_value.get<ValueT>();
 			}
 		};
 
@@ -356,12 +359,15 @@ namespace pclass
 		{
 			static Value get_value(const StaticProperty<ValueT *> &prop, int index)
 			{
+				if (prop.m_value == nullptr)
+					throw runtime_error("Called get_value() but value is nullptr.");
 				return Value::make_reference<ValueT>(*prop.m_value);
 			}
 
 			static void set_value(StaticProperty<ValueT *> &prop, Value value, int index)
 			{
-				prop.m_value = value.as<ValueT>().release<ValueT>();
+				Value casted_value = value.as<ValueT>();
+				prop.m_value = casted_value.release<ValueT>();
 			}
 		};
 
@@ -379,7 +385,8 @@ namespace pclass
 
 			static void set_value(StaticProperty<ValueT[N]> &prop, Value value, const int index)
 			{
-				prop.m_value[index] = value.as<ValueT>().get<ValueT>();
+				Value casted_value = value.as<ValueT>();
+				prop.m_value[index] = casted_value.get<ValueT>();
 			}
 		};
 
@@ -397,30 +404,25 @@ namespace pclass
 
 			static void set_value(StaticProperty<ValueT[N]> &prop, Value value, const int index)
 			{
-				prop.m_value[index] = value.as<ValueT>().release<ValueT>();
+				Value casted_value = value.as<ValueT>();
+				prop.m_value[index] = casted_value.release<ValueT>();
 			}
 		};
 	}
 
 	/**
-	 * TODO: Documentation
+	 * Base type for StaticProperty.
+	 * This is used to remove the amount of repeated code in specializations.
 	 */
 	template <typename ValueT>
 	class IStaticProperty : public IProperty
 	{
 	public:
+		using IProperty::IProperty;
+
 		// Do not allow copy assignment. Once a property has been constructed,
 		// it shouldn't be able to change.
 		virtual IStaticProperty<ValueT> &operator=(const IStaticProperty<ValueT> &that) = delete;
-
-		IStaticProperty(PropertyClass &object,
-			const std::string &name, const Type &type)
-			: IProperty(object, name, type)
-		{}
-
-		IStaticProperty(PropertyClass &object, const StaticProperty<ValueT> &that)
-			: IProperty(object, that)
-		{}
 
 		constexpr bool is_pointer() const override
 		{
@@ -435,20 +437,6 @@ namespace pclass
 		void set_element_count(std::size_t size) override
 		{
 			throw runtime_error("Tried to call set_element_count() on a property that is not dynamic.");
-		}
-
-		void write_value_to(BitStream &stream, const std::size_t index) const override
-		{
-			if (index < 0 || index >= get_element_count())
-				throw runtime_error("Index out of bounds.");
-			get_type().write_to(stream, get_value(index));
-		}
-
-		void read_value_from(BitStream &stream, const std::size_t index) override
-		{
-			if (index < 0 || index >= get_element_count())
-				throw runtime_error("Index out of bounds.");
-			set_value(get_type().read_from(stream), index);
 		}
 	};
 
@@ -471,19 +459,19 @@ namespace pclass
 
 		StaticProperty(PropertyClass &object,
 			const std::string &name, const Type &type)
-			: IStaticProperty(object, name, type)
+			: IStaticProperty<ValueT>(object, name, type)
 			, m_value(detail::static_object_helper<ValueT>::construct(type))
 		{}
 
 		StaticProperty(PropertyClass &object,
 			const std::string &name, const Type &type, ValueT value)
-			: IStaticProperty(object, name, type)
+			: IStaticProperty<ValueT>(object, name, type)
 		{
 			m_value = value;
 		}
 
 		StaticProperty(PropertyClass &object, const StaticProperty<ValueT> &that)
-			: IStaticProperty(object, that)
+			: IStaticProperty<ValueT>(object, that)
 			, m_value(detail::static_object_helper<ValueT>::copy(that))
 		{}
 
@@ -576,14 +564,14 @@ namespace pclass
 
 		StaticProperty(PropertyClass &object,
 			const std::string &name, const Type &type)
-			: IStaticProperty(object, name, type)
+			: IStaticProperty<ValueT[N]>(object, name, type)
 		{
 			for (auto i = 0; i < N; ++i)
 				m_value[i] = detail::static_object_helper<ValueT>::construct(type);
 		}
 
 		StaticProperty(PropertyClass &object, const StaticProperty<ValueT[N]> &that)
-			: IStaticProperty(object, that)
+			: IStaticProperty<ValueT[N]>(object, that)
 		{
 			for (auto i = 0; i < N; ++i)
 				m_value[i] = that.m_value[i];
