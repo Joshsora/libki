@@ -4,7 +4,7 @@
 #include <json.hpp>
 #include "ki/pclass/Value.h"
 #include "ki/util/BitTypes.h"
-#include "ki/pclass/types/EnumType.h"
+#include "ki/pclass/EnumType.h"
 
 namespace ki
 {

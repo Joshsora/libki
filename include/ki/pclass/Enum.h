@@ -1,6 +1,6 @@
 #pragma once
-#include "ki/pclass/types/EnumType.h"
-#include "ki/pclass/types/PrimitiveType.h"
+#include "ki/pclass/EnumType.h"
+#include "ki/pclass/PrimitiveType.h"
 
 namespace ki
 {

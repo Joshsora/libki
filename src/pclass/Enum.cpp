@@ -7,7 +7,7 @@ namespace pclass
 	Enum::Enum(const Type &type, const enum_value_t value)
 	{
 		// Make sure the type we've been given is an enum type
-		if (type.get_kind() != Type::kind::ENUM)
+		if (type.get_kind() != Type::Kind::ENUM)
 			throw runtime_error("Enum constructor was supplied with a non-enum type.");
 
 		m_type = &dynamic_cast<const EnumType &>(type);
@@ -17,14 +17,14 @@ namespace pclass
 	Enum::Enum(const Type &type, const std::string &element_name)
 	{
 		// Make sure the type we've been given is an enum type
-		if (type.get_kind() != Type::kind::ENUM)
+		if (type.get_kind() != Type::Kind::ENUM)
 			throw runtime_error("Enum constructor was supplied with a non-enum type.");
 
 		m_type = &dynamic_cast<const EnumType &>(type);
 		set_value(element_name);
 	}
 
-	Enum& Enum::operator=(const Enum& that)
+	Enum &Enum::operator=(const Enum& that)
 	{
 		// Are the types the same?
 		if (&get_type() != &that.get_type())

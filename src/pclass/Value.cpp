@@ -9,7 +9,7 @@ namespace pclass
 
 	namespace detail
 	{
-		Value value_caster_base::cast(const Value &v) const
+		Value value_caster_base::cast(const Value &value) const
 		{
 			throw runtime_error("Unimplemented cast.");
 		}
@@ -24,7 +24,7 @@ namespace pclass
 			m_deallocator = deallocator;
 		}
 
-		ValueDeallocator::ValueDeallocator(ValueDeallocator &that)
+		ValueDeallocator::ValueDeallocator(const ValueDeallocator &that)
 		{
 			m_deallocator = that.m_deallocator->copy();
 		}
@@ -35,7 +35,7 @@ namespace pclass
 			that.m_deallocator = nullptr;
 		}
 
-		ValueDeallocator &ValueDeallocator::operator=(ValueDeallocator &that)
+		ValueDeallocator &ValueDeallocator::operator=(const ValueDeallocator &that)
 		{
 			m_deallocator = that.m_deallocator->copy();
 			return *this;
@@ -87,7 +87,7 @@ namespace pclass
 		m_deallocator = detail::ValueDeallocator();
 	}
 
-	Value::Value(Value& that)
+	Value::Value(const Value &that)
 	{
 		m_value_ptr = that.m_value_ptr;
 		m_ptr_is_owned = false;
@@ -108,7 +108,7 @@ namespace pclass
 		m_deallocator = std::move(that.m_deallocator);
 	}
 
-	Value &Value::operator=(Value &that)
+	Value &Value::operator=(const Value &that)
 	{
 		m_value_ptr = that.m_value_ptr;
 		m_ptr_is_owned = false;

@@ -1,8 +1,8 @@
 #pragma once
 #include <type_traits>
 #include <unordered_map>
-#include "ki/pclass/types/Type.h"
-#include "ki/pclass/types/PrimitiveType.h"
+#include "ki/pclass/Type.h"
+#include "ki/pclass/PrimitiveType.h"
 
 namespace ki
 {
@@ -32,6 +32,12 @@ namespace pclass
 		};
 
 	public:
+		// Do not allow copy construction or movement of types
+		EnumType(const EnumType &that) = delete;
+		EnumType &operator=(const EnumType &that) = delete;
+		EnumType(EnumType &&that) noexcept = delete;
+		EnumType &operator=(EnumType &&that) noexcept = delete;
+
 		EnumType(const std::string &name, const TypeSystem &type_system);
 		~EnumType();
 
@@ -43,7 +49,7 @@ namespace pclass
 
 		EnumType &add_element(const std::string &name, enum_value_t value);
 
-		void write_to(BitStream &stream, Value value) const override;
+		void write_to(BitStream &stream, Value &value) const override;
 		Value read_from(BitStream &stream) const override;
 
 	private:
@@ -66,10 +72,10 @@ namespace pclass
 		CppEnumType(const std::string &name, const TypeSystem &type_system)
 			: Type(name, type_system)
 		{
-			m_kind = kind::ENUM;
+			m_kind = Kind::ENUM;
 		}
 
-		void write_to(BitStream &stream, const Value value) const override
+		void write_to(BitStream &stream, Value &value) const override
 		{
 			auto &enum_reference = value.get<EnumT>();
 			auto &underlying_reference = reinterpret_cast<const underlying_type &>(enum_reference);

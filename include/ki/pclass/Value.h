@@ -26,7 +26,7 @@ namespace pclass
 		 */
 		struct value_caster_base
 		{
-			virtual ~value_caster_base() {}
+			virtual ~value_caster_base() = default;
 
 			/**
 			 * @param[in] value The value being casted.
@@ -51,7 +51,7 @@ namespace pclass
 		};
 
 		/**
-		 * TODO: Documentation
+		 * Provides casting implementations to ValueCaster instances.
 		 */
 		template <typename SrcT, typename DestT, typename Enable>
 		struct value_caster : value_caster_impl<SrcT, DestT>
@@ -64,15 +64,15 @@ namespace pclass
 		};
 
 		/**
-		 * A base class for Value deallocators.
+		 * A base class for Value de-allocators.
 		 * Provides a common interface for deallocate()
 		 */
 		struct value_deallocator_base
 		{
-			virtual ~value_deallocator_base() {}
+			virtual ~value_deallocator_base() = default;
 
 			/**
-			 * Deallocate a Value-owned pointer.
+			 * De-allocate a Value-owned pointer.
 			 * @param[in] ptr The pointer to deallocate.
 			 */
 			virtual void deallocate(void *ptr) const = 0;
@@ -84,7 +84,9 @@ namespace pclass
 		};
 
 		/**
-		 * TODO: Documentation
+		 * Provides a deallocate() implementation to ValueDeallocator
+		 * based on the type being de-allocated.
+		 * @tparam T The type being de-allocated.
 		 */
 		template <typename T>
 		struct value_deallocator : value_deallocator_base
@@ -102,7 +104,8 @@ namespace pclass
 		};
 
 		/**
-		 * TODO: Documentation
+		 * Provides Value with a way to safely delete the void pointer
+		 * that has had it's type information "erased".
 		 */
 		class ValueDeallocator
 		{
@@ -110,9 +113,9 @@ namespace pclass
 			friend Value;
 
 		public:
-			ValueDeallocator(ValueDeallocator &that);
+			ValueDeallocator(const ValueDeallocator &that);
 			ValueDeallocator(ValueDeallocator &&that) noexcept;
-			ValueDeallocator &operator=(ValueDeallocator &that);
+			ValueDeallocator &operator=(const ValueDeallocator &that);
 			ValueDeallocator &operator=(ValueDeallocator &&that) noexcept;
 			~ValueDeallocator();
 
@@ -137,8 +140,8 @@ namespace pclass
 	}
 
 	/**
-	* TODO: Documentation
-	*/
+	 * Provides a way to perform casting on Value instances.
+	 */
 	class ValueCaster
 	{
 		// Allow Value to call the default constructor and get<SrcT>()
@@ -229,9 +232,9 @@ namespace pclass
 	class Value
 	{
 	public:
-		Value(Value &that);
+		Value(const Value &that);
 		Value(Value &&that) noexcept;
-		Value &operator=(Value &that);
+		Value &operator=(const Value &that);
 		Value &operator=(Value &&that) noexcept;
 		~Value();
 
@@ -351,7 +354,7 @@ namespace pclass
 		/**
 		 * @tparam T The type of value to hold.
 		 * @param[in] value The initial value.
-		 * @returns A new Value instance that refers to a value it doesn't own.
+		 * @returns A new Value instance that refers to a value it does not own.
 		 */
 		template <typename T>
 		static Value make_reference(T &value)

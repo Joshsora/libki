@@ -1,5 +1,5 @@
 #pragma once
-#include "ki/pclass/types/Type.h"
+#include "ki/pclass/Type.h"
 #include "ki/pclass/PropertyList.h"
 
 #define _KI_TYPE ki::pclass::Type
@@ -52,11 +52,10 @@ namespace ki
 {
 namespace pclass
 {
-	template <typename ValueT>
-	class ClassType;
-
 	/**
-	 * TODO: Documentation
+	 * A base class for all objects defined as ClassTypes by a
+	 * TypeSystem instance. Provides a way to access a list of 
+	 * instance properties, as well as their values, at runtime.
 	 */
 	class PropertyClass
 	{
@@ -64,7 +63,7 @@ namespace pclass
 
 	public:
 		explicit PropertyClass(const Type &type, const TypeSystem &type_system);
-		virtual ~PropertyClass() {}
+		virtual ~PropertyClass() = default;
 
 		PropertyClass(const PropertyClass &that);
 		PropertyClass &operator=(const PropertyClass &that);
@@ -75,12 +74,11 @@ namespace pclass
 
 		virtual void on_created() const {}
 
-	protected:
-		void add_property(IProperty &prop);
-
 	private:
 		const Type *m_type;
 		PropertyList m_properties;
+
+		void add_property(IProperty &prop);
 	};
 }
 }

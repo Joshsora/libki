@@ -330,7 +330,7 @@ TEST_CASE("BitStream Functionality", "[bit-stream]")
 	SECTION("Copying memory in/out of the stream")
 	{
 		// Copy the string into the stream
-		char *str = "Hello, world!";
+		char str[] = "Hello, world!";
 		const auto size = bitsizeof<char>::value * (strlen(str) + 1);
 		bit_stream.write_copy(reinterpret_cast<uint8_t *>(str), size);
 

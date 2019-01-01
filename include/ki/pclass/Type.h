@@ -19,12 +19,21 @@ namespace pclass
 	class Type
 	{
 	public:
-		enum class kind
+		// Do not allow copy construction or movement of types
+		Type(const Type &that) = delete;
+		Type &operator=(const Type &that) = delete;
+		Type(Type &&that) noexcept = delete;
+		Type &operator=(Type &&that) noexcept = delete;
+
+		/**
+		 * An enum of Type kinds.
+		 */
+		enum class Kind
 		{
 			NONE,
 			
 			/**
-			 * A Type that contain pure, simple values.
+			 * A Type that contains pure, simple values.
 			 */
 			PRIMITIVE,
 
@@ -40,19 +49,39 @@ namespace pclass
 		};
 
 		Type(const std::string &name, const TypeSystem &type_system);
-		virtual ~Type() {}
+		virtual ~Type() = default;
 
-		std::string get_name() const;
+		const std::string &get_name() const;
 		hash_t get_hash() const;
-		kind get_kind() const;
+		Kind get_kind() const;
+
+		/**
+		 * The TypeSystem used to define this Type instance.
+		 */
 		const TypeSystem &get_type_system() const;
 
+		/**
+		 * Create an instance of the type being represented.
+		 * @returns A pointer to a new PropertyClass instance.
+		 */
 		virtual std::unique_ptr<PropertyClass> instantiate() const;
-		virtual void write_to(BitStream &stream, Value value) const;
+
+		/**
+		 * Write a value of this type to a BitStream.
+		 * @param[in] stream The stream to write to.
+		 * @param[in] value The value to write to the stream.
+		 */
+		virtual void write_to(BitStream &stream, Value &value) const;
+
+		/**
+		 * Read a value of this type from a BitStream.
+		 * @param stream[in] The stream to read from.
+		 * @returns The value read from the stream.
+		 */
 		virtual Value read_from(BitStream &stream) const;
 
 	protected:
-		kind m_kind;
+		Kind m_kind;
 
 	private:
 		std::string m_name;

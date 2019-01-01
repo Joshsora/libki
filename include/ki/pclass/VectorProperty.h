@@ -112,14 +112,14 @@ namespace pclass
 			using default_vector_object_helper<ValueT>::copy;
 
 			static const PropertyClass *get_object(
-				const VectorProperty<ValueT *> &prop, const int index)
+				const VectorProperty<ValueT> &prop, const int index)
 			{
 				// ValueT does derive from PropertyClass, and we have an instance of ValueT,
 				// so we can cast down to a PropertyClass pointer.
 				return dynamic_cast<const PropertyClass *>(&prop.at(index));
 			}
 
-			static void set_object(VectorProperty<ValueT *> &prop,
+			static void set_object(VectorProperty<ValueT> &prop,
 				std::unique_ptr<PropertyClass> &object, const int index)
 			{
 				// Ensure that object is not nullptr

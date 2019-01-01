@@ -1,4 +1,4 @@
-#include "ki/pclass/types/ClassType.h"
+#include "ki/pclass/ClassType.h"
 #include "ki/pclass/TypeSystem.h"
 #include "ki/util/exception.h"
 
@@ -7,16 +7,16 @@ namespace ki
 namespace pclass
 {
 	IClassType::IClassType(const std::string& name,
-		const Type* base_class, const TypeSystem& type_system)
+		const Type *base_class, const TypeSystem& type_system)
 		: Type(name, type_system)
 	{
-		m_kind = kind::CLASS;
+		m_kind = Kind::CLASS;
 
 		// Have we been given a base class?
 		if (base_class)
 		{
 			// Make sure the base class is a class type
-			if (base_class->get_kind() != kind::CLASS)
+			if (base_class->get_kind() != Kind::CLASS)
 				throw runtime_error("base_class must be a class type!");
 
 			// Cast the base class up to a IClassType pointer

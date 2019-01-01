@@ -1,8 +1,7 @@
-#include "ki/pclass/types/Type.h"
-#include "ki/pclass/types/ClassType.h"
+#include "ki/pclass/Type.h"
+#include "ki/pclass/ClassType.h"
 #include "ki/pclass/TypeSystem.h"
 #include "ki/util/exception.h"
-#include <stdexcept>
 #include <sstream>
 
 namespace ki
@@ -16,10 +15,10 @@ namespace pclass
 		m_hash = m_type_system
 			.get_hash_calculator()
 			.calculate_type_hash(name);
-		m_kind = kind::NONE;
+		m_kind = Kind::NONE;
 	}
 
-	std::string Type::get_name() const
+	const std::string &Type::get_name() const
 	{
 		return m_name;
 	}
@@ -29,7 +28,7 @@ namespace pclass
 		return m_hash;
 	}
 
-	Type::kind Type::get_kind() const
+	Type::Kind Type::get_kind() const
 	{
 		return m_kind;
 	}
@@ -39,7 +38,7 @@ namespace pclass
 		return m_type_system;
 	}
 
-	void Type::write_to(BitStream &stream, Value value) const
+	void Type::write_to(BitStream &stream, Value &value) const
 	{
 		std::ostringstream oss;
 		oss << "Type '" << m_name << "' does not implement Type::write_to.";
@@ -68,7 +67,7 @@ namespace pclass
 	{
 		// Do the types match via inheritance?
 		if (allow_inheritance &&
-			expected.get_kind() == Type::kind::CLASS)
+			expected.get_kind() == Type::Kind::CLASS)
 		{
 			const auto &actual_class = dynamic_cast<const IClassType &>(actual);
 			if (actual_class.inherits(expected))

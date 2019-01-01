@@ -3,7 +3,7 @@
 #include <type_traits>
 #include <string>
 #include "ki/pclass/Property.h"
-#include "ki/pclass/types/Type.h"
+#include "ki/pclass/Type.h"
 #include "ki/pclass/PropertyClass.h"
 
 namespace ki
@@ -11,18 +11,22 @@ namespace ki
 namespace pclass
 {
 	/**
-	 * TODO: Documentation
+	 * Base type for classes. Adds inheritance to Type.
 	 */
 	class IClassType : public Type
 	{
 	public:
 		IClassType(const std::string &name,
 			const Type *base_class, const TypeSystem &type_system);
-		virtual ~IClassType() {}
+		virtual ~IClassType() = default;
 
+		/**
+		 * @param[in] type The ancestor type to check against.
+		 * @returns True if this Type is a descendant of the given type. False otherwise.
+		 */
 		bool inherits(const Type &type) const;
 
-		void write_to(BitStream &stream, Value value) const override = 0;
+		void write_to(BitStream &stream, Value &value) const override = 0;
 		Value read_from(BitStream &stream) const override = 0;
 
 	private:
@@ -30,19 +34,27 @@ namespace pclass
 	};
 
 	/**
-	 * TODO: Documentation
+	 * A user-defined structure.
+	 * @tparam ClassT The compile-time user-defined class that the class represents.
 	 */
-	template <class ClassT>
+	template <typename ClassT>
 	class ClassType : public IClassType
 	{
 		// Ensure that ClassT inherits PropertyClass
 		static_assert(std::is_base_of<PropertyClass, ClassT>::value, "ClassT must inherit PropertyClass!");
 
 	public:
+		// Do not allow copy construction or movement of types
+		ClassType(const ClassType<ClassT> &that) = delete;
+		ClassType &operator=(const ClassType<ClassT> &that) = delete;
+		ClassType(ClassType<ClassT> &&that) noexcept = delete;
+		ClassType &operator=(ClassType<ClassT> &&that) noexcept = delete;
+
 		ClassType(const std::string &name,
 			const Type *base_class, const TypeSystem &type_system)
 			: IClassType(name, base_class, type_system)
 		{}
+		~ClassType() = default;
 
 		std::unique_ptr<PropertyClass> instantiate() const override
 		{
@@ -52,7 +64,7 @@ namespace pclass
 			);
 		}
 
-		void write_to(BitStream &stream, Value value) const override
+		void write_to(BitStream &stream, Value &value) const override
 		{
 			const auto &object = value.get<ClassT>();
 			const auto &properties = object.get_properties();

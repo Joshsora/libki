@@ -36,7 +36,7 @@ namespace pclass
 	template <>
 	void define_bit_integer_primitive<0>(TypeSystem &type_system) {}
 
-	TypeSystem::TypeSystem(std::unique_ptr<HashCalculator> &hash_calculator)
+	TypeSystem::TypeSystem(std::unique_ptr<IHashCalculator> &hash_calculator)
 	{
 		m_hash_calculator = std::move(hash_calculator);
 
@@ -48,6 +48,7 @@ namespace pclass
 		define_primitive<int8_t>("int8_t");
 		define_primitive<uint8_t>("uint8_t");
 		DEFINE_INTEGER_PRIMTIIVE(int16_t, uint16_t, "short");
+		define_primitive<char16_t>("wchar_t");
 		DEFINE_INTEGER_PRIMTIIVE(int16_t, uint16_t, "__int16");
 		define_primitive<int16_t>("int16_t");
 		define_primitive<uint16_t>("uint16_t");
@@ -59,7 +60,6 @@ namespace pclass
 		DEFINE_INTEGER_PRIMTIIVE(int64_t, uint64_t, "__int64");
 		define_primitive<int64_t>("int64_t");
 		define_primitive<uint64_t>("uint64_t");
-		define_primitive<uint64_t>("gid");
 
 		// Define bit-integer types
 		define_bit_integer_primitive(*this);
@@ -78,11 +78,8 @@ namespace pclass
 		define_class<PropertyClass>("class PropertyClass");
 	}
 
-	const HashCalculator &TypeSystem::get_hash_calculator() const
+	const IHashCalculator &TypeSystem::get_hash_calculator() const
 	{
-		// Make sure the hash calculator isn't null
-		if (m_hash_calculator == nullptr)
-			throw runtime_error("TypeSystem::get_hash_calculator() called but hash calculator is null.");
 		return *m_hash_calculator;
 	}
 
@@ -143,7 +140,7 @@ namespace pclass
 		}
 
 		// Does a type with this hash already exist?
-		if (m_type_name_lookup.find(type->get_name()) != m_type_name_lookup.end())
+		if (m_type_hash_lookup.find(type->get_hash()) != m_type_hash_lookup.end())
 		{
 			// Throw an error
 			auto &other_type = get_type(type->get_hash());

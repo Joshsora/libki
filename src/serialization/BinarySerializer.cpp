@@ -120,7 +120,7 @@ namespace serialization
 		if (object)
 			stream.write<uint32_t>(object->get_type().get_hash());
 		else
-			stream.write<uint32_t>(NULL);
+			stream.write<uint32_t>(0);
 		return object != nullptr;
 	}
 
@@ -183,7 +183,7 @@ namespace serialization
 		for (auto i = 0; i < prop.get_element_count(); ++i)
 		{
 			if (prop.is_pointer()
-				&& prop.get_type().get_kind() == pclass::Type::kind::CLASS)
+				&& prop.get_type().get_kind() == pclass::Type::Kind::CLASS)
 			{
 				// Write the value as a nested object
 				save_object(prop.get_object(i), stream);
@@ -358,7 +358,7 @@ namespace serialization
 		for (auto i = 0; i < prop.get_element_count(); ++i)
 		{
 			if (prop.is_pointer() &&
-				prop.get_type().get_kind() == pclass::Type::kind::CLASS)
+				prop.get_type().get_kind() == pclass::Type::Kind::CLASS)
 			{
 				// Read the object as a nested object
 				std::unique_ptr<pclass::PropertyClass> object = nullptr;

@@ -13,10 +13,10 @@ namespace ki
 		/**
 		 * A base class for type/property hash calculators.
 		 */
-		class HashCalculator
+		class IHashCalculator
 		{
 		public:
-			virtual ~HashCalculator() {};
+			virtual ~IHashCalculator() {};
 
 			/**
 			 * Calculate a type hash from the type's name.
@@ -35,7 +35,7 @@ namespace ki
 		 * A hash calculator that uses the algorithms found and used in
 		 * Wizard101.
 		 */
-		class WizardHashCalculator : public HashCalculator
+		class WizardHashCalculator : public IHashCalculator
 		{
 		public:
 			hash_t calculate_type_hash(const std::string& name) const override;

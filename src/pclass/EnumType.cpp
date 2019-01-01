@@ -1,4 +1,4 @@
-#include "ki/pclass/types/EnumType.h"
+#include "ki/pclass/EnumType.h"
 #include "ki/util/exception.h"
 #include <sstream>
 #include "ki/pclass/Enum.h"
@@ -7,7 +7,6 @@ namespace ki
 {
 namespace pclass
 {
-
 	EnumType::Element::Element(const std::string &name,
 		const enum_value_t value)
 	{
@@ -29,7 +28,7 @@ namespace pclass
 		const TypeSystem &type_system)
 		: Type(name, type_system)
 	{
-		m_kind = kind::ENUM;
+		m_kind = Kind::ENUM;
 	}
 
 	EnumType::~EnumType()
@@ -110,7 +109,7 @@ namespace pclass
 		return *this;
 	}
 
-	void EnumType::write_to(BitStream &stream, const Value value) const
+	void EnumType::write_to(BitStream &stream, Value &value) const
 	{
 		// Get an Enum reference and use it to write to the stream
 		value.get<Enum>().write_to(stream);

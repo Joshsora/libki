@@ -271,14 +271,14 @@ namespace pclass
 		>
 		{
 			static const PropertyClass *get_object(
-				const StaticProperty<ValueT> &prop, const int index)
+				const StaticProperty<ValueT[N]> &prop, const int index)
 			{
 				// ValueT does derive from PropertyClass, and we have an instance of ValueT,
 				// so we can cast down to a PropertyClass pointer.
 				return dynamic_cast<const PropertyClass *>(&prop.m_value[index]);
 			}
 
-			static void set_object(StaticProperty<ValueT> &prop,
+			static void set_object(StaticProperty<ValueT[N]> &prop,
 				std::unique_ptr<PropertyClass> &object, const int index)
 			{
 				// Ensure that object is not nullptr
@@ -308,14 +308,14 @@ namespace pclass
 		>
 		{
 			static const PropertyClass *get_object(
-				const StaticProperty<ValueT> &prop, const int index)
+				const StaticProperty<ValueT *[N]> &prop, const int index)
 			{
 				// ValueT does derive from PropertyClass, and we have an instance of ValueT,
 				// so we can cast down to a PropertyClass pointer.
 				return dynamic_cast<const PropertyClass *>(prop.m_value[index]);
 			}
 
-			static void set_object(StaticProperty<ValueT> &prop,
+			static void set_object(StaticProperty<ValueT *[N]> &prop,
 				std::unique_ptr<PropertyClass> &object, const int index)
 			{
 				// Ensure that object inherits the type of the property
@@ -397,12 +397,12 @@ namespace pclass
 		template <typename ValueT, int N>
 		struct static_value_helper<ValueT *[N]>
 		{
-			static Value get_value(const StaticProperty<ValueT[N]> &prop, const int index)
+			static Value get_value(const StaticProperty<ValueT *[N]> &prop, const int index)
 			{
 				return Value::make_reference<ValueT>(*prop.m_value[index]);
 			}
 
-			static void set_value(StaticProperty<ValueT[N]> &prop, Value value, const int index)
+			static void set_value(StaticProperty<ValueT *[N]> &prop, Value value, const int index)
 			{
 				Value casted_value = value.as<ValueT>();
 				prop.m_value[index] = casted_value.release<ValueT>();

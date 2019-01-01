@@ -11,16 +11,13 @@ namespace pclass
 	class IProperty;
 
 	/**
-	 * TODO: Documentation
+	 * Manages property lookup on a PropertyClass instance.
 	 */
 	class PropertyList
 	{
 		friend PropertyClass;
 
 	public:
-		/**
-		 * TODO: Documentation
-		 */
 		class iterator
 		{
 			friend PropertyList;
@@ -40,9 +37,6 @@ namespace pclass
 			explicit iterator(PropertyList &list, int index = 0);
 		};
 
-		/**
-		 * TODO: Documentation
-		 */
 		class const_iterator
 		{
 			friend PropertyList;
@@ -62,18 +56,63 @@ namespace pclass
 			explicit const_iterator(const PropertyList &list, int index = 0);
 		};
 
+		/**
+		 * @returns The number of properties in this list.
+		 */
 		std::size_t get_property_count() const;
 
+		/**
+		 * @param[in] name The name of the property to search for.
+		 * @returns Whether or not a property with the given name exists.
+		 */
 		bool has_property(const std::string &name) const;
+
+		/**
+		 * @param[in] hash The full hash of the property to search for.
+		 * @returns Whether or not a property with the given hash exists.
+		 */
 		bool has_property(hash_t hash) const;
 
+		/**
+		 * @param[in] index The index of the property to return.
+		 * @returns The property at the specified index.
+		 * @throw ki::runtime_error If the index is out of bounds.
+		 */
 		IProperty &get_property(int index);
+
+		/**
+		 * @param[in] index The index of the property to return.
+		 * @returns The property at the specified index.
+		 * @throw ki::runtime_error If the specified index is out of bounds.
+		 */
 		const IProperty &get_property(int index) const;
 
+		/**
+		 * @param[in] name The name of the property to search for.
+		 * @returns The property found with the specified name.
+		 * @throw ki::runtime_error If no property exists with the specified name.
+		 */
 		IProperty &get_property(const std::string &name);
+
+		/**
+		 * @param[in] name The name of the property to search for.
+		 * @returns The property found with the specified name.
+		 * @throw ki::runtime_error If no property exists with the specified name.
+		 */
 		const IProperty &get_property(const std::string &name) const;
 
+		/**
+		 * @param[in] hash The full hash of the property to search for.
+		 * @returns The property found with the specified hash.
+		 * @throw ki::runtime_error If no property exists with the specified hash.
+		 */
 		IProperty &get_property(hash_t hash);
+
+		/**
+		 * @param[in] hash The full hash of the property to search for.
+		 * @returns The property found with the specified hash.
+		 * @throw ki::runtime_error If no property exists with the specified hash.
+		 */
 		const IProperty &get_property(hash_t hash) const;
 
 		iterator begin();

@@ -27,7 +27,7 @@ namespace serialization
 	{
 		// Add the object's meta information
 		j["_pclass_meta"] = {
-			{ "type_hash", object ? object->get_type().get_hash() : NULL }
+			{ "type_hash", object ? object->get_type().get_hash() : 0 }
 		};
 		return object != nullptr;
 	}
@@ -38,7 +38,6 @@ namespace serialization
 		if (!presave_object(j, object))
 			return j;
 
-		// Add the object's properties
 		auto &property_list = object->get_properties();
 		for (auto it = property_list.begin();
 			it != property_list.end(); ++it)
@@ -55,7 +54,7 @@ namespace serialization
 	{
 		for (std::size_t i = 0; i < prop.get_element_count(); ++i)
 		{
-			if (prop.get_type().get_kind() == pclass::Type::kind::CLASS)
+			if (prop.get_type().get_kind() == pclass::Type::Kind::CLASS)
 			{
 				auto *other_object = prop.get_object(i);
 				if (prop.is_array())
@@ -124,6 +123,10 @@ namespace serialization
 			auto &prop = *it;
 			load_property(prop, j);
 		}
+
+		// All properties on this object have been set, let the new
+		// instance react to this change
+		dest->on_created();
 	}
 
 	void JsonSerializer::load_property(
@@ -143,7 +146,7 @@ namespace serialization
 
 		for (std::size_t i = 0; i < prop.get_element_count(); ++i)
 		{
-			if (prop.get_type().get_kind() == pclass::Type::kind::CLASS)
+			if (prop.get_type().get_kind() == pclass::Type::Kind::CLASS)
 			{
 				std::unique_ptr<pclass::PropertyClass> other_object = nullptr;
 				if (prop.is_array())

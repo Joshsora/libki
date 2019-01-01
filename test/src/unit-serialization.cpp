@@ -1,4 +1,4 @@
-#define CATCH_CONFIG_MAIN
+﻿#define CATCH_CONFIG_MAIN
 #include <cstdio>
 #include <cstdint>
 #include <string>
@@ -10,6 +10,7 @@
 #include <ki/pclass/VectorProperty.h>
 #include <ki/serialization/BinarySerializer.h>
 #include <ki/serialization/JsonSerializer.h>
+#include "ki/pclass/Enum.h"
 
 using namespace ki;
 
@@ -42,11 +43,9 @@ struct Vector3D
 
 	bool operator==(const Vector3D &that) const
 	{
-		return (
-			m_x == that.m_x,
-			m_y == that.m_y,
-			m_z == that.m_z
-		);
+		return m_x == that.m_x &&
+			   m_y == that.m_y &&
+			   m_z == that.m_z;
 	}
 
 	void write_to(BitStream &stream) const
@@ -244,12 +243,14 @@ public:
 		INIT_PROPERTY(float64, "double")
 		INIT_PROPERTY(vector3d, "struct Vector3D")
 		INIT_PROPERTY(int_ptr, "int")
-		INIT_PROPERTY(value_object, "class NestedTestObjectA")
-		INIT_PROPERTY(not_null_object, "class NestedTestObject")
-		INIT_PROPERTY(null_object, "class NestedTestObject")
-		INIT_PROPERTY(collection, "int")
-		INIT_PROPERTY(ptr_collection, "int")
-		INIT_PROPERTY(objects, "class NestedTestObject")
+		INIT_PROPERTY(int_array, "int")
+		INIT_PROPERTY(int_ptr_array, "int")
+		INIT_PROPERTY(object, "class NestedTestObjectA")
+		INIT_PROPERTY(object_ptr, "class NestedTestObject")
+		INIT_PROPERTY(null_object_ptr, "class NestedTestObject")
+		INIT_PROPERTY(int_vector, "int")
+		INIT_PROPERTY(int_ptr_vector, "int")
+		INIT_PROPERTY(object_ptr_vector, "class NestedTestObject")
 	{}
 
 	// Test signed and unsigned integers with a bit length less than 8
@@ -282,21 +283,27 @@ public:
 	// Test dereferencing when writing pointers to primitives
 	pclass::StaticProperty<int *> int_ptr;
 
-	// Test writing a single instance of another object
-	pclass::StaticProperty<NestedTestObjectA> value_object;
-	pclass::StaticProperty<NestedTestObject *> not_null_object;
-	pclass::StaticProperty<NestedTestObject *> null_object;
+	// Test explicitly-sized array of primitives and pointers
+	pclass::StaticProperty<int[5]> int_array;
+	pclass::StaticProperty<int *[5]> int_ptr_array;
+
+	// Test writing a class type as a value
+	pclass::StaticProperty<NestedTestObjectA> object;
+
+	// Test writing a class type as a pointer
+	pclass::StaticProperty<NestedTestObject *> object_ptr;
+	pclass::StaticProperty<NestedTestObject *> null_object_ptr;
 
 	// Test writing collections of primitives
-	pclass::VectorProperty<int> collection;
-	pclass::VectorProperty<int *> ptr_collection;
+	pclass::VectorProperty<int> int_vector;
+	pclass::VectorProperty<int *> int_ptr_vector;
 
 	// Test writing multiple instances of another object
-	pclass::VectorProperty<NestedTestObject *> objects;
+	pclass::VectorProperty<NestedTestObject *> object_ptr_vector;
 };
 
 // Setup a global TypeSystem instance
-std::unique_ptr<pclass::HashCalculator> g_hash_calculator
+std::unique_ptr<pclass::IHashCalculator> g_hash_calculator
 	= ki::make_unique<pclass::WizardHashCalculator>();
 auto g_type_system = ki::make_unique<pclass::TypeSystem>(g_hash_calculator);
 bool g_types_defined = false;
@@ -338,13 +345,14 @@ void define_types()
 #define EXPECTED_uint32 0x0708090A
 #define EXPECTED_uint64 0x0B0C0D0E0F101112
 #define EXPECTED_string "This is a test value"
-#define EXPECTED_wstring u"This is a test value"
+#define EXPECTED_wstring u"\u1d57\u02b0\u2071\u02e2\u0020\u2071\u02e2\u0020\u1d43\u0020\u1d57\u1d49\u02e2\u1d57\u0020\u1d5b\u1d43\u02e1\u1d58\u1d49"
 #define EXPECTED_float32 3.1415927410125732421875f
 #define EXPECTED_float64 3.141592653589793115997963468544185161590576171875
 #define EXPECTED_vector3d Vector3D(24.0f, 61.0f, 3.62f)
 #define EXPECTED_int_ptr 52
 #define EXPECTED_value_object_extra_value 20
-#define EXPECTED_collection_size 100
+#define EXPECTED_int_array_size 5
+#define EXPECTED_int_vector_size 100
 #define SET_EXPECTED(object, identifier) object.identifier = EXPECTED_##identifier
 #define IS_EXPECTED(object, identifier) object.identifier.get() == EXPECTED_##identifier
 
@@ -372,22 +380,29 @@ void configure_test_object(TestObject &object)
 	SET_EXPECTED(object, float64);
 	SET_EXPECTED(object, vector3d);
 	object.int_ptr = new int(EXPECTED_int_ptr);
-	
-	// Configure the collection of integers
-	for (auto i = 0; i < EXPECTED_collection_size; ++i)
+
+	// Configure the int array
+	for (auto i = 0; i < EXPECTED_int_array_size; ++i)
 	{
-		object.collection.push_back(i);
-		object.ptr_collection.push_back(new int(i));
+		object.int_array[i] = i;
+		object.int_ptr_array[i] = new int(i);
+	}
+
+	// Configure the int vector
+	for (auto i = 0; i < EXPECTED_int_vector_size; ++i)
+	{
+		object.int_vector.push_back(i);
+		object.int_ptr_vector.push_back(new int(i));
 	}
 
 	// Configure nested objects
-	object.value_object.get().extra_value = EXPECTED_value_object_extra_value;
-	object.not_null_object = g_type_system->instantiate<NestedTestObject>("class NestedTestObject").release();
-	object.null_object = nullptr;
-	object.objects.push_back(
+	object.object.get().extra_value = EXPECTED_value_object_extra_value;
+	object.object_ptr = g_type_system->instantiate<NestedTestObject>("class NestedTestObject").release();
+	object.null_object_ptr = nullptr;
+	object.object_ptr_vector.push_back(
 		g_type_system->instantiate<NestedTestObjectA>("class NestedTestObjectA").release()
 	);
-	object.objects.push_back(
+	object.object_ptr_vector.push_back(
 		g_type_system->instantiate<NestedTestObjectB>("class NestedTestObjectB").release()
 	);
 }
@@ -417,23 +432,32 @@ void validate_test_object(TestObject &object)
 	REQUIRE(IS_EXPECTED(object, vector3d));
 	REQUIRE(*object.int_ptr == EXPECTED_int_ptr);
 
-	// Validate both collections
-	REQUIRE(object.collection.size() == EXPECTED_collection_size);
-	REQUIRE(object.ptr_collection.size() == EXPECTED_collection_size);
-	for (auto i = 0; i < EXPECTED_collection_size; i++)
+	// Validate the int array
+	REQUIRE(object.int_array.get_element_count() == EXPECTED_int_array_size);
+	REQUIRE(object.int_ptr_array.get_element_count() == EXPECTED_int_array_size);
+	for (auto i = 0; i < EXPECTED_int_array_size; i++)
 	{
-		REQUIRE(object.collection[i] == i);
-		REQUIRE(*object.ptr_collection[i] == i);
+		REQUIRE(object.int_array[i] == i);
+		REQUIRE(*object.int_ptr_array[i] == i);
+	}
+
+	// Validate the int vector
+	REQUIRE(object.int_vector.size() == EXPECTED_int_vector_size);
+	REQUIRE(object.int_ptr_vector.size() == EXPECTED_int_vector_size);
+	for (auto i = 0; i < EXPECTED_int_vector_size; i++)
+	{
+		REQUIRE(object.int_vector[i] == i);
+		REQUIRE(*object.int_ptr_vector[i] == i);
 	}
 
 	// Validate nested objects
-	REQUIRE(object.value_object.get().extra_value == EXPECTED_value_object_extra_value);
-	REQUIRE(object.not_null_object.get() != nullptr);
-	REQUIRE(object.not_null_object.get()->get_kind() == NestedObjectKind::OBJECT);
-	REQUIRE(object.null_object.get() == nullptr);
-	REQUIRE(object.objects.size() == 2);
-	REQUIRE(object.objects[0]->get_kind() == NestedObjectKind::OBJECT_A);
-	REQUIRE(object.objects[1]->get_kind() == NestedObjectKind::OBJECT_B);
+	REQUIRE(object.object.get().extra_value == EXPECTED_value_object_extra_value);
+	REQUIRE(object.object_ptr.get() != nullptr);
+	REQUIRE(object.object_ptr.get()->get_kind() == NestedObjectKind::OBJECT);
+	REQUIRE(object.null_object_ptr.get() == nullptr);
+	REQUIRE(object.object_ptr_vector.size() == 2);
+	REQUIRE(object.object_ptr_vector[0]->get_kind() == NestedObjectKind::OBJECT_A);
+	REQUIRE(object.object_ptr_vector[1]->get_kind() == NestedObjectKind::OBJECT_B);
 }
 
 /**
@@ -580,7 +604,7 @@ TEST_CASE("Serialization tests", "[serialization]")
 		SECTION("Regular format without compression")
 		{
 			serialization::BinarySerializer serializer(
-				*g_type_system.get(), false,
+				*g_type_system, false,
 				serialization::BinarySerializer::flags::NONE
 			);
 			test_serializer(test_object, serializer, "regular");
@@ -588,7 +612,7 @@ TEST_CASE("Serialization tests", "[serialization]")
 		SECTION("File format without compression")
 		{
 			serialization::BinarySerializer serializer(
-				*g_type_system.get(), true,
+				*g_type_system, true,
 				serialization::BinarySerializer::flags::WRITE_SERIALIZER_FLAGS
 			);
 			test_serializer(test_object, serializer, "file");
@@ -596,7 +620,7 @@ TEST_CASE("Serialization tests", "[serialization]")
 		SECTION("Regular format with compression")
 		{
 			serialization::BinarySerializer serializer(
-				*g_type_system.get(), false,
+				*g_type_system, false,
 				serialization::BinarySerializer::flags::COMPRESSED
 			);
 			test_serializer(test_object, serializer, "regular_compressed");
@@ -604,7 +628,7 @@ TEST_CASE("Serialization tests", "[serialization]")
 		SECTION("File format with compression")
 		{
 			serialization::BinarySerializer serializer(
-				*g_type_system.get(), true,
+				*g_type_system, true,
 				serialization::BinarySerializer::flags::WRITE_SERIALIZER_FLAGS |
 				serialization::BinarySerializer::flags::COMPRESSED
 			);
