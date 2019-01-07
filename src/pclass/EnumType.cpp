@@ -14,7 +14,7 @@ namespace pclass
 		m_value = value;
 	}
 
-	std::string EnumType::Element::get_name() const
+	const std::string &EnumType::Element::get_name() const
 	{
 		return m_name;
 	}

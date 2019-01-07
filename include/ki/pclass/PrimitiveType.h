@@ -157,10 +157,10 @@ namespace pclass
 		{
 			try
 			{
-				Value deref_value = value.dereference<ValueT>();
+				Value casted_value = value.as<ValueT>();
 				detail::primitive_type_helper<ValueT>::write_to(
 					stream,
-					deref_value.get<ValueT>()
+					casted_value.get<ValueT>()
 				);
 			}
 			catch (runtime_error &e)

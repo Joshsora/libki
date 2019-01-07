@@ -30,7 +30,7 @@ namespace pclass
 
 		virtual ~IProperty() = default;
 
-		std::string get_name() const;
+		const std::string &get_name() const;
 		hash_t get_name_hash() const;
 		hash_t get_full_hash() const;
 		const Type &get_type() const;

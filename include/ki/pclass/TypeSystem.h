@@ -21,6 +21,7 @@ namespace pclass
 	{
 	public:
 		explicit TypeSystem(std::unique_ptr<IHashCalculator> &hash_calculator);
+		virtual ~TypeSystem() = default;
 
 		/**
 		 * @returns The IHashCalculator instance this TypeSystem uses to calculate
@@ -64,8 +65,6 @@ namespace pclass
 		PrimitiveType<ValueT> &define_primitive(const std::string &name)
 		{
 			detail::caster_declarer<ValueT>::declare();
-			ValueCaster::declare<nlohmann::json, ValueT>();
-
 			auto *type = new PrimitiveType<ValueT>(name, *this);
 			define_type(std::unique_ptr<Type>(
 				dynamic_cast<Type *>(type)
@@ -116,8 +115,6 @@ namespace pclass
 		CppEnumType<EnumT> &define_enum(const std::string &name)
 		{
 			detail::caster_declarer<EnumT>::declare();
-			ValueCaster::declare<nlohmann::json, EnumT>();
-
 			auto *type = new CppEnumType<EnumT>(name, *this);
 			define_type(std::unique_ptr<Type>(
 				dynamic_cast<Type *>(type)
@@ -127,14 +124,19 @@ namespace pclass
 
 		/**
 		 * Create a new instance of a PropertyClass-derived class.
+		 * @param[in] name The name of the class type to instantiate.
+		 */
+		virtual std::unique_ptr<PropertyClass> instantiate(const std::string &name) const;
+
+		/**
+		 * Create a new instance of a PropertyClass-derived class.
 		 * @tparam ClassT The expected compile-time class.
 		 * @param[in] name The name of the class type to instantiate.
 		 */
 		template <typename ClassT>
 		std::unique_ptr<ClassT> instantiate(const std::string &name) const
 		{
-			const auto &type = get_type(name);
-			auto object = type.instantiate();
+			auto object = instantiate(name);
 			return std::unique_ptr<ClassT>(
 				dynamic_cast<ClassT *>(object.release())
 			);
@@ -153,8 +155,6 @@ namespace pclass
 		ClassType<ClassT> &define_class(
 			const std::string &name, const Type *base_class)
 		{
-			detail::caster_declarer<ClassT>::declare();
-
 			// If the caller does not specify a base class, automatically make
 			// ki::pclass::PropertyClass the base class (if it has been defined)
 			if (base_class == nullptr && has_type("class PropertyClass"))

@@ -41,7 +41,7 @@ namespace pclass
 		return *m_instance;
 	}
 
-	std::string IProperty::get_name() const
+	const std::string &IProperty::get_name() const
 	{
 		return m_name;
 	}

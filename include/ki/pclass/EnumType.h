@@ -23,7 +23,7 @@ namespace pclass
 		public:
 			explicit Element(const std::string &name, enum_value_t value);
 
-			std::string get_name() const;
+			const std::string &get_name() const;
 			enum_value_t get_value() const;
 
 		private:

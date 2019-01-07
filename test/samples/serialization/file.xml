@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Objects>
+	<Class Name="class TestObject">
+		<int4>-6</int4>
+		<uint4>5</uint4>
+		<int8>1</int8>
+		<int16>515</int16>
+		<int24>263430</int24>
+		<int32>117967114</int32>
+		<int64>796025588171149586</int64>
+		<uint8>1</uint8>
+		<uint16>515</uint16>
+		<uint24>263430</uint24>
+		<uint32>117967114</uint32>
+		<uint64>796025588171149586</uint64>
+		<string>This is a test value</string>
+		<wstring>ᵗʰⁱˢ ⁱˢ ᵃ ᵗᵉˢᵗ ᵛᵃˡᵘᵉ</wstring>
+		<float32>3.14159274</float32>
+		<float64>3.1415926535897931</float64>
+		<vector3d>24 61 3.62</vector3d>
+		<int_ptr>52</int_ptr>
+		<int_array key="0">0</int_array>
+		<int_array key="1">1</int_array>
+		<int_array key="2">2</int_array>
+		<int_array key="3">3</int_array>
+		<int_array key="4">4</int_array>
+		<int_ptr_array key="0">0</int_ptr_array>
+		<int_ptr_array key="1">1</int_ptr_array>
+		<int_ptr_array key="2">2</int_ptr_array>
+		<int_ptr_array key="3">3</int_ptr_array>
+		<int_ptr_array key="4">4</int_ptr_array>
+		<object>
+			<Class Name="class NestedTestObjectA">
+				<m_kind>2</m_kind>
+				<extra_value>20</extra_value>
+			</Class>
+		</object>
+		<object_ptr>
+			<Class Name="class NestedTestObject">
+				<m_kind>1</m_kind>
+			</Class>
+		</object_ptr>
+		<null_object_ptr>0</null_object_ptr>
+		<int_vector key="0">0</int_vector>
+		<int_vector key="1">1</int_vector>
+		<int_vector key="2">2</int_vector>
+		<int_vector key="3">3</int_vector>
+		<int_vector key="4">4</int_vector>
+		<int_vector key="5">5</int_vector>
+		<int_vector key="6">6</int_vector>
+		<int_vector key="7">7</int_vector>
+		<int_vector key="8">8</int_vector>
+		<int_vector key="9">9</int_vector>
+		<int_vector key="10">10</int_vector>
+		<int_vector key="11">11</int_vector>
+		<int_vector key="12">12</int_vector>
+		<int_vector key="13">13</int_vector>
+		<int_vector key="14">14</int_vector>
+		<int_vector key="15">15</int_vector>
+		<int_vector key="16">16</int_vector>
+		<int_vector key="17">17</int_vector>
+		<int_vector key="18">18</int_vector>
+		<int_vector key="19">19</int_vector>
+		<int_vector key="20">20</int_vector>
+		<int_vector key="21">21</int_vector>
+		<int_vector key="22">22</int_vector>
+		<int_vector key="23">23</int_vector>
+		<int_vector key="24">24</int_vector>
+		<int_vector key="25">25</int_vector>
+		<int_vector key="26">26</int_vector>
+		<int_vector key="27">27</int_vector>
+		<int_vector key="28">28</int_vector>
+		<int_vector key="29">29</int_vector>
+		<int_vector key="30">30</int_vector>
+		<int_vector key="31">31</int_vector>
+		<int_vector key="32">32</int_vector>
+		<int_vector key="33">33</int_vector>
+		<int_vector key="34">34</int_vector>
+		<int_vector key="35">35</int_vector>
+		<int_vector key="36">36</int_vector>
+		<int_vector key="37">37</int_vector>
+		<int_vector key="38">38</int_vector>
+		<int_vector key="39">39</int_vector>
+		<int_vector key="40">40</int_vector>
+		<int_vector key="41">41</int_vector>
+		<int_vector key="42">42</int_vector>
+		<int_vector key="43">43</int_vector>
+		<int_vector key="44">44</int_vector>
+		<int_vector key="45">45</int_vector>
+		<int_vector key="46">46</int_vector>
+		<int_vector key="47">47</int_vector>
+		<int_vector key="48">48</int_vector>
+		<int_vector key="49">49</int_vector>
+		<int_vector key="50">50</int_vector>
+		<int_vector key="51">51</int_vector>
+		<int_vector key="52">52</int_vector>
+		<int_vector key="53">53</int_vector>
+		<int_vector key="54">54</int_vector>
+		<int_vector key="55">55</int_vector>
+		<int_vector key="56">56</int_vector>
+		<int_vector key="57">57</int_vector>
+		<int_vector key="58">58</int_vector>
+		<int_vector key="59">59</int_vector>
+		<int_vector key="60">60</int_vector>
+		<int_vector key="61">61</int_vector>
+		<int_vector key="62">62</int_vector>
+		<int_vector key="63">63</int_vector>
+		<int_vector key="64">64</int_vector>
+		<int_vector key="65">65</int_vector>
+		<int_vector key="66">66</int_vector>
+		<int_vector key="67">67</int_vector>
+		<int_vector key="68">68</int_vector>
+		<int_vector key="69">69</int_vector>
+		<int_vector key="70">70</int_vector>
+		<int_vector key="71">71</int_vector>
+		<int_vector key="72">72</int_vector>
+		<int_vector key="73">73</int_vector>
+		<int_vector key="74">74</int_vector>
+		<int_vector key="75">75</int_vector>
+		<int_vector key="76">76</int_vector>
+		<int_vector key="77">77</int_vector>
+		<int_vector key="78">78</int_vector>
+		<int_vector key="79">79</int_vector>
+		<int_vector key="80">80</int_vector>
+		<int_vector key="81">81</int_vector>
+		<int_vector key="82">82</int_vector>
+		<int_vector key="83">83</int_vector>
+		<int_vector key="84">84</int_vector>
+		<int_vector key="85">85</int_vector>
+		<int_vector key="86">86</int_vector>
+		<int_vector key="87">87</int_vector>
+		<int_vector key="88">88</int_vector>
+		<int_vector key="89">89</int_vector>
+		<int_vector key="90">90</int_vector>
+		<int_vector key="91">91</int_vector>
+		<int_vector key="92">92</int_vector>
+		<int_vector key="93">93</int_vector>
+		<int_vector key="94">94</int_vector>
+		<int_vector key="95">95</int_vector>
+		<int_vector key="96">96</int_vector>
+		<int_vector key="97">97</int_vector>
+		<int_vector key="98">98</int_vector>
+		<int_vector key="99">99</int_vector>
+		<int_ptr_vector key="0">0</int_ptr_vector>
+		<int_ptr_vector key="1">1</int_ptr_vector>
+		<int_ptr_vector key="2">2</int_ptr_vector>
+		<int_ptr_vector key="3">3</int_ptr_vector>
+		<int_ptr_vector key="4">4</int_ptr_vector>
+		<int_ptr_vector key="5">5</int_ptr_vector>
+		<int_ptr_vector key="6">6</int_ptr_vector>
+		<int_ptr_vector key="7">7</int_ptr_vector>
+		<int_ptr_vector key="8">8</int_ptr_vector>
+		<int_ptr_vector key="9">9</int_ptr_vector>
+		<int_ptr_vector key="10">10</int_ptr_vector>
+		<int_ptr_vector key="11">11</int_ptr_vector>
+		<int_ptr_vector key="12">12</int_ptr_vector>
+		<int_ptr_vector key="13">13</int_ptr_vector>
+		<int_ptr_vector key="14">14</int_ptr_vector>
+		<int_ptr_vector key="15">15</int_ptr_vector>
+		<int_ptr_vector key="16">16</int_ptr_vector>
+		<int_ptr_vector key="17">17</int_ptr_vector>
+		<int_ptr_vector key="18">18</int_ptr_vector>
+		<int_ptr_vector key="19">19</int_ptr_vector>
+		<int_ptr_vector key="20">20</int_ptr_vector>
+		<int_ptr_vector key="21">21</int_ptr_vector>
+		<int_ptr_vector key="22">22</int_ptr_vector>
+		<int_ptr_vector key="23">23</int_ptr_vector>
+		<int_ptr_vector key="24">24</int_ptr_vector>
+		<int_ptr_vector key="25">25</int_ptr_vector>
+		<int_ptr_vector key="26">26</int_ptr_vector>
+		<int_ptr_vector key="27">27</int_ptr_vector>
+		<int_ptr_vector key="28">28</int_ptr_vector>
+		<int_ptr_vector key="29">29</int_ptr_vector>
+		<int_ptr_vector key="30">30</int_ptr_vector>
+		<int_ptr_vector key="31">31</int_ptr_vector>
+		<int_ptr_vector key="32">32</int_ptr_vector>
+		<int_ptr_vector key="33">33</int_ptr_vector>
+		<int_ptr_vector key="34">34</int_ptr_vector>
+		<int_ptr_vector key="35">35</int_ptr_vector>
+		<int_ptr_vector key="36">36</int_ptr_vector>
+		<int_ptr_vector key="37">37</int_ptr_vector>
+		<int_ptr_vector key="38">38</int_ptr_vector>
+		<int_ptr_vector key="39">39</int_ptr_vector>
+		<int_ptr_vector key="40">40</int_ptr_vector>
+		<int_ptr_vector key="41">41</int_ptr_vector>
+		<int_ptr_vector key="42">42</int_ptr_vector>
+		<int_ptr_vector key="43">43</int_ptr_vector>
+		<int_ptr_vector key="44">44</int_ptr_vector>
+		<int_ptr_vector key="45">45</int_ptr_vector>
+		<int_ptr_vector key="46">46</int_ptr_vector>
+		<int_ptr_vector key="47">47</int_ptr_vector>
+		<int_ptr_vector key="48">48</int_ptr_vector>
+		<int_ptr_vector key="49">49</int_ptr_vector>
+		<int_ptr_vector key="50">50</int_ptr_vector>
+		<int_ptr_vector key="51">51</int_ptr_vector>
+		<int_ptr_vector key="52">52</int_ptr_vector>
+		<int_ptr_vector key="53">53</int_ptr_vector>
+		<int_ptr_vector key="54">54</int_ptr_vector>
+		<int_ptr_vector key="55">55</int_ptr_vector>
+		<int_ptr_vector key="56">56</int_ptr_vector>
+		<int_ptr_vector key="57">57</int_ptr_vector>
+		<int_ptr_vector key="58">58</int_ptr_vector>
+		<int_ptr_vector key="59">59</int_ptr_vector>
+		<int_ptr_vector key="60">60</int_ptr_vector>
+		<int_ptr_vector key="61">61</int_ptr_vector>
+		<int_ptr_vector key="62">62</int_ptr_vector>
+		<int_ptr_vector key="63">63</int_ptr_vector>
+		<int_ptr_vector key="64">64</int_ptr_vector>
+		<int_ptr_vector key="65">65</int_ptr_vector>
+		<int_ptr_vector key="66">66</int_ptr_vector>
+		<int_ptr_vector key="67">67</int_ptr_vector>
+		<int_ptr_vector key="68">68</int_ptr_vector>
+		<int_ptr_vector key="69">69</int_ptr_vector>
+		<int_ptr_vector key="70">70</int_ptr_vector>
+		<int_ptr_vector key="71">71</int_ptr_vector>
+		<int_ptr_vector key="72">72</int_ptr_vector>
+		<int_ptr_vector key="73">73</int_ptr_vector>
+		<int_ptr_vector key="74">74</int_ptr_vector>
+		<int_ptr_vector key="75">75</int_ptr_vector>
+		<int_ptr_vector key="76">76</int_ptr_vector>
+		<int_ptr_vector key="77">77</int_ptr_vector>
+		<int_ptr_vector key="78">78</int_ptr_vector>
+		<int_ptr_vector key="79">79</int_ptr_vector>
+		<int_ptr_vector key="80">80</int_ptr_vector>
+		<int_ptr_vector key="81">81</int_ptr_vector>
+		<int_ptr_vector key="82">82</int_ptr_vector>
+		<int_ptr_vector key="83">83</int_ptr_vector>
+		<int_ptr_vector key="84">84</int_ptr_vector>
+		<int_ptr_vector key="85">85</int_ptr_vector>
+		<int_ptr_vector key="86">86</int_ptr_vector>
+		<int_ptr_vector key="87">87</int_ptr_vector>
+		<int_ptr_vector key="88">88</int_ptr_vector>
+		<int_ptr_vector key="89">89</int_ptr_vector>
+		<int_ptr_vector key="90">90</int_ptr_vector>
+		<int_ptr_vector key="91">91</int_ptr_vector>
+		<int_ptr_vector key="92">92</int_ptr_vector>
+		<int_ptr_vector key="93">93</int_ptr_vector>
+		<int_ptr_vector key="94">94</int_ptr_vector>
+		<int_ptr_vector key="95">95</int_ptr_vector>
+		<int_ptr_vector key="96">96</int_ptr_vector>
+		<int_ptr_vector key="97">97</int_ptr_vector>
+		<int_ptr_vector key="98">98</int_ptr_vector>
+		<int_ptr_vector key="99">99</int_ptr_vector>
+		<object_ptr_vector key="0">
+			<Class Name="class NestedTestObjectA">
+				<m_kind>2</m_kind>
+				<extra_value>10</extra_value>
+			</Class>
+		</object_ptr_vector>
+		<object_ptr_vector key="1">
+			<Class Name="class NestedTestObjectB">
+				<m_kind>3</m_kind>
+			</Class>
+		</object_ptr_vector>
+	</Class>
+</Objects>
+

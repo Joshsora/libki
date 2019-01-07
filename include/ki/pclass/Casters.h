@@ -5,6 +5,9 @@
 #include "ki/pclass/Value.h"
 #include "ki/util/BitTypes.h"
 #include "ki/pclass/EnumType.h"
+#include <iomanip>
+#include <locale>
+#include <codecvt>
 
 namespace ki
 {
@@ -138,6 +141,11 @@ namespace detail
 	{
 		using type = uint16_t;
 	};
+	template <>
+	struct string_cast_t<char16_t>
+	{
+		using type = int16_t;
+	};
 
 	/**
 	 * Enums should be written as 32-bit integers.
@@ -152,11 +160,44 @@ namespace detail
 	};
 
 	/**
+	 * A utility to enforce that a template parameter has a minimum
+	 * value.
+	 */
+	template <uint8_t N, uint8_t MinN, typename Enable = void>
+	struct minimum
+	{
+		static constexpr uint8_t value = N;
+	};
+
+	template <uint8_t N, uint8_t MinN>
+	struct minimum<
+		N, MinN,
+		typename std::enable_if<N < MinN>::type
+	>
+	{
+		static constexpr uint8_t value = MinN;
+	};
+
+	/**
+	 * BitIntegers should be written as the most suitable integer type
+	 * based on signedness and number of bits.
+	 */
+	template <uint8_t N, bool Unsigned>
+	struct string_cast_t<BitInteger<N, Unsigned>>
+	{
+		using type = typename BitInteger<
+			minimum<N, 16>::value, Unsigned>::type;
+	};
+
+	/**
 	 * Caster implementation for casting any type to string
 	 * via std::ostringstream.
 	 */
 	template <typename SrcT>
-	struct value_caster<SrcT, std::string>
+	struct value_caster<
+		SrcT, std::string,
+		typename std::enable_if<!std::is_floating_point<SrcT>::value>::type
+	>
 		: value_caster_impl<SrcT, std::string>
 	{
 		std::string cast_value(const SrcT &value) const override
@@ -166,6 +207,90 @@ namespace detail
 				typename string_cast_t<SrcT>::type>(value);
 			oss << casted_value;
 			return oss.str();
+		}
+	};
+
+	/**
+	 * Caster implementation for casting floating point integers
+	 * to string via std::ostringstream.
+	 */
+	template <typename SrcT>
+	struct value_caster<
+		SrcT, std::string,
+		typename std::enable_if<std::is_floating_point<SrcT>::value>::type
+	>
+		: value_caster_impl<SrcT, std::string>
+	{
+		std::string cast_value(const SrcT &value) const override
+		{
+			std::ostringstream oss;
+			oss << std::setprecision(std::numeric_limits<SrcT>::max_digits10) << value;
+			return oss.str();
+		}
+	};
+
+	/**
+	 * Caster implementation for casting std::string to std::u16string
+	 * via std::wstring_convert.
+	 */
+	template <>
+	struct value_caster<std::string, std::u16string>
+		: value_caster_impl<std::string, std::u16string>
+	{
+		std::u16string cast_value(const std::string &value) const override
+		{
+#if _MSC_VER >= 1900
+			std::wstring_convert<std::codecvt_utf8_utf16<int16_t>, int16_t> convert;
+			auto converted_string = convert.from_bytes(value.data());
+			return std::u16string(
+				reinterpret_cast<const char16_t *>(converted_string.data()),
+				converted_string.size()
+			);
+#else
+			std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+			return convert.from_bytes(value.data());
+#endif
+		}
+	};
+
+	/**
+	 * Caster implementation for casting std::u16string to std::string
+	 * via std::wstring_convert.
+	 */
+	template <>
+	struct value_caster<std::u16string, std::string>
+		: value_caster_impl<std::u16string, std::string>
+	{
+		std::string cast_value(const std::u16string &value) const override
+		{
+#if _MSC_VER >= 1900
+			std::wstring_convert<std::codecvt_utf8_utf16<int16_t>, int16_t> convert;
+			auto *p = reinterpret_cast<const int16_t *>(value.data());
+			return convert.to_bytes(p, p + value.size());
+#else
+			std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+			return convert.to_bytes(value);
+#endif
+		}
+	};
+
+	/**
+	 * Caster implementation for casting from string to any type
+	 * via std::istringstream.
+	 */
+	template <typename DestT>
+	struct value_caster<
+		std::string, DestT,
+		typename std::enable_if<!std::is_same<DestT, nlohmann::json>::value>::type
+	>
+		: value_caster_impl<std::string, DestT>
+	{
+		DestT cast_value(const std::string &value) const override
+		{
+			typename string_cast_t<DestT>::type casted_value;
+			std::istringstream iss(value);
+			iss >> casted_value;
+			return static_cast<DestT>(casted_value);
 		}
 	};
 
@@ -249,7 +374,15 @@ namespace detail
 	template <typename T, typename Enable = void>
 	struct caster_declarer
 	{
-		static void declare() {}
+		static void declare()
+		{
+			// These casters are required for JsonSerializer and
+			// XmlSerializer to work.
+			ValueCaster::declare<T, std::string>();
+			ValueCaster::declare<std::string, T>();
+			ValueCaster::declare<T, nlohmann::json>();
+			ValueCaster::declare<nlohmann::json, T>();
+		}
 	};
 
 	/**
@@ -280,7 +413,9 @@ namespace detail
 			ValueCaster::declare<T, float>();
 			ValueCaster::declare<T, double>();
 			ValueCaster::declare<T, std::string>();
+			ValueCaster::declare<std::string, T>();
 			ValueCaster::declare<T, nlohmann::json>();
+			ValueCaster::declare<nlohmann::json, T>();
 		}
 	};
 
@@ -312,7 +447,9 @@ namespace detail
 			ValueCaster::declare<T, float>();
 			ValueCaster::declare<T, double>();
 			ValueCaster::declare<T, std::string>();
+			ValueCaster::declare<std::string, T>();
 			ValueCaster::declare<T, nlohmann::json>();
+			ValueCaster::declare<nlohmann::json, T>();
 		}
 	};
 
@@ -342,7 +479,9 @@ namespace detail
 			ValueCaster::declare<T, uint32_t>();
 			ValueCaster::declare<T, uint64_t>();
 			ValueCaster::declare<T, std::string>();
+			ValueCaster::declare<std::string, T>();
 			ValueCaster::declare<T, nlohmann::json>();
+			ValueCaster::declare<nlohmann::json, T>();
 		}
 	};
 
@@ -355,8 +494,9 @@ namespace detail
 	{
 		static void declare()
 		{
-			// TODO: Casting string to u16string
+			ValueCaster::declare<std::string, std::u16string>();
 			ValueCaster::declare<std::string, nlohmann::json>();
+			ValueCaster::declare<nlohmann::json, std::string>();
 		}
 	};
 
@@ -369,8 +509,9 @@ namespace detail
 	{
 		static void declare()
 		{
-			// TODO: Casting u16string to string
+			ValueCaster::declare<std::u16string, std::string>();
 			ValueCaster::declare<std::u16string, nlohmann::json>();
+			ValueCaster::declare<nlohmann::json, std::u16string>();
 		}
 	};
 }

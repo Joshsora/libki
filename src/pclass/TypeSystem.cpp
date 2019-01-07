@@ -128,6 +128,13 @@ namespace pclass
 		return *type;
 	}
 
+	std::unique_ptr<PropertyClass> TypeSystem::instantiate(
+		const std::string& name) const
+	{
+		const auto &type = get_type(name);
+		return type.instantiate();
+	}
+
 	void TypeSystem::define_type(std::unique_ptr<Type> type)
 	{
 		// Does a type with this name already exist?

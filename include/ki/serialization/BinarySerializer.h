@@ -11,7 +11,8 @@ namespace ki
 namespace serialization
 {
 	/**
-	 * TODO: Documentation
+	 * A serializer class used to serialize PropertyClass instances into their binary
+	 * representations, and deserialize binary data into PropertyClass instances.
 	 */
 	class BinarySerializer
 	{
@@ -30,47 +31,50 @@ namespace serialization
 			WRITE_SERIALIZER_FLAGS = 0x01,
 
 			/**
-			 * When enabled, the serialized data (after the flags, if present) is compressed.
+			 * When enabled, the serialized data (after the flags, if present) is 
+			 * potentially compressed. This is based on an added compression header.
 			 */
 			COMPRESSED = 0x08
 		};
 
 		/**
 		 * Construct a new binary serializer.
-		 * @param type_system The TypeSystem instance to acquire Type information from.
-		 * @param is_file Determines whether or not to write type sizes, and property headers.
-		 * @param flags Determines how serialized data is formatted.
+		 * @param[in] type_system The TypeSystem instance to acquire Type information from.
+		 * @param[in] is_file Determines whether or not to write type sizes, and property headers.
+		 * @param[in] flags Determines how serialized data is formatted.
 		 */
 		explicit BinarySerializer(const pclass::TypeSystem &type_system,
 			bool is_file, flags flags);
-		virtual ~BinarySerializer() {}
+		virtual ~BinarySerializer() = default;
 
 		/**
-		 * @param object The object to write to the stream.
-		 * @param stream The stream to write the object to.
+		 * Serialize an object into a BitStream.
+		 * @param[in] object The object to write to the stream.
+		 * @param[in] stream The stream to write the object to.
 		 */
 		void save(const pclass::PropertyClass *object, BitStream &stream);
 
 		/**
-		 * @param dest Where to load the PropertyClass instance into.
-		 * @param stream The stream to read the object from.
-		 * @param size The size of the stream's available data.
+		 * Deserialize the contents of a BitStream.
+		 * @param[out] dest Where to load the PropertyClass instance into.
+		 * @param[in] stream The stream to read the object from.
+		 * @param[in] size The size of the stream's available data.
 		 */
 		void load(std::unique_ptr<pclass::PropertyClass> &dest,
 			BitStream &stream, std::size_t size);
 
 	protected:
 		/**
-		 * @param object The object that is being saved.
-		 * @param stream The stream to write the object header to.
+		 * @param[in] object The object that is being saved.
+		 * @param[in] stream The stream to write the object header to.
 		 * @returns Whether or not the object is null.
 		 */
 		virtual bool presave_object(const pclass::PropertyClass *object, BitStream &stream) const;
 
 		/**
 		 * Read an object header, and instantiate the necessary PropertyClass.
-		 * @param dest Where to instantiate the PropertyClass.
-		 * @param stream The stream to read the object header from.
+		 * @param[out] dest Where to instantiate the PropertyClass.
+		 * @param[in] stream The stream to read the object header from.
 		 */
 		virtual void preload_object(
 			std::unique_ptr<pclass::PropertyClass> &dest, BitStream &stream) const;

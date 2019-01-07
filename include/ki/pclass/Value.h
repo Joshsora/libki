@@ -222,6 +222,8 @@ namespace pclass
 		void add_caster()
 		{
 			const auto dest_type_hash = typeid(DestT).hash_code();
+			if (m_casts.find(dest_type_hash) != m_casts.end())
+				delete m_casts[dest_type_hash];
 			m_casts[dest_type_hash] = new detail::value_caster<SrcT, DestT>();
 		}
 	};

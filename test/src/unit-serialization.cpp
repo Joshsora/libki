@@ -11,6 +11,8 @@
 #include <ki/serialization/BinarySerializer.h>
 #include <ki/serialization/JsonSerializer.h>
 #include "ki/pclass/Enum.h"
+#include "ki/serialization/XmlSerializer.h"
+#include "ki/serialization/FileSerializer.h"
 
 using namespace ki;
 
@@ -23,14 +25,18 @@ struct Vector3D
 	friend pclass::detail::value_caster<Vector3D, nlohmann::json>;
 	friend pclass::detail::value_caster<nlohmann::json, Vector3D>;
 
+	// Allow string caster to access private members
+	friend pclass::detail::value_caster<Vector3D, std::string>;
+	friend pclass::detail::value_caster<std::string, Vector3D>;
+
 	explicit Vector3D(
 		const float x = 0.0f,
 		const float y = 0.0f,
 		const float z = 0.0f)
 	{
-		this->m_x = x;
-		this->m_y = y;
-		this->m_z = z;
+		m_x = x;
+		m_y = y;
+		m_z = z;
 	}
 
 	Vector3D &operator=(const Vector3D &that)
@@ -131,6 +137,41 @@ namespace detail
 				value["y"].get<float>(),
 				value["z"].get<float>()
 			);
+		}
+	};
+
+	/**
+	 * value_caster specialization for casting Vector3D to std::string.
+	 */
+	template <>
+	struct value_caster<Vector3D, std::string>
+		: value_caster_impl<Vector3D, std::string>
+	{
+		std::string cast_value(const Vector3D &value) const override
+		{
+			std::ostringstream oss;
+			oss << value.m_x << " "
+				<< value.m_y << " "
+				<< value.m_z;
+			return oss.str();
+		}
+	};
+
+	/**
+	 * value_caster specialization for casting std::string to Vector3D.
+	 */
+	template <>
+	struct value_caster<std::string, Vector3D>
+		: value_caster_impl<std::string, Vector3D>
+	{
+		Vector3D cast_value(const std::string &value) const override
+		{
+			Vector3D result;
+			std::istringstream iss(value);
+			iss >> result.m_x;
+			iss >> result.m_y;
+			iss >> result.m_z;
+			return result;
 		}
 	};
 }
@@ -465,7 +506,7 @@ void validate_test_object(TestObject &object)
  */
 void test_serializer(
 	std::unique_ptr<TestObject> &test_object,
-	serialization::BinarySerializer &serializer,
+	serialization::BinarySerializer::flags flags,
 	const std::string &file_suffix)
 {
 	BitBuffer buffer;
@@ -475,20 +516,18 @@ void test_serializer(
 	// Open the sample data
 	std::ifstream sample(
 		"samples/serialization/" + file_suffix + ".bin",
-		std::ios::binary
+		std::ios::binary | std::ios::ate
 	);
 	REQUIRE(sample.is_open());
 
 	// Load the sample data
-	const auto begin = sample.tellg();
-	sample.seekg(0, std::ios::end);
-	const auto end = sample.tellg();
-	const size_t sample_size = end - begin;
+	const size_t sample_size = sample.tellg();
 	sample.seekg(std::ios::beg);
 	auto *sample_data = new char[sample_size];
 	sample.read(sample_data, sample_size);
 	sample.close();
 
+	serialization::BinarySerializer serializer(*g_type_system, false, flags);
 	SECTION("Saving objects")
 	{
 		// Create a test object, configure it, and write it to our stream
@@ -512,7 +551,6 @@ void test_serializer(
 		// Cleanup
 		delete[] stream_data;
 	}
-
 	SECTION("Loading objects")
 	{
 		// Write the sample data to the bit stream
@@ -536,61 +574,96 @@ void test_serializer(
 }
 
 /**
-* Conduct save/load tests with a BinarySerializer instance.
-*/
-void test_serializer(
+ * 
+ */
+void test_file_serializer_load(
 	std::unique_ptr<TestObject> &test_object,
-	serialization::JsonSerializer &serializer,
-	const std::string &file_suffix)
+	const std::string &filename)
 {
-	// Open the sample data
-	std::ifstream sample_file(
-		"samples/serialization/" + file_suffix + ".json",
-		std::ios::binary
+	serialization::FileSerializer serializer(*g_type_system);
+
+	// Load an object from a pre-made sample
+	const auto sample_filepath = "samples/serialization/" + filename;
+	std::unique_ptr<pclass::PropertyClass> object = nullptr;
+	serializer.load(object, sample_filepath);
+
+	// Set test_object so that it is validated by the caller
+	REQUIRE(object != nullptr);
+	test_object = std::unique_ptr<TestObject>(
+		dynamic_cast<TestObject *>(object.release())
 	);
-	REQUIRE(sample_file.is_open());
+	REQUIRE(test_object != nullptr);
+}
 
-	// Load the sample data into a buffer
-	const auto begin = sample_file.tellg();
-	sample_file.seekg(0, std::ios::end);
-	const auto end = sample_file.tellg();
-	const size_t sample_size = end - begin;
-	sample_file.seekg(std::ios::beg);
+/**
+ *
+ */
+void test_file_serializer_save(
+	const std::string &out_filepath,
+	const std::string &sample_filepath)
+{
+	// Load sample data
+	std::ifstream sample_ifs(
+		sample_filepath,
+		std::ios::binary | std::ios::ate
+	);
+	REQUIRE(sample_ifs.is_open());
+	const auto sample_size = sample_ifs.tellg();
+	sample_ifs.seekg(std::ios::beg);
 	auto *sample_data = new char[sample_size];
-	sample_file.read(sample_data, sample_size);
-	sample_file.close();
+	sample_ifs.read(sample_data, sample_size);
+	sample_ifs.close();
 
-	// Load the sample data into a string
-	const auto sample = std::string(sample_data, sample_size);
+	// Load output file that was just created
+	std::ifstream output_ifs(
+		out_filepath,
+		std::ios::binary | std::ios::ate
+	);
+	REQUIRE(output_ifs.is_open());
+	const auto output_size = output_ifs.tellg();
+	output_ifs.seekg(std::ios::beg);
+	auto *output_data = new char[output_size];
+	output_ifs.read(output_data, output_size);
+	output_ifs.close();
+
+	// Validate the output
+	REQUIRE(sample_size == output_size);
+	REQUIRE(strncmp(sample_data, output_data, sample_size) == 0);
+
+	// Cleanup
 	delete[] sample_data;
+	delete[] output_data;
+}
 
+/**
+ * 
+ */
+void test_binary_file_serializer(
+	std::unique_ptr<TestObject> &test_object,
+	const serialization::BinarySerializer::flags flags,
+	const std::string &filename)
+{
 	SECTION("Saving objects")
 	{
-		// Create a test object, configure it, and write it to our stream
+		// Create a test object, configure it, and write it a file
+		serialization::FileSerializer serializer(*g_type_system);
 		test_object = g_type_system->instantiate<TestObject>("class TestObject");
 		configure_test_object(*test_object);
-		const auto json_string = serializer.save(test_object.get());
+		const auto out_filepath = "out_" + filename + ".bin";
+		serializer.save_binary(test_object.get(), flags, out_filepath);
+		test_file_serializer_save(
+			out_filepath,
+			"samples/serialization/" + filename + ".bin"
+		);
 
 		// Delete the test object here so that it is not
 		// unnecessarily validated by the caller
 		test_object = nullptr;
-
-		// Validate the JSON string
-		REQUIRE(json_string == sample);
 	}
-
 	SECTION("Loading objects")
 	{
-		// Load an object from the sample
-		std::unique_ptr<pclass::PropertyClass> object = nullptr;
-		serializer.load(object, sample);
-
-		// Set test_object so that it is validated by the caller
-		REQUIRE(object != nullptr);
-		test_object = std::unique_ptr<TestObject>(
-			dynamic_cast<TestObject *>(object.release())
-		);
-		REQUIRE(test_object != nullptr);
+		test_file_serializer_load(
+			test_object, filename + ".bin");
 	}
 }
 
@@ -601,53 +674,189 @@ TEST_CASE("Serialization tests", "[serialization]")
 
 	SECTION("BinarySerializer")
 	{
-		SECTION("Regular format without compression")
+		SECTION("Without compression")
 		{
-			serialization::BinarySerializer serializer(
-				*g_type_system, false,
-				serialization::BinarySerializer::flags::NONE
+			test_serializer(
+				test_object,
+				serialization::BinarySerializer::flags::NONE,
+				"regular"
 			);
-			test_serializer(test_object, serializer, "regular");
 		}
-		SECTION("File format without compression")
+		SECTION("With compression")
 		{
-			serialization::BinarySerializer serializer(
-				*g_type_system, true,
-				serialization::BinarySerializer::flags::WRITE_SERIALIZER_FLAGS
+			test_serializer(
+				test_object,
+				serialization::BinarySerializer::flags::COMPRESSED,
+				"regular_compressed"
 			);
-			test_serializer(test_object, serializer, "file");
-		}
-		SECTION("Regular format with compression")
-		{
-			serialization::BinarySerializer serializer(
-				*g_type_system, false,
-				serialization::BinarySerializer::flags::COMPRESSED
-			);
-			test_serializer(test_object, serializer, "regular_compressed");
-		}
-		SECTION("File format with compression")
-		{
-			serialization::BinarySerializer serializer(
-				*g_type_system, true,
-				serialization::BinarySerializer::flags::WRITE_SERIALIZER_FLAGS |
-				serialization::BinarySerializer::flags::COMPRESSED
-			);
-			test_serializer(test_object, serializer, "file_compressed");
 		}
 	}
 
 	SECTION("JsonSerializer")
 	{
-		SECTION("Regular format")
-		{
-			serialization::JsonSerializer serializer(*g_type_system, false);
-			test_serializer(test_object, serializer, "regular");
-		}
+		// Open the sample data
+		std::ifstream sample_file(
+			"samples/serialization/regular.json",
+			std::ios::binary | std::ios::ate
+		);
+		REQUIRE(sample_file.is_open());
 
-		SECTION("File format")
+		// Load the sample data into a buffer
+		const size_t sample_size = sample_file.tellg();
+		sample_file.seekg(std::ios::beg);
+		auto *sample_data = new char[sample_size];
+		sample_file.read(sample_data, sample_size);
+		sample_file.close();
+
+		// Load the sample data into a string
+		const auto sample = std::string(sample_data, sample_size);
+		delete[] sample_data;
+
+		serialization::JsonSerializer serializer(*g_type_system, false);
+		SECTION("Saving objects")
 		{
-			serialization::JsonSerializer serializer(*g_type_system, true);
-			test_serializer(test_object, serializer, "file");
+			// Create a test object, configure it, and write it to our stream
+			test_object = g_type_system->instantiate<TestObject>("class TestObject");
+			configure_test_object(*test_object);
+			const auto json_string = serializer.save(test_object.get());
+
+			// Delete the test object here so that it is not
+			// unnecessarily validated by the caller
+			test_object = nullptr;
+
+			// Validate the JSON string
+			REQUIRE(json_string == sample);
+		}
+		SECTION("Loading objects")
+		{
+			// Load an object from the sample
+			std::unique_ptr<pclass::PropertyClass> object = nullptr;
+			serializer.load(object, sample);
+
+			// Set test_object so that it is validated by the caller
+			REQUIRE(object != nullptr);
+			test_object = std::unique_ptr<TestObject>(
+				dynamic_cast<TestObject *>(object.release())
+			);
+			REQUIRE(test_object != nullptr);
+		}
+	}
+
+	SECTION("XmlSerializer")
+	{
+		// Open the sample data
+		std::ifstream sample_file(
+			"samples/serialization/regular.xml",
+			std::ios::binary | std::ios::ate
+		);
+		REQUIRE(sample_file.is_open());
+
+		// Load the sample data into a buffer
+		const size_t sample_size = sample_file.tellg();
+		sample_file.seekg(std::ios::beg);
+		auto *sample_data = new char[sample_size];
+		sample_file.read(sample_data, sample_size);
+		sample_file.close();
+
+		// Load the sample data into a string
+		auto sample = std::string(sample_data, sample_size);
+		delete[] sample_data;
+
+		serialization::XmlSerializer serializer(*g_type_system);
+		SECTION("Saving objects")
+		{
+			// Create a test object, configure it, and write it to our stream
+			test_object = g_type_system->instantiate<TestObject>("class TestObject");
+			configure_test_object(*test_object);
+			auto xml_string = serializer.save(test_object.get());
+
+			// Delete the test object here so that it is not
+			// unnecessarily validated by the caller
+			test_object = nullptr;
+
+			// Validate the JSON string
+			REQUIRE(xml_string == sample);
+		}
+		SECTION("Loading objects")
+		{
+			// Load an object from the sample
+			std::unique_ptr<pclass::PropertyClass> object = nullptr;
+			serializer.load(object, sample);
+
+			// Set test_object so that it is validated by the caller
+			REQUIRE(object != nullptr);
+			test_object = std::unique_ptr<TestObject>(
+				dynamic_cast<TestObject *>(object.release())
+			);
+			REQUIRE(test_object != nullptr);
+		}
+	}
+
+	SECTION("FileSerializer")
+	{
+		SECTION("Binary")
+		{
+			test_binary_file_serializer(
+				test_object,
+				serialization::BinarySerializer::flags::NONE,
+				"file"
+			);
+		}
+		SECTION("Compressed Binary")
+		{
+			test_binary_file_serializer(
+				test_object,
+				serialization::BinarySerializer::flags::COMPRESSED,
+				"file_compressed"
+			);
+		}
+		SECTION("JSON")
+		{
+			SECTION("Saving objects")
+			{
+				// Create a test object, configure it, and write it a file
+				serialization::FileSerializer serializer(*g_type_system);
+				test_object = g_type_system->instantiate<TestObject>("class TestObject");
+				configure_test_object(*test_object);
+				const auto out_filepath = "out_file.json";
+				serializer.save_json(test_object.get(), out_filepath);
+				test_file_serializer_save(
+					out_filepath,
+					"samples/serialization/file.json"
+				);
+
+				// Delete the test object here so that it is not
+				// unnecessarily validated by the caller
+				test_object = nullptr;
+			}
+			SECTION("Loading objects")
+			{
+				test_file_serializer_load(test_object, "file.json");
+			}
+		}
+		SECTION("XML")
+		{
+			SECTION("Saving objects")
+			{
+				// Create a test object, configure it, and write it a file
+				serialization::FileSerializer serializer(*g_type_system);
+				test_object = g_type_system->instantiate<TestObject>("class TestObject");
+				configure_test_object(*test_object);
+				const auto out_filepath = "out_file.xml";
+				serializer.save_xml(test_object.get(), out_filepath);
+				test_file_serializer_save(
+					out_filepath,
+					"samples/serialization/file.xml"					
+				);
+
+				// Delete the test object here so that it is not
+				// unnecessarily validated by the caller
+				test_object = nullptr;
+			}
+			SECTION("Loading objects")
+			{
+				test_file_serializer_load(test_object, "file.xml");
+			}
 		}
 	}
 

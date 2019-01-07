@@ -7,7 +7,7 @@ namespace ki
 {
 namespace serialization
 {
-	JsonSerializer::JsonSerializer(pclass::TypeSystem& type_system,
+	JsonSerializer::JsonSerializer(const pclass::TypeSystem& type_system,
 		const bool is_file)
 	{
 		m_type_system = &type_system;
