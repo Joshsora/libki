@@ -112,7 +112,7 @@ namespace pclass
 	void EnumType::write_to(BitStream &stream, Value &value) const
 	{
 		// Get an Enum reference and use it to write to the stream
-		value.get<Enum>().write_to(stream);
+		value.as<Enum>().get<Enum>().write_to(stream);
 	}
 
 	Value EnumType::read_from(BitStream &stream) const
