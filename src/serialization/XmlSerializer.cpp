@@ -65,9 +65,9 @@ namespace serialization
 
 	void XmlSerializer::save_property(rapidxml::xml_node<> *object, const pclass::IProperty& prop)
 	{
+		auto *property_name = m_document.allocate_string(prop.get_name().data());
 		for (std::size_t i = 0; i < prop.get_element_count(); ++i)
 		{
-			auto *property_name = m_document.allocate_string(prop.get_name().data());
 			auto *property_node = m_document.allocate_node(
 				rapidxml::node_element, property_name
 			);

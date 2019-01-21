@@ -7,14 +7,14 @@ namespace ki
 {
 namespace serialization
 {
-	JsonSerializer::JsonSerializer(const pclass::TypeSystem& type_system,
+	JsonSerializer::JsonSerializer(const pclass::TypeSystem &type_system,
 		const bool is_file)
 	{
 		m_type_system = &type_system;
 		m_is_file = is_file;
 	}
 
-	std::string JsonSerializer::save(const pclass::PropertyClass* object) const
+	std::string JsonSerializer::save(const pclass::PropertyClass *object) const
 	{
 		return save_object(object).dump(
 			m_is_file ? FILE_INDENT_VALUE : -1,
@@ -23,7 +23,7 @@ namespace serialization
 		);
 	}
 
-	bool JsonSerializer::presave_object(json& j, const pclass::PropertyClass* object) const
+	bool JsonSerializer::presave_object(json &j, const pclass::PropertyClass *object) const
 	{
 		// Add the object's meta information
 		j["_pclass_meta"] = {
@@ -32,7 +32,7 @@ namespace serialization
 		return object != nullptr;
 	}
 
-	json JsonSerializer::save_object(const pclass::PropertyClass* object) const
+	json JsonSerializer::save_object(const pclass::PropertyClass *object) const
 	{
 		json j;
 		if (!presave_object(j, object))
@@ -50,8 +50,15 @@ namespace serialization
 	}
 
 	void JsonSerializer::save_property(
-		json& j, const pclass::IProperty &prop) const
+		json &j, const pclass::IProperty &prop) const
 	{
+		// Ensure that, even if there is no value, the property is added
+		// to the JSON object
+		if (prop.is_array())
+			j[prop.get_name()] = std::vector<json>();
+		else
+			j[prop.get_name()] = json();
+
 		for (std::size_t i = 0; i < prop.get_element_count(); ++i)
 		{
 			if (prop.get_type().get_kind() == pclass::Type::Kind::CLASS)
@@ -90,7 +97,7 @@ namespace serialization
 	}
 
 	bool JsonSerializer::preload_object(
-		std::unique_ptr<pclass::PropertyClass>& dest, json& j) const
+		std::unique_ptr<pclass::PropertyClass> &dest, json& j) const
 	{
 		// If meta information is not present, assume that the type hash is null.
 		if (!j.count("_pclass_meta"))
