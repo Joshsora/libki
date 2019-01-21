@@ -75,9 +75,9 @@ unset(_ZLIB_x86)
 list(APPEND _ZLIB_SEARCHES _ZLIB_SEARCH_NORMAL)
 
 set(ZLIB_NAMES z zlib zdll zlib1)
-set(ZLIB_NAMES_STATIC zlibstatic)
+set(ZLIB_NAMES_STATIC libz.a zlibstatic)
 set(ZLIB_NAMES_DEBUG zlibd zlibd1)
-set(ZLIB_NAMES_STATIC_DEBUG zlibstaticd)
+set(ZLIB_NAMES_STATIC_DEBUG libz.a zlibstaticd)
 
 # Try each search configuration.
 foreach(search ${_ZLIB_SEARCHES})
