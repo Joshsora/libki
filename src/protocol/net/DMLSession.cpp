@@ -70,7 +70,10 @@ namespace net
 			on_message(message);
 		else
 			on_invalid_message(InvalidDMLMessageErrorCode::INSUFFICIENT_ACCESS);
-		delete message;
+
+		// WARNING: Refactor, and utilize smart pointers to avoid memory leaks in DML messages.
+		// The following line breaks asynchronous code.
+		// delete message;
 	}
 }
 }

@@ -38,14 +38,19 @@ namespace pclass
 		return m_type_system;
 	}
 
-	void Type::write_to(BitStream &stream, Value &value) const
+	bool Type::is_byte_based() const
+	{
+		return true;
+	}
+
+	void Type::write_to(BitStream &stream, const bool is_file, Value &value) const
 	{
 		std::ostringstream oss;
 		oss << "Type '" << m_name << "' does not implement Type::write_to.";
 		throw runtime_error(oss.str());
 	}
 
-	Value Type::read_from(BitStream &stream) const
+	Value Type::read_from(BitStream &stream, const bool is_file) const
 	{
 		std::ostringstream oss;
 		oss << "Type '" << m_name << "' does not implement Type::read_from.";

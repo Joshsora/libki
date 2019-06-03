@@ -101,14 +101,14 @@ namespace pclass
 		 * @param[in] stream The stream to write to.
 		 * @param[in] index The index of the element to retrieve the value from
 		 */
-		virtual void write_value_to(BitStream &stream, std::size_t index = 0) const;
+		virtual void write_value_to(BitStream &stream, const bool is_file, std::size_t index = 0) const;
 
 		/**
 		 * Read a value from a BitStream into the specified element of this property.
 		 * @param[in] stream The stream to read from.
 		 * @param[in] index The index of the element to read a value into.
 		 */
-		virtual void read_value_from(BitStream &stream, std::size_t index = 0);
+		virtual void read_value_from(BitStream &stream, const bool is_file, std::size_t index = 0);
 
 	private:
 		const PropertyClass *m_instance;

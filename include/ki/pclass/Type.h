@@ -56,6 +56,11 @@ namespace pclass
 		Kind get_kind() const;
 
 		/**
+		* @returns Whether or not this type works in bytes, rather than bits.
+		*/
+		virtual bool is_byte_based() const;
+
+		/**
 		 * The TypeSystem used to define this Type instance.
 		 */
 		const TypeSystem &get_type_system() const;
@@ -71,14 +76,14 @@ namespace pclass
 		 * @param[in] stream The stream to write to.
 		 * @param[in] value The value to write to the stream.
 		 */
-		virtual void write_to(BitStream &stream, Value &value) const;
+		virtual void write_to(BitStream &stream, const bool is_file, Value &value) const;
 
 		/**
 		 * Read a value of this type from a BitStream.
 		 * @param stream[in] The stream to read from.
 		 * @returns The value read from the stream.
 		 */
-		virtual Value read_from(BitStream &stream) const;
+		virtual Value read_from(BitStream &stream, const bool is_file) const;
 
 	protected:
 		Kind m_kind;

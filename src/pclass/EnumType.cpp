@@ -109,16 +109,16 @@ namespace pclass
 		return *this;
 	}
 
-	void EnumType::write_to(BitStream &stream, Value &value) const
+	void EnumType::write_to(BitStream &stream, const bool is_file, Value &value) const
 	{
 		// Get an Enum reference and use it to write to the stream
-		value.as<Enum>().get<Enum>().write_to(stream);
+		value.as<Enum>().get<Enum>().write_to(stream, is_file);
 	}
 
-	Value EnumType::read_from(BitStream &stream) const
+	Value EnumType::read_from(BitStream &stream, const bool is_file) const
 	{
 		auto value = Enum(*this);
-		value.read_from(stream);
+		value.read_from(stream, is_file);
 		return Value::make_value<Enum>(value);
 	}
 }

@@ -56,21 +56,42 @@ namespace pclass
 		m_value = value;
 	}
 
-	void Enum::set_value(const std::string& element_name)
+	void Enum::set_value(const std::string &element_name)
 	{
 		m_value = get_type().get_element(element_name).get_value();
 	}
 
-	void Enum::write_to(BitStream& stream) const
+	void Enum::write_to(BitStream& stream, const bool is_file) const
 	{
-		detail::primitive_type_helper<enum_value_t>::write_to(stream, m_value);
+		if (is_file)
+		{
+			// Write the element name
+			const auto &name = get_type().get_element(m_value).get_name();
+			detail::primitive_type_helper<std::string>::write_to(stream, is_file, name);
+		}
+		else
+		{
+			// Write the element value
+			detail::primitive_type_helper<enum_value_t>::write_to(stream, is_file, m_value);
+		}
 	}
 
-	void Enum::read_from(BitStream& stream)
+	void Enum::read_from(BitStream& stream, const bool is_file)
 	{
-		const auto value = detail::primitive_type_helper<enum_value_t>
-			::read_from(stream).get<enum_value_t>();
-		set_value(value);
+		if (is_file)
+		{
+			// Set the value using the element name
+			const auto name = detail::primitive_type_helper<std::string>
+				::read_from(stream, is_file).get<std::string>();
+			set_value(name);
+		}
+		else
+		{
+			// Set the value using the element value
+			const auto value = detail::primitive_type_helper<enum_value_t>
+				::read_from(stream, is_file).get<enum_value_t>();
+			set_value(value);
+		}
 	}
 
 	Enum::operator enum_value_t() const

@@ -26,8 +26,8 @@ namespace pclass
 		 */
 		bool inherits(const Type &type) const;
 
-		void write_to(BitStream &stream, Value &value) const override = 0;
-		Value read_from(BitStream &stream) const override = 0;
+		void write_to(BitStream &stream, const bool is_file, Value &value) const override = 0;
+		Value read_from(BitStream &stream, const bool is_file) const override = 0;
 
 	private:
 		const IClassType *m_base_class;
@@ -64,20 +64,20 @@ namespace pclass
 			);
 		}
 
-		void write_to(BitStream &stream, Value &value) const override
+		void write_to(BitStream &stream, const bool is_file, Value &value) const override
 		{
 			const auto &object = value.get<ClassT>();
 			const auto &properties = object.get_properties();
 			for (auto it = properties.begin(); it != properties.end(); ++it)
-				it->write_value_to(stream);
+				it->write_value_to(stream, is_file);
 		}
 
-		Value read_from(BitStream &stream) const override
+		Value read_from(BitStream &stream, const bool is_file) const override
 		{
 			auto object = ClassT(*this, get_type_system());
 			auto &properties = object.get_properties();
 			for (auto it = properties.begin(); it != properties.end(); ++it)
-				it->read_value_from(stream);
+				it->read_value_from(stream, is_file);
 			return Value::make_value<ClassT>(object);
 		}
 	};

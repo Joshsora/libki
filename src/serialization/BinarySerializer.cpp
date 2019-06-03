@@ -27,7 +27,8 @@ namespace serialization
 		const auto compression_header_pos = stream.tell();
 		if (FLAG_IS_SET(m_flags, flags::COMPRESSED))
 		{
-			stream.write<bool>(false);
+			if (m_is_file)
+				stream.write<bool>(false);
 			stream.write<uint32_t>(0);
 		}
 
@@ -102,7 +103,8 @@ namespace serialization
 			// Write the compression header
 			const auto use_compression = compressed.size() < size_bytes;
 			stream.seek(compression_header_pos);
-			stream.write<bool>(use_compression);
+			if (m_is_file)
+				stream.write<bool>(use_compression);
 			stream.write<uint32_t>(size_bytes);
 			
 			// Write the compressed data
@@ -157,14 +159,14 @@ namespace serialization
 			stream.write(size_bits);
 			stream.seek(end_pos);
 		}
-		
-		// Re-align the stream so that our position lies on a byte
-		// TODO: Look into how/when the serialization re-aligns as this may not be the right place
-		stream.seek(BitStream::stream_pos(stream.tell().as_bytes(), 0));
 	}
 
 	void BinarySerializer::save_property(const pclass::IProperty &prop, BitStream &stream) const
 	{
+		// Determine if we need to re-align the stream so that our position lies on a byte
+		if (prop.get_type().is_byte_based() || prop.is_dynamic() || m_is_file)
+			stream.seek(BitStream::stream_pos(stream.tell().as_bytes(), 0));
+
 		// Remember where we started writing the property data
 		const auto start_pos = stream.tell();
 
@@ -178,7 +180,19 @@ namespace serialization
 
 		// If the property is dynamic, write the element count
 		if (prop.is_dynamic())
-			stream.write<uint32_t>(prop.get_element_count());
+		{
+			if (m_is_file)
+			{
+				// TODO: Determine how the size of the element count is chosen
+				// while in file mode
+				stream.write<uint8_t>(prop.get_element_count() * 2);
+			}
+			else
+			{
+				// Write the element count as an unsigned int
+				stream.write<uint32_t>(prop.get_element_count());
+			}
+		}
 
 		for (auto i = 0; i < prop.get_element_count(); ++i)
 		{
@@ -189,7 +203,7 @@ namespace serialization
 				save_object(prop.get_object(i), stream);
 			}
 			else
-				prop.write_value_to(stream, i);
+				prop.write_value_to(stream, m_is_file, i);
 		}
 
 		// Finish writing the property header by writing the length
@@ -226,7 +240,9 @@ namespace serialization
 		if (FLAG_IS_SET(m_flags, flags::COMPRESSED))
 		{
 			// Read the compression header
-			const auto use_compression = segment_stream.read<bool>();
+			bool use_compression = true;
+			if (m_is_file)
+				use_compression = segment_stream.read<bool>();
 			const auto uncompressed_size = segment_stream.read<uint32_t>();
 
 			// Work out how much data is available after the compression header
@@ -305,14 +321,15 @@ namespace serialization
 				stream.tell(), object_size
 			);
 			auto object_stream = BitStream(*object_buffer);
-			stream.seek(stream.tell() + object_size, false);
 
 			// Instead of loading properties sequentially, the file format specifies
 			// the hash of a property before writing its value, so we just need to
-			// iterate for how ever many properties the object has declared.
-			for (std::size_t i = 0;
-				i < properties.get_property_count(); i++)
+			// iterate over how ever many bits were specified as the object size.
+			while (object_stream.tell().as_bits() < object_size)
 			{
+				// Re-align the object stream so that our position lies on a byte
+				object_stream.seek(BitStream::stream_pos(object_stream.tell().as_bytes(), 0));
+
 				// Read the property's size, and create a new BitBufferSegment to
 				// ensure that data is only read from inside this region.
 				const auto property_size =
@@ -321,14 +338,21 @@ namespace serialization
 					object_stream.tell(), property_size
 				);
 				auto property_stream = BitStream(*property_buffer);
-				object_stream.seek(object_stream.tell() + property_size, false);
 
 				// Get the property to load based on it's hash, and then load
 				// it's value.
 				const auto property_hash = property_stream.read<uint32_t>();
 				auto &prop = properties.get_property(property_hash);
 				load_property(prop, property_stream);
+
+				// Seek out the end of the property in the object stream
+				auto byte_pos = object_stream.tell().as_bytes() + property_stream.tell().as_bytes();
+				object_stream.seek(BitStream::stream_pos(byte_pos, 0), false);
 			}
+
+			// Seek out the end of the object in the stream
+			auto byte_pos = stream.tell().as_bytes() + object_stream.tell().as_bytes();
+			stream.seek(BitStream::stream_pos(byte_pos, 0), false);
 		}
 		else
 		{
@@ -341,17 +365,29 @@ namespace serialization
 		// All properties on this object have been set now, so call the
 		// created handler on the object
 		dest->on_created();
-
-		// Re-align the stream so that our position lies on a byte
-		stream.seek(BitStream::stream_pos(stream.tell().as_bytes(), 0), false);
 	}
 
 	void BinarySerializer::load_property(pclass::IProperty &prop, BitStream &stream) const
 	{
+		// Determine if we need to re-align the stream so that our position lies on a byte
+		if (prop.get_type().is_byte_based() || prop.is_dynamic())
+			stream.seek(BitStream::stream_pos(stream.tell().as_bytes(), 0));
+
 		// If the property is dynamic, we need to load the element count
 		if (prop.is_dynamic())
 		{
-			const auto element_count = stream.read<uint32_t>();
+			std::size_t element_count;
+			if (m_is_file)
+			{
+				// TODO: Determine how the size of the element count is chosen
+				// while in file mode
+				element_count = stream.read<uint8_t>() / 2;
+			}
+			else
+			{
+				// Load the element count as an unsigned int
+				element_count = stream.read<uint32_t>();
+			}
 			prop.set_element_count(element_count);
 		}
 
@@ -366,7 +402,7 @@ namespace serialization
 				prop.set_object(object, i);
 			}
 			else
-				prop.read_value_from(stream, i);
+				prop.read_value_from(stream, m_is_file, i);
 		}
 	}
 }

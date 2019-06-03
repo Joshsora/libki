@@ -49,8 +49,8 @@ namespace pclass
 
 		EnumType &add_element(const std::string &name, enum_value_t value);
 
-		void write_to(BitStream &stream, Value &value) const override;
-		Value read_from(BitStream &stream) const override;
+		void write_to(BitStream &stream, const bool is_file, Value &value) const override;
+		Value read_from(BitStream &stream, const bool is_file) const override;
 
 	private:
 		std::vector<Element *> m_elements;
@@ -75,17 +75,17 @@ namespace pclass
 			m_kind = Kind::ENUM;
 		}
 
-		void write_to(BitStream &stream, Value &value) const override
+		void write_to(BitStream &stream, const bool is_file, Value &value) const override
 		{
 			auto &enum_reference = value.get<EnumT>();
 			auto &underlying_reference = reinterpret_cast<const underlying_type &>(enum_reference);
-			detail::primitive_type_helper<underlying_type>::write_to(stream, underlying_reference);
+			detail::primitive_type_helper<underlying_type>::write_to(stream, is_file, underlying_reference);
 		}
 
-		Value read_from(BitStream &stream) const override
+		Value read_from(BitStream &stream, const bool is_file) const override
 		{
 			Value read_result =
-				detail::primitive_type_helper<underlying_type>::read_from(stream);
+				detail::primitive_type_helper<underlying_type>::read_from(stream, is_file);
 			auto underlying_value = read_result.get<underlying_type>();
 			return Value::make_value<EnumT>(
 				static_cast<EnumT>(underlying_value)

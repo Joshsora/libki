@@ -54,24 +54,24 @@ struct Vector3D
 			   m_z == that.m_z;
 	}
 
-	void write_to(BitStream &stream) const
+	void write_to(BitStream &stream, const bool is_file) const
 	{
 		pclass::detail::primitive_type_helper<float>
-			::write_to(stream, m_x);
+			::write_to(stream, is_file, m_x);
 		pclass::detail::primitive_type_helper<float>
-			::write_to(stream, m_y);
+			::write_to(stream, is_file, m_y);
 		pclass::detail::primitive_type_helper<float>
-			::write_to(stream, m_z);
+			::write_to(stream, is_file, m_z);
 	}
 
-	void read_from(BitStream &stream)
+	void read_from(BitStream &stream, const bool is_file)
 	{
 		m_x = pclass::detail::primitive_type_helper<float>
-			::read_from(stream).get<float>();
+			::read_from(stream, is_file).get<float>();
 		m_y = pclass::detail::primitive_type_helper<float>
-			::read_from(stream).get<float>();
+			::read_from(stream, is_file).get<float>();
 		m_z = pclass::detail::primitive_type_helper<float>
-			::read_from(stream).get<float>();
+			::read_from(stream, is_file).get<float>();
 	}
 
 private:
@@ -93,15 +93,20 @@ namespace detail
 	template <>
 	struct primitive_type_helper<Vector3D>
 	{
-		static void write_to(BitStream &stream, const Vector3D &value)
+		static bool is_byte_based()
 		{
-			value.write_to(stream);
+			return true;
 		}
 
-		static Value read_from(BitStream &stream)
+		static void write_to(BitStream &stream, const bool is_file, const Vector3D &value)
+		{
+			value.write_to(stream, is_file);
+		}
+
+		static Value read_from(BitStream &stream, const bool is_file)
 		{
 			Vector3D value;
-			value.read_from(stream);
+			value.read_from(stream, is_file);
 			return Value::make_value<Vector3D>(value);
 		}
 	};

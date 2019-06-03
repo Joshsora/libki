@@ -22,8 +22,8 @@ namespace pclass
 		void set_value(enum_value_t value);
 		void set_value(const std::string &element_name);
 
-		void write_to(BitStream& stream) const;
-		void read_from(BitStream& stream);
+		void write_to(BitStream &stream, const bool is_file) const;
+		void read_from(BitStream &stream, const bool is_file);
 
 		operator enum_value_t() const;
 		void operator=(enum_value_t value);
