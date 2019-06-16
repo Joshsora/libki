@@ -163,9 +163,9 @@ namespace serialization
 
 	void BinarySerializer::save_property(const pclass::IProperty &prop, BitStream &stream) const
 	{
-		// Determine if we need to re-align the stream so that our position lies on a byte
-		if (prop.get_type().is_byte_based() || prop.is_dynamic() || m_is_file)
-			stream.seek(BitStream::stream_pos(stream.tell().as_bytes(), 0));
+		// Realign the stream if we're going to write a prefix for this property
+		if (prop.is_dynamic() || m_is_file)
+			stream.realign();
 
 		// Remember where we started writing the property data
 		const auto start_pos = stream.tell();
@@ -196,6 +196,10 @@ namespace serialization
 
 		for (auto i = 0; i < prop.get_element_count(); ++i)
 		{
+			// Realign the stream if this property works in bytes
+			if (prop.get_type().is_byte_based())
+				stream.realign();
+
 			if (prop.is_pointer()
 				&& prop.get_type().get_kind() == pclass::Type::Kind::CLASS)
 			{
@@ -369,9 +373,9 @@ namespace serialization
 
 	void BinarySerializer::load_property(pclass::IProperty &prop, BitStream &stream) const
 	{
-		// Determine if we need to re-align the stream so that our position lies on a byte
-		if (prop.get_type().is_byte_based() || prop.is_dynamic())
-			stream.seek(BitStream::stream_pos(stream.tell().as_bytes(), 0));
+		// Re-align the stream if we're going to read a prefix for this property
+		if (prop.is_dynamic())
+			stream.realign();
 
 		// If the property is dynamic, we need to load the element count
 		if (prop.is_dynamic())
@@ -393,6 +397,10 @@ namespace serialization
 
 		for (auto i = 0; i < prop.get_element_count(); ++i)
 		{
+			// Realign the stream if this property works in bytes
+			if (prop.get_type().is_byte_based())
+				stream.realign();
+
 			if (prop.is_pointer() &&
 				prop.get_type().get_kind() == pclass::Type::Kind::CLASS)
 			{

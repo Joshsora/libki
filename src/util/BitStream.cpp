@@ -386,6 +386,11 @@ namespace ki
 		m_position = position;
 	}
 
+	void realign()
+	{
+		seek(stream_pos(tell().as_bytes(), 0), false);
+	}
+
 	std::size_t BitStream::capacity() const
 	{
 		return m_buffer->size();

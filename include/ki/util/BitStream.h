@@ -279,6 +279,11 @@ namespace ki
 		void seek(stream_pos position, bool expand = true);
 
 		/**
+		* Realigns the position of the stream so that it lies directly on a byte.
+		*/
+		void realign();
+
+		/**
 		 * @returns The current size of the internal buffer.
 		 */
 		std::size_t capacity() const;
