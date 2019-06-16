@@ -386,7 +386,7 @@ namespace ki
 		m_position = position;
 	}
 
-	void realign()
+	void BitStream::realign()
 	{
 		seek(stream_pos(tell().as_bytes(), 0), false);
 	}
