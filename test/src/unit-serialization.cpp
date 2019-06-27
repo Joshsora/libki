@@ -202,7 +202,7 @@ PCLASS(NestedTestObject)
 {
 public:
 	PCLASS_CONSTRUCTOR(NestedTestObject)
-		INIT_PROPERTY(m_kind, "enum NestedObjectKind")
+		INIT_PROPERTY(m_kind, "enum NestedObjectKind", pclass::IProperty::flags::PUBLIC)
 	{
 		m_kind = NestedObjectKind::OBJECT;
 	}
@@ -231,7 +231,7 @@ DERIVED_PCLASS(NestedTestObjectA, NestedTestObject)
 {
 public:
 	DERIVED_PCLASS_CONSTRUCTOR(NestedTestObjectA, NestedTestObject)
-		INIT_PROPERTY(extra_value, "int")
+		INIT_PROPERTY(extra_value, "int", pclass::IProperty::flags::PUBLIC)
 	{
 		m_kind = NestedObjectKind::OBJECT_A;
 		extra_value = 10;
@@ -271,32 +271,32 @@ PCLASS(TestObject)
 {
 public:
 	PCLASS_CONSTRUCTOR(TestObject)
-		INIT_PROPERTY(int4, "bi4")
-		INIT_PROPERTY(uint4, "bui4")
-		INIT_PROPERTY(int8, "char")
-		INIT_PROPERTY(int16, "short")
-		INIT_PROPERTY(int24, "s24")
-		INIT_PROPERTY(int32, "int")
-		INIT_PROPERTY(int64, "long")
-		INIT_PROPERTY(uint8, "unsigned char")
-		INIT_PROPERTY(uint16, "unsigned short")
-		INIT_PROPERTY(uint24, "u24")
-		INIT_PROPERTY(uint32, "unsigned int")
-		INIT_PROPERTY(uint64, "unsigned long")
-		INIT_PROPERTY(string, "std::string")
-		INIT_PROPERTY(wstring, "std::wstring")
-		INIT_PROPERTY(float32, "float")
-		INIT_PROPERTY(float64, "double")
-		INIT_PROPERTY(vector3d, "struct Vector3D")
-		INIT_PROPERTY(int_ptr, "int")
-		INIT_PROPERTY(int_array, "int")
-		INIT_PROPERTY(int_ptr_array, "int")
-		INIT_PROPERTY(object, "class NestedTestObjectA")
-		INIT_PROPERTY(object_ptr, "class NestedTestObject")
-		INIT_PROPERTY(null_object_ptr, "class NestedTestObject")
-		INIT_PROPERTY(int_vector, "int")
-		INIT_PROPERTY(int_ptr_vector, "int")
-		INIT_PROPERTY(object_ptr_vector, "class NestedTestObject")
+		INIT_PROPERTY(int4, "bi4", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(uint4, "bui4", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(int8, "char", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(int16, "short", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(int24, "s24", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(int32, "int", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(int64, "long", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(uint8, "unsigned char", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(uint16, "unsigned short", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(uint24, "u24", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(uint32, "unsigned int", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(uint64, "unsigned long", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(string, "std::string", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(wstring, "std::wstring", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(float32, "float", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(float64, "double", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(vector3d, "struct Vector3D", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(int_ptr, "int", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(int_array, "int", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(int_ptr_array, "int", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(object, "class NestedTestObjectA", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(object_ptr, "class NestedTestObject", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(null_object_ptr, "class NestedTestObject", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(int_vector, "int", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(int_ptr_vector, "int", pclass::IProperty::flags::PUBLIC)
+		INIT_PROPERTY(object_ptr_vector, "class NestedTestObject", pclass::IProperty::flags::PUBLIC)
 	{}
 
 	// Test signed and unsigned integers with a bit length less than 8

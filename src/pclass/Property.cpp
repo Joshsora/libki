@@ -8,7 +8,7 @@ namespace ki
 namespace pclass
 {
 	IProperty::IProperty(PropertyClass &object,
-		const std::string &name, const Type &type)
+		const std::string &name, const Type &type, IProperty::flags flags)
 	{
 		m_instance = &object;
 		m_name = name;
@@ -18,6 +18,7 @@ namespace pclass
 			.calculate_property_hash(name);
 		m_full_hash = m_name_hash + type.get_hash();
 		m_type = &type;
+		m_flags = flags;
 
 		// Add this property to the object's property list
 		object.add_property(*this);
@@ -31,6 +32,7 @@ namespace pclass
 		m_name_hash = that.m_name_hash;
 		m_full_hash = that.m_full_hash;
 		m_type = that.m_type;
+		m_flags = that.m_flags;
 
 		// Add this property to the object's property list
 		object.add_property(*this);
@@ -59,6 +61,11 @@ namespace pclass
 	const Type &IProperty::get_type() const
 	{
 		return *m_type;
+	}
+
+	IProperty::flags IProperty::get_flags() const
+	{
+		return m_flags;
 	}
 
 	bool IProperty::is_pointer() const

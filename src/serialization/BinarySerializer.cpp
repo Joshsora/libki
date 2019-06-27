@@ -163,6 +163,11 @@ namespace serialization
 
 	void BinarySerializer::save_property(const pclass::IProperty &prop, BitStream &stream) const
 	{
+		// Ignore non-public properties if the WRITE_PUBLIC_ONLY flag is set
+		if (FLAG_IS_SET(m_flags, flags::WRITE_PUBLIC_ONLY) &&
+			!FLAG_IS_SET(prop.get_flags(), pclass::IProperty::flags::PUBLIC))
+			return;
+
 		// Realign the stream if we're going to write a prefix for this property
 		if (prop.is_dynamic() || m_is_file)
 			stream.realign();
@@ -373,6 +378,11 @@ namespace serialization
 
 	void BinarySerializer::load_property(pclass::IProperty &prop, BitStream &stream) const
 	{
+		// Ignore non-public properties if the WRITE_PUBLIC_ONLY flag is set
+		if (FLAG_IS_SET(m_flags, flags::WRITE_PUBLIC_ONLY) &&
+			!FLAG_IS_SET(prop.get_flags(), pclass::IProperty::flags::PUBLIC))
+			return;
+
 		// Re-align the stream if we're going to read a prefix for this property
 		if (prop.is_dynamic())
 			stream.realign();

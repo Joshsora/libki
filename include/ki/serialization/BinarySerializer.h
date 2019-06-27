@@ -31,6 +31,12 @@ namespace serialization
 			WRITE_SERIALIZER_FLAGS = 0x01,
 
 			/**
+			 * When enabled, only properties that were declared with the PUBLIC flag
+			 * will be written.
+			 */
+			WRITE_PUBLIC_ONLY = 0x04,
+
+			/**
 			 * When enabled, the serialized data (after the flags, if present) is 
 			 * potentially compressed. This is based on an added compression header.
 			 */

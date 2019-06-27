@@ -8,7 +8,7 @@
 
 #define SET_FLAG(v, f) v |= f
 #define UNSET_FLAG(v, f) v &= ~f
-#define FLAG_IS_SET(v, f) (v & f) == f
+#define FLAG_IS_SET(v, f) ((v & f) == f)
 
 namespace ki
 {

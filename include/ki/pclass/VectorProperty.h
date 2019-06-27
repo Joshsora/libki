@@ -251,8 +251,8 @@ namespace pclass
 		VectorProperty<ValueT> &operator=(const VectorProperty<ValueT> &that) = delete;
 
 		VectorProperty(PropertyClass &object,
-			const std::string &name, const Type &type)
-			: IProperty(object, name, type)
+			const std::string &name, const Type &type, IProperty::flags flags)
+			: IProperty(object, name, type, flags)
 		{}
 
 		VectorProperty(PropertyClass &object,

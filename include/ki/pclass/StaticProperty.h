@@ -458,14 +458,14 @@ namespace pclass
 		StaticProperty<ValueT> &operator=(const StaticProperty<ValueT> &that) = delete;
 
 		StaticProperty(PropertyClass &object,
-			const std::string &name, const Type &type)
-			: IStaticProperty<ValueT>(object, name, type)
+			const std::string &name, const Type &type, IProperty::flags flags)
+			: IStaticProperty<ValueT>(object, name, type, flags)
 			, m_value(detail::static_object_helper<ValueT>::construct(type))
 		{}
 
 		StaticProperty(PropertyClass &object,
-			const std::string &name, const Type &type, ValueT value)
-			: IStaticProperty<ValueT>(object, name, type)
+			const std::string &name, const Type &type, IProperty::flags flags, ValueT value)
+			: IStaticProperty<ValueT>(object, name, type, flags)
 		{
 			m_value = value;
 		}
@@ -563,8 +563,8 @@ namespace pclass
 		StaticProperty<ValueT[N]> &operator=(const StaticProperty<ValueT[N]> &that) = delete;
 
 		StaticProperty(PropertyClass &object,
-			const std::string &name, const Type &type)
-			: IStaticProperty<ValueT[N]>(object, name, type)
+			const std::string &name, const Type &type, IProperty::flags flags)
+			: IStaticProperty<ValueT[N]>(object, name, type, flags)
 		{
 			for (auto i = 0; i < N; ++i)
 				m_value[i] = detail::static_object_helper<ValueT>::construct(type);

@@ -4,6 +4,7 @@
 #include "ki/pclass/HashCalculator.h"
 #include "ki/pclass/Value.h"
 #include "ki/util/BitStream.h"
+#include "ki/util/FlagsEnum.h"
 
 namespace ki
 {
@@ -19,12 +20,27 @@ namespace pclass
 	class IProperty
 	{
 	public:
+		/**
+		* These flags can be used to define special rules for the property.
+		*/
+		enum class flags : uint32_t
+		{
+			NONE = 0,
+
+			/**
+			* When enabled, the property is marked as public.
+			* This can be used in conjunction with the WRITE_PUBLIC_ONLY serializer flag.
+			*/
+			PUBLIC = 0x04
+		};
+
+
 		// Do not allow copy assignment. Once a property has been constructed,
 		// it shouldn't be able to change.
 		virtual IProperty &operator=(const IProperty &that) = delete;
 
 		IProperty(PropertyClass &object,
-			const std::string &name, const Type &type);
+			const std::string &name, const Type &type, flags flags);
 		IProperty(PropertyClass &object,
 			const IProperty &that);
 
@@ -34,6 +50,7 @@ namespace pclass
 		hash_t get_name_hash() const;
 		hash_t get_full_hash() const;
 		const Type &get_type() const;
+		flags get_flags() const;
 
 		/**
 		 * @returns A reference to the instance of PropertyClass that this property
@@ -116,6 +133,10 @@ namespace pclass
 		hash_t m_name_hash;
 		hash_t m_full_hash;
 		const Type *m_type;
+		flags m_flags;
 	};
 }
 }
+
+// Make sure the flags enum can be used like a bitflag
+MAKE_FLAGS_ENUM(ki::pclass::IProperty::flags);

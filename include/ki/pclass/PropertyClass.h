@@ -39,14 +39,14 @@ _KI_PCLASS_COPY_CONSTRUCTOR(derived) \
 
 #define TYPE(n) type_system.get_type(n)
 
-#define INIT_PROPERTY(identifier, type) \
-	, identifier(*this, #identifier, TYPE(type))
+#define INIT_PROPERTY(identifier, type, flags) \
+	, identifier(*this, #identifier, TYPE(type), flags)
 
 #define INIT_PROPERTY_COPY(identifier) \
 	, identifier(*this, that.identifier)
 
-#define INIT_PROPERTY_VALUE(identifier, type, value) \
-	, identifier(*this, #identifier, TYPE(type), value)
+#define INIT_PROPERTY_VALUE(identifier, type, flags, value) \
+	, identifier(*this, #identifier, TYPE(type), flags, value)
 
 namespace ki
 {
