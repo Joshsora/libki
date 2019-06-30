@@ -66,6 +66,17 @@ namespace serialization
 	void XmlSerializer::save_property(rapidxml::xml_node<> *object, const pclass::IProperty& prop)
 	{
 		auto *property_name = m_document.allocate_string(prop.get_name().data());
+
+		// Write an empty property if we don't have any elements.
+		if (prop.get_element_count() == 0)
+		{
+			auto *property_node = m_document.allocate_node(
+				rapidxml::node_element, property_name
+			);
+			object->append_node(property_node);
+			return;
+		}
+
 		for (std::size_t i = 0; i < prop.get_element_count(); ++i)
 		{
 			auto *property_node = m_document.allocate_node(
@@ -182,6 +193,14 @@ namespace serialization
 				auto *key_attribute = property_node->first_attribute("key");
 				if (!key_attribute)
 				{
+					// Perhaps this is an empty vector
+					if (prop.is_dynamic())
+					{
+						property_node = property_node->next_sibling(property_name);
+						if (!property_node)
+							break;
+					}
+
 					std::ostringstream oss;
 					oss << "Parameter element '" << prop.get_name()
 						<< "' is missing 'key' attribute.";
