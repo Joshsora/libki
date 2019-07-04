@@ -8,18 +8,18 @@ namespace pclass
 	namespace detail
 	{
 		/**
-		 * Provides implementations to PrimitiveType<ValueT>::is_byte_based,
+		 * Provides implementations to PrimitiveType<ValueT>::is_byte_aligned,
 		 * PrimitiveType<ValueT>::write_to, and PrimitiveType<ValueT>::read_from.
 		 */
 		template <typename ValueT, typename Enable = void>
 		struct primitive_type_helper
 		{
-			static bool is_byte_based()
+			static bool is_byte_aligned()
 			{
 				// Provide a compiler error if this is not specialized
 				static_assert(
 					sizeof(ValueT) == 0,
-					"Missing specialization of primitive_type_helper::is_byte_based"
+					"Missing specialization of primitive_type_helper::is_byte_aligned"
 				);
 			}
 
@@ -51,7 +51,7 @@ namespace pclass
 			typename std::enable_if<std::is_integral<ValueT>::value>::type
 		>
 		{
-			static bool is_byte_based()
+			static bool is_byte_aligned()
 			{
 				return true;
 			}
@@ -79,7 +79,7 @@ namespace pclass
 			using type = ki::BitInteger<N, Unsigned>;
 
 		public:
-			static bool is_byte_based()
+			static bool is_byte_aligned()
 			{
 				return false;
 			}
@@ -107,7 +107,7 @@ namespace pclass
 			using underlying_type = ki::BitInteger<1, true>;
 
 		public:
-			static bool is_byte_based()
+			static bool is_byte_aligned()
 			{
 				return false;
 			}
@@ -142,7 +142,7 @@ namespace pclass
 			using uint_type = typename bits<bitsizeof<ValueT>::value>::uint_type;
 
 		public:
-			static bool is_byte_based()
+			static bool is_byte_aligned()
 			{
 				return true;
 			}
@@ -177,7 +177,7 @@ namespace pclass
 			using type = std::basic_string<_Elem, _Traits, _Alloc>;
 
 		public:
-			static bool is_byte_based()
+			static bool is_byte_aligned()
 			{
 				return true;
 			}
@@ -250,9 +250,14 @@ namespace pclass
 		}
 		~PrimitiveType() = default;
 
-		bool is_byte_based() const override
+		bool is_byte_aligned() const override
 		{
-			return detail::primitive_type_helper<ValueT>::is_byte_based();
+			return detail::primitive_type_helper<ValueT>::is_byte_aligned();
+		}
+
+		Value cast(Value &value) const override
+		{
+			return value.as<ValueT>();
 		}
 
 		void write_to(BitStream &stream, const bool is_file, Value &value) const override

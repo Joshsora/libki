@@ -56,14 +56,20 @@ namespace pclass
 		Kind get_kind() const;
 
 		/**
-		* @returns Whether or not this type works in bytes, rather than bits.
+		* @returns Whether or not this type should be byte aligned.
 		*/
-		virtual bool is_byte_based() const;
+		virtual bool is_byte_aligned() const;
 
 		/**
 		 * The TypeSystem used to define this Type instance.
 		 */
 		const TypeSystem &get_type_system() const;
+
+		/**
+		 * Casts the provided value to this type.
+		 * @returns A new Value instance that has been casted to this type.
+		 */
+		virtual Value cast(Value &value) const;
 
 		/**
 		 * Create an instance of the type being represented.

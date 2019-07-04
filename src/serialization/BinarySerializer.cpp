@@ -201,8 +201,8 @@ namespace serialization
 
 		for (auto i = 0; i < prop.get_element_count(); ++i)
 		{
-			// Realign the stream if this property works in bytes
-			if (prop.get_type().is_byte_based())
+			// Realign the stream if necessary
+			if (prop.get_type().is_byte_aligned())
 				stream.realign();
 
 			if (prop.is_pointer()
@@ -407,8 +407,8 @@ namespace serialization
 
 		for (auto i = 0; i < prop.get_element_count(); ++i)
 		{
-			// Realign the stream if this property works in bytes
-			if (prop.get_type().is_byte_based())
+			// Realign the stream if necessary
+			if (prop.get_type().is_byte_aligned())
 				stream.realign();
 
 			if (prop.is_pointer() &&

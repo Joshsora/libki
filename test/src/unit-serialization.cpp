@@ -93,7 +93,7 @@ namespace detail
 	template <>
 	struct primitive_type_helper<Vector3D>
 	{
-		static bool is_byte_based()
+		static bool is_byte_aligned()
 		{
 			return true;
 		}

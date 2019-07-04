@@ -38,9 +38,16 @@ namespace pclass
 		return m_type_system;
 	}
 
-	bool Type::is_byte_based() const
+	bool Type::is_byte_aligned() const
 	{
 		return true;
+	}
+
+	Value Type::cast(Value &value) const
+	{
+		std::ostringstream oss;
+		oss << "Type '" << m_name << "' does not implement Type::cast.";
+		throw runtime_error(oss.str());
 	}
 
 	void Type::write_to(BitStream &stream, const bool is_file, Value &value) const
