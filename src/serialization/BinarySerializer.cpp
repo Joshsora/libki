@@ -2,6 +2,7 @@
 #include <zlib.h>
 #include <cassert>
 #include "ki/util/unique.h"
+#include "ki/util/trace.h"
 
 namespace ki
 {
@@ -298,6 +299,9 @@ namespace serialization
 		std::unique_ptr<pclass::PropertyClass> &dest, BitStream &stream) const
 	{
 		const auto type_hash = stream.read<pclass::hash_t>();
+		TRACE << "BinarySerializer::preload_object: type_hash = "
+			  << type_hash << std::endl;
+
 		if (type_hash != 0)
 		{
 			// Instantiate the type
@@ -318,14 +322,20 @@ namespace serialization
 		// Did we get an object or null?
 		if (!dest)
 			return;
+
+		TRACE << "BinarySerializer::load_object: dest->get_type().get_name() = "
+			  << dest->get_type().get_name() << std::endl;
+
 		auto &properties = dest->get_properties();
-		
+
 		if (m_is_file)
 		{
 			// Read the object's size, and create a new BitBufferSegment to
 			// ensure that data is only read from inside this region.
 			const auto object_size =
 				stream.read<uint32_t>() - bitsizeof<uint32_t>::value;
+			TRACE << "BinarySerializer::load_object: object_size = "
+				  << object_size << std::endl;
 			auto object_buffer = stream.buffer().segment(
 				stream.tell(), object_size
 			);
@@ -343,6 +353,8 @@ namespace serialization
 				// ensure that data is only read from inside this region.
 				const auto property_size =
 					object_stream.read<uint32_t>() - bitsizeof<uint32_t>::value;
+				TRACE << "BinarySerializer::load_object: property_size = "
+					  << property_size << std::endl;
 				const auto property_buffer = object_buffer->segment(
 					object_stream.tell(), property_size
 				);
@@ -351,6 +363,8 @@ namespace serialization
 				// Get the property to load based on it's hash, and then load
 				// it's value.
 				const auto property_hash = property_stream.read<uint32_t>();
+				TRACE << "BinarySerializer::load_object: property_hash = "
+					  << property_hash << std::endl;
 				auto &prop = properties.get_property(property_hash);
 				load_property(prop, property_stream);
 
@@ -383,6 +397,9 @@ namespace serialization
 			!FLAG_IS_SET(prop.get_flags(), pclass::IProperty::flags::PUBLIC))
 			return;
 
+		TRACE << "BinarySerializer::load_property: prop.get_name() = "
+			  << prop.get_name() << std::endl;
+
 		// Re-align the stream if we're going to read a prefix for this property
 		if (prop.is_dynamic())
 			stream.realign();
@@ -403,10 +420,14 @@ namespace serialization
 				element_count = stream.read<uint32_t>();
 			}
 			prop.set_element_count(element_count);
+			TRACE << "BinarySerializer::load_property: element_count = "
+				  << element_count << std::endl;
 		}
 
 		for (auto i = 0; i < prop.get_element_count(); ++i)
 		{
+			TRACE << "BinarySerializer::load_property: i = " << i << std::endl;
+
 			// Realign the stream if necessary
 			if (prop.get_type().is_byte_aligned())
 				stream.realign();
@@ -420,7 +441,11 @@ namespace serialization
 				prop.set_object(object, i);
 			}
 			else
+			{
 				prop.read_value_from(stream, m_is_file, i);
+				TRACE << "BinarySerializer::load_property: prop.get_value(" << i << ") = "
+					  << prop.get_value(i).as<std::string>().get<std::string>() << std::endl;
+			}
 		}
 	}
 }
